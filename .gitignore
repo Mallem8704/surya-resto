@@ -1,0 +1,54 @@
+# ==========================================
+# Tea Time Cafe — Root .gitignore
+# ==========================================
+
+# Python & Backend
+venv/
+backend/venv/
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite
+*.sqlite3
+backend/*.db
+backend/teatime.db
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Environment variables (keep .env.example)
+.env
+backend/.env
+frontend/.env
+frontend/.env.local
+frontend/.env*.local
+
+# Node & Next.js Frontend
+node_modules/
+frontend/node_modules/
+.next/
+frontend/.next/
+out/
+frontend/out/
+build/
+frontend/build/
+.vercel/
+frontend/.vercel/
+*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Logs & Diagnostics
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+*.swp
+scratch/
+*.swo
+.vscode/
+.idea/

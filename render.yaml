@@ -1,0 +1,46 @@
+# Render Blueprint Infrastructure-as-Code Configuration
+# Deploy Tea Time Cafe SaaS Backend & Managed Database with 1-Click
+version: "1"
+
+services:
+  # =================================================================
+  # FASTAPI BACKEND WEB SERVICE
+  # =================================================================
+  - type: web
+    name: tea-time-backend
+    runtime: python
+    region: singapore # or oregon, frankfurt
+    plan: free
+    rootDir: backend
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tea-time-db
+          property: connectionString
+      - key: FRONTEND_URL
+        value: https://arabic-restaurant-dineos.vercel.app,https://tea-time-application.vercel.app,http://localhost:3000
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 1440
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+
+# =================================================================
+# MANAGED POSTGRESQL DATABASE
+# =================================================================
+databases:
+  - name: tea-time-db
+    plan: free
+    region: singapore # Match web service region
+    databaseName: teatime
+    user: teatime_user

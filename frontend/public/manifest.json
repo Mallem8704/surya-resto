@@ -1,0 +1,49 @@
+{
+  "name": "Surya Family Restaurant Kadiri",
+  "short_name": "Surya Restaurant",
+  "description": "Surya Family Restaurant Kadiri — QR Dine-In Ordering & POS Cockpit",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0d0a06",
+  "theme_color": "#f97316",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Floor Captain POS",
+      "short_name": "Captain",
+      "description": "Floor waiter table ordering",
+      "url": "/captain",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Cashier POS",
+      "short_name": "POS",
+      "description": "Counter cashier billing",
+      "url": "/admin/pos",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Customer Menu",
+      "short_name": "Menu",
+      "description": "Customer table QR ordering",
+      "url": "/order?branch=1&table=T1",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["food", "business", "productivity"]
+}
