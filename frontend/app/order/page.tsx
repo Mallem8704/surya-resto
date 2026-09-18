@@ -26,6 +26,7 @@ import { CartDrawer, CartItem } from "@/components/order/CartDrawer";
 import { OrderTracker, OrderDetail } from "@/components/order/OrderTracker";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/Button";
+import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { formatRupees } from "@/lib/formatters";
@@ -489,13 +490,17 @@ function CustomerOrderContent() {
             <main className="min-h-screen bg-cream-50 text-espresso-950 flex flex-col">
                 <header className="border-b border-cream-200 bg-white/90 backdrop-blur-md sticky top-0 z-40">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <img
-                                src="/logo.png"
-                                alt="Arabic Restaurant Logo"
-                                className="h-10 w-auto object-contain"
-                            />
-                        </div>
+                        <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition">
+                            <SuryaSunLogo size={36} />
+                            <div>
+                                <span className="text-xs font-black uppercase tracking-wider text-amber-800 block">
+                                    Surya Family Restaurant
+                                </span>
+                                <span className="text-[10px] text-espresso-500 font-medium">
+                                    Opp. RTC Bus Stand, Kadiri
+                                </span>
+                            </div>
+                        </Link>
                         <LanguageToggle />
                     </div>
                 </header>
@@ -517,21 +522,17 @@ function CustomerOrderContent() {
             {/* Header */}
             <header className="border-b border-cream-200 bg-white/90 backdrop-blur-md sticky top-0 z-40">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                        <img
-                            src="/logo.png"
-                            alt="Surya Family Restaurant Logo"
-                            className="h-10 sm:h-11 w-auto object-contain"
-                        />
-                        <div className="hidden sm:block">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 block">
+                    <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition">
+                        <SuryaSunLogo size={38} />
+                        <div>
+                            <span className="text-xs font-black uppercase tracking-wider text-amber-800 block">
                                 {branchOutlet?.name || "Surya Family Restaurant"}
                             </span>
                             <span className="text-[10px] text-espresso-500 font-medium">
                                 Opp. RTC Bus Stand, Kadiri
                             </span>
                         </div>
-                    </div>
+                    </Link>
 
                     <div className="flex items-center gap-2">
                         {/* Branch indicator on mobile */}

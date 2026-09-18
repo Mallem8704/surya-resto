@@ -619,7 +619,7 @@ export default function AdminTablesPage() {
                                     <div className="flex flex-col items-center">
                                         <img
                                             src="/logo.png"
-                                            alt="Arabic Restaurant Logo"
+                                            alt="Surya Family Restaurant Logo"
                                             className="h-16 w-auto object-contain mx-auto mb-1"
                                         />
                                         <p className="text-[10px] text-espresso-600 font-bold uppercase tracking-wider">

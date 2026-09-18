@@ -21,8 +21,9 @@ import {
     Calendar,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useLanguage } from "@/context/LanguageContext";
 import { useOutlet } from "@/context/OutletContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 
 export function AdminSidebar({ className = "" }: { className?: string }) {
     const pathname = usePathname();
@@ -57,13 +58,7 @@ export function AdminSidebar({ className = "" }: { className?: string }) {
             {/* Top Brand */}
             <div>
                 <div className="p-4 border-b border-espresso-800 flex items-center gap-3">
-                    <div className="h-10 px-2 py-1 rounded-xl bg-white flex items-center justify-center shadow-md shrink-0">
-                        <img
-                            src="/logo.png"
-                            alt="Arabic Restaurant Logo"
-                            className="h-8 w-auto object-contain"
-                        />
-                    </div>
+                    <SuryaSunLogo size={36} />
                     <div>
                         <h2 className="font-extrabold text-sm tracking-tight text-white">{t("app_title")}</h2>
                         <span className="text-[10px] text-terracotta-400 font-bold uppercase tracking-wider block">

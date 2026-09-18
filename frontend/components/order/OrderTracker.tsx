@@ -28,6 +28,7 @@ import { useOutlet } from "@/context/OutletContext";
 import { useToast } from "@/context/ToastContext";
 import { useOrderSocket } from "@/hooks/useSockets";
 import { Button } from "@/components/ui/Button";
+import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 import { api } from "@/lib/api";
 
 export interface OrderDetail {
@@ -131,12 +132,8 @@ export function OrderTracker({ initialOrder, onOrderMore }: OrderTrackerProps) {
             {/* Header Banner */}
             <div className="bg-white rounded-3xl p-6 border border-cream-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-2xl bg-white border border-cream-200 p-1 flex items-center justify-center shadow-xs shrink-0">
-                        <img
-                            src="/logo.png"
-                            alt="Arabic Restaurant Logo"
-                            className="h-10 w-auto object-contain"
-                        />
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200/70 p-1 flex items-center justify-center shadow-xs shrink-0">
+                        <SuryaSunLogo size={36} />
                     </div>
                     <div>
                         <div className="flex items-center gap-2">

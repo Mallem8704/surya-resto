@@ -26,6 +26,7 @@ import {
     User,
 } from "lucide-react";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
@@ -206,9 +207,7 @@ export function AdminHeader({
                             {/* Drawer Header */}
                             <div className="flex items-center justify-between pb-4 border-b border-espresso-800 mb-4">
                                 <div className="flex items-center gap-2.5">
-                                    <div className="h-9 px-2 py-0.5 rounded-xl bg-white flex items-center justify-center">
-                                        <img src="/logo.png" alt="Logo" className="h-7 w-auto object-contain" />
-                                    </div>
+                                    <SuryaSunLogo size={32} />
                                     <div>
                                         <h3 className="font-extrabold text-sm text-white">{t("app_title")}</h3>
                                         <p className="text-[10px] text-terracotta-400 font-bold">{outlet?.name || "Admin"}</p>
