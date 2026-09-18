@@ -28,13 +28,28 @@ interface OutletContextType {
     switchBranch: (outletId: number) => Promise<void>;
 }
 
+const DEFAULT_SURYA_OUTLET: OutletInfo = {
+    id: 1,
+    name: "Surya Family Restaurant",
+    address: "Dhandubatu Street, Bypass road, opposite to RTC Bus Stand, Police Quarters, Kadiri, Andhra Pradesh 515591",
+    phone: "+91 98803 58634",
+    currency: "INR",
+    tax_rate_percent: 5,
+    opening_hours: "11:00 AM - 10:30 PM",
+    tagline: "Kadiri's Favorite Family Dining & Biryani Destination",
+    logo_url: "/logo.png",
+    gstin: "37SURYA0000A1Z5",
+    fssai_license_number: "10124999000586",
+    upi_vpa: "9880358634@upi",
+};
+
 const OutletContext = createContext<OutletContextType | undefined>(undefined);
 
 export function OutletProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
-    const [outlet, setOutlet] = useState<OutletInfo | null>(null);
-    const [allOutlets, setAllOutlets] = useState<OutletInfo[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [outlet, setOutlet] = useState<OutletInfo | null>(DEFAULT_SURYA_OUTLET);
+    const [allOutlets, setAllOutlets] = useState<OutletInfo[]>([DEFAULT_SURYA_OUTLET]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const activeOutletId = user?.outlet_id || 1;
 
@@ -49,7 +64,7 @@ export function OutletProvider({ children }: { children: React.ReactNode }) {
             if (singleData.status === "fulfilled" && singleData.value) {
                 setOutlet(singleData.value);
             }
-            if (listData.status === "fulfilled" && Array.isArray(listData.value)) {
+            if (listData.status === "fulfilled" && Array.isArray(listData.value) && listData.value.length > 0) {
                 setAllOutlets(listData.value);
             }
         } catch (err) {

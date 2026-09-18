@@ -387,21 +387,17 @@ origins = [
     "http://127.0.0.1:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
-    "https://arabeiqrestaurant.com",
-    "https://www.arabeiqrestaurant.com",
-    "http://arabeiqrestaurant.com",
-    "http://www.arabeiqrestaurant.com",
-    "https://arabieqrestaurant.com",
-    "https://www.arabieqrestaurant.com",
-    "https://arabic-restaurant-dineos.vercel.app",
-    "https://tea-time-application.vercel.app",
+    "http://localhost:3002",
+    "http://127.0.0.1:3002",
+    "https://surya-resto.vercel.app",
+    "https://frontend-lake-iota-65.vercel.app",
     *frontend_origins,
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https?://.*(arabeiq|arabieq|arabic-restaurant|tea-time|vercel\.app).*",
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -470,7 +466,7 @@ app.include_router(shifts.router, prefix="/shifts", tags=["Cashier Shifts & Cash
 @app.get("/")
 def root():
     return {
-        "app": "Arabic Restaurant API",
+        "app": "Surya Family Restaurant API",
         "status": "online",
         "version": "1.0.0",
         "docs_url": "/docs",
@@ -499,7 +495,7 @@ def health_check():
         print(f"[HEALTH] Auto-seed warning: {e}")
     return {
         "status": "healthy",
-        "service": "tea-time-backend",
+        "service": "surya-resto-backend",
         "timestamp": "ok",
     }
 
@@ -514,7 +510,7 @@ def trigger_seed(key: str = "admin123"):
         seed_database(clear_existing=True)
         return {
             "status": "success",
-            "message": "Seeded full 198-item Arabieq Restaurant menu with 11 categories and 10 tables",
+            "message": "Seeded full Surya Family Restaurant Kadiri menu with categories and tables",
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
