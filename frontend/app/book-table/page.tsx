@@ -27,7 +27,7 @@ import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
 import { useCustomer } from "@/context/CustomerContext";
 import { soundManager } from "@/lib/sound";
-import { ArabiqLogo, ArabesqueDivider } from "@/components/home/ArabiqBrandIcons";
+import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 import { LanguageToggle } from "@/components/LanguageToggle";
 
 const BRANCHES = [
@@ -169,8 +169,16 @@ function BookTableContent() {
             {/* Header */}
             <header className="sticky top-0 z-40 bg-[#0D0907]/90 backdrop-blur-md border-b border-[#D4AF37]/20">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
-                    <Link href="/" className="hover:opacity-95 transition">
-                        <ArabiqLogo />
+                    <Link href="/" className="flex items-center gap-2.5 hover:opacity-95 transition">
+                        <SuryaSunLogo size={42} />
+                        <div>
+                            <span className="font-extrabold text-sm sm:text-base tracking-wide text-[#FAF5ED] block">
+                                Surya Family Restaurant
+                            </span>
+                            <span className="text-[10px] text-[#D4AF37] font-semibold tracking-wider uppercase">
+                                Kadiri &bull; Table Booking
+                            </span>
+                        </div>
                     </Link>
                     <div className="flex items-center gap-3">
                         <LanguageToggle />
@@ -200,9 +208,9 @@ function BookTableContent() {
                     <h1 className="font-serif text-3xl sm:text-5xl font-black tracking-tight text-white uppercase">
                         PRE-BOOK YOUR TABLE
                     </h1>
-                    <ArabesqueDivider light={false} className="my-2" />
+                    <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mx-auto my-2" />
                     <p className="text-xs sm:text-sm text-[#C5B39A] max-w-lg mx-auto leading-relaxed">
-                        Reserve your table in advance from home or office. Enjoy guaranteed zero waiting time, priority seating, and authentic Arabian Mandi hospitality.
+                        Reserve your table in advance for family dining, celebrations, and gatherings at Surya Family Restaurant Kadiri. Enjoy guaranteed zero waiting time and warm hospitality.
                     </p>
                 </div>
 
