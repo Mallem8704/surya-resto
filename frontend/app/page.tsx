@@ -6,6 +6,33 @@ import Image from "next/image";
 import { StaffPortalModal } from "@/components/home/StaffPortalModal";
 import { HowItWorksModal } from "@/components/home/HowItWorksModal";
 import { BranchSelectorModal } from "@/components/home/BranchSelectorModal";
+import {
+    Shield,
+    Phone,
+    Clock,
+    Snowflake,
+    MessageSquare,
+    UtensilsCrossed,
+    Utensils,
+    Crown,
+    Calendar,
+    Users,
+    MapPin,
+    Search,
+    Flame,
+    Sparkles,
+    ShoppingBag,
+    QrCode,
+    Zap,
+    ShieldCheck,
+    Smartphone,
+    CreditCard,
+    Bike,
+    Truck,
+    Star,
+    CheckCircle2,
+    Heart,
+} from "lucide-react";
 
 /* ─── SVG Sun Logo (matches design exactly) ──────────────────── */
 // Ray coords are pre-computed (inner r=25, outer r=38, center=50,50)
@@ -315,12 +342,14 @@ export default function SuryaLandingPage() {
                                 onClick={() => { setMobileOpen(false); setStaffModalOpen(true); }}
                                 className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold border border-[#D4AF37]/50 text-[#D4AF37] bg-[#1A0800]"
                             >
-                                🛡️ Staff & Operations Cockpit
+                                <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                <span>Staff &amp; Operations Cockpit</span>
                             </button>
                             <a href={`tel:${PHONE_TEL}`}
                                 className="mt-2 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white"
                                 style={{ background: "#8B2020" }}>
-                                📞 {PHONE}
+                                <Phone className="w-4 h-4 text-white" />
+                                <span>{PHONE}</span>
                             </a>
                         </div>
                     </div>
@@ -681,32 +710,32 @@ export default function SuryaLandingPage() {
                             {/* 4 Pre-booking perks */}
                             <div className="grid grid-cols-2 gap-3.5 pt-2">
                                 <div className="p-4 rounded-2xl bg-[#200A02] border border-[#D4AF37]/20">
-                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold mb-2 text-base">
-                                        ⏱️
+                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center mb-2">
+                                        <Clock className="w-4 h-4 text-amber-400" />
                                     </div>
                                     <h4 className="font-bold text-sm text-white">Instant Seating</h4>
                                     <p className="text-[11px] text-white/50 mt-0.5">Your table is kept reserved &amp; sanitized for your arrival</p>
                                 </div>
 
                                 <div className="p-4 rounded-2xl bg-[#200A02] border border-[#D4AF37]/20">
-                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold mb-2 text-base">
-                                        ❄️
+                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center mb-2">
+                                        <Snowflake className="w-4 h-4 text-sky-400" />
                                     </div>
                                     <h4 className="font-bold text-sm text-white">AC Family Section</h4>
                                     <p className="text-[11px] text-white/50 mt-0.5">Private dining for couples, elders &amp; large groups</p>
                                 </div>
 
                                 <div className="p-4 rounded-2xl bg-[#200A02] border border-[#D4AF37]/20">
-                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold mb-2 text-base">
-                                        📱
+                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center mb-2">
+                                        <MessageSquare className="w-4 h-4 text-emerald-400" />
                                     </div>
                                     <h4 className="font-bold text-sm text-white">WhatsApp Updates</h4>
                                     <p className="text-[11px] text-white/50 mt-0.5">Receive booking reference &amp; table details directly on WhatsApp</p>
                                 </div>
 
                                 <div className="p-4 rounded-2xl bg-[#200A02] border border-[#D4AF37]/20">
-                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold mb-2 text-base">
-                                        🍲
+                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center mb-2">
+                                        <UtensilsCrossed className="w-4 h-4 text-amber-400" />
                                     </div>
                                     <h4 className="font-bold text-sm text-white">Pre-Order Dishes</h4>
                                     <p className="text-[11px] text-white/50 mt-0.5">Request your Biryani, Naan &amp; Starters ready when you arrive</p>
@@ -726,24 +755,33 @@ export default function SuryaLandingPage() {
                                             Reserve Your Dining Table
                                         </h3>
                                     </div>
-                                    <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-lg">
-                                        👑
+                                    <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center">
+                                        <Crown className="w-5 h-5 text-amber-400" />
                                     </div>
                                 </div>
 
                                 <div className="space-y-3 text-xs">
                                     <div className="p-3 rounded-xl bg-[#150600] border border-[#D4AF37]/20 flex items-center justify-between">
-                                        <span className="text-white/70">📅 Timing:</span>
+                                        <span className="text-white/70 flex items-center gap-1.5">
+                                            <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                            <span>Timing:</span>
+                                        </span>
                                         <span className="font-bold text-[#D4AF37]">Lunch (11 AM - 4 PM) &bull; Dinner (6 PM - 10 PM)</span>
                                     </div>
 
                                     <div className="p-3 rounded-xl bg-[#150600] border border-[#D4AF37]/20 flex items-center justify-between">
-                                        <span className="text-white/70">👥 Group Size:</span>
+                                        <span className="text-white/70 flex items-center gap-1.5">
+                                            <Users className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                            <span>Group Size:</span>
+                                        </span>
                                         <span className="font-bold text-white">2 to 20+ Guests (Family / Friends / Corporate)</span>
                                     </div>
 
                                     <div className="p-3 rounded-xl bg-[#150600] border border-[#D4AF37]/20 flex items-center justify-between">
-                                        <span className="text-white/70">📍 Location:</span>
+                                        <span className="text-white/70 flex items-center gap-1.5">
+                                            <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                            <span>Location:</span>
+                                        </span>
                                         <span className="font-bold text-white">Opp. RTC Bus Stand, Bypass Road, Kadiri</span>
                                     </div>
                                 </div>
@@ -827,28 +865,39 @@ export default function SuryaLandingPage() {
                                         </div>
                                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                     </div>
-                                    <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] text-white/50">
-                                        🔍 48 Dishes Available
+                                    <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] text-white/60 flex items-center gap-1.5">
+                                        <Search className="w-3 h-3 text-[#D4AF37] shrink-0" />
+                                        <span>48 Dishes Available</span>
                                     </div>
                                     <div className="space-y-1.5">
                                         <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
-                                            <span>🍗 Chicken Dum Biryani</span>
+                                            <span className="flex items-center gap-1.5">
+                                                <Flame className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                                                <span>Chicken Dum Biryani</span>
+                                            </span>
                                             <span className="font-mono text-[#D4AF37] font-bold">₹240</span>
                                         </div>
                                         <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
-                                            <span>🫓 Butter Naan (2 Pcs)</span>
+                                            <span className="flex items-center gap-1.5">
+                                                <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                                                <span>Butter Naan (2 Pcs)</span>
+                                            </span>
                                             <span className="font-mono text-[#D4AF37] font-bold">₹90</span>
                                         </div>
                                         <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
-                                            <span>🥘 Punjabi Chicken Curry</span>
+                                            <span className="flex items-center gap-1.5">
+                                                <Utensils className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                                                <span>Punjabi Chicken Curry</span>
+                                            </span>
                                             <span className="font-mono text-[#D4AF37] font-bold">₹280</span>
                                         </div>
                                     </div>
                                     <Link
                                         href="/order?branch=1&table=T1"
-                                        className="block p-2 rounded-lg bg-[#E5A93C] text-black text-center font-bold text-[10px] uppercase tracking-wider"
+                                        className="flex items-center justify-center gap-1.5 p-2 rounded-lg bg-[#E5A93C] text-black text-center font-bold text-[10px] uppercase tracking-wider hover:bg-[#F2BC5C] transition"
                                     >
-                                        Open Table 1 Menu 🛍️
+                                        <span>Open Table 1 Menu</span>
+                                        <ShoppingBag className="w-3 h-3 text-black" />
                                     </Link>
                                 </div>
                             </div>
@@ -857,8 +906,8 @@ export default function SuryaLandingPage() {
                         {/* Right: Scannable Standee QR Card */}
                         <div className="lg:col-span-3">
                             <div className="bg-[#1C0A02] border-2 border-emerald-500/40 rounded-3xl p-5 text-center space-y-3.5 shadow-xl">
-                                <div className="w-10 h-10 rounded-2xl bg-[#142618] text-emerald-400 flex items-center justify-center mx-auto text-lg">
-                                    📱
+                                <div className="w-10 h-10 rounded-2xl bg-[#142618] text-emerald-400 flex items-center justify-center mx-auto">
+                                    <QrCode className="w-5 h-5 text-emerald-400" />
                                 </div>
                                 <div>
                                     <h4 className="font-black text-sm text-white uppercase">
@@ -904,30 +953,31 @@ export default function SuryaLandingPage() {
                                 <span className="text-[#D4AF37]">WE'LL DELIVER IT PIPING HOT TO YOUR DOORSTEP.</span>
                             </h2>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                    <span className="text-sm block">🚀</span>
-                                    <span className="text-xs font-bold text-white block mt-0.5">30-40 Mins Fast</span>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col items-start justify-center">
+                                    <Zap className="w-5 h-5 text-amber-400 mb-1" />
+                                    <span className="text-xs font-bold text-white block">30-40 Mins Fast</span>
                                 </div>
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                    <span className="text-sm block">🛡️</span>
-                                    <span className="text-xs font-bold text-white block mt-0.5">Hygienic Pack</span>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col items-start justify-center">
+                                    <ShieldCheck className="w-5 h-5 text-emerald-400 mb-1" />
+                                    <span className="text-xs font-bold text-white block">Hygienic Pack</span>
                                 </div>
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                    <span className="text-sm block">📲</span>
-                                    <span className="text-xs font-bold text-white block mt-0.5">WhatsApp Updates</span>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col items-start justify-center">
+                                    <Smartphone className="w-5 h-5 text-sky-400 mb-1" />
+                                    <span className="text-xs font-bold text-white block">WhatsApp Updates</span>
                                 </div>
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                    <span className="text-sm block">💳</span>
-                                    <span className="text-xs font-bold text-white block mt-0.5">UPI / Cash on Delivery</span>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col items-start justify-center">
+                                    <CreditCard className="w-5 h-5 text-purple-400 mb-1" />
+                                    <span className="text-xs font-bold text-white block">UPI / Cash on Delivery</span>
                                 </div>
                             </div>
                         </div>
                         <div className="lg:col-span-4 flex flex-col gap-3 justify-center items-start lg:items-end">
                             <Link
                                 href="/delivery?branch=1"
-                                className="px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-[#E5A93C] hover:bg-[#F2BC5C] shadow-lg transition"
+                                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-[#E5A93C] hover:bg-[#F2BC5C] shadow-lg transition"
                             >
-                                Order For Delivery Now 🛵
+                                <span>Order For Delivery Now</span>
+                                <Bike className="w-4 h-4 text-black" />
                             </Link>
                             <button
                                 type="button"
@@ -1089,8 +1139,9 @@ export default function SuryaLandingPage() {
                                 <svg viewBox="0 0 24 24" width="18" height="18" fill="#8B2020"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" /></svg>
                             </div>
                             <div>
-                                <p style={{ color: "#1A0800", fontSize: 24, fontWeight: 900, lineHeight: 1 }}>4.8
-                                    <span style={{ fontSize: 16 }}>★</span>
+                                <p className="flex items-center" style={{ color: "#1A0800", fontSize: 24, fontWeight: 900, lineHeight: 1 }}>
+                                    4.8
+                                    <Star className="w-4 h-4 fill-amber-500 text-amber-500 inline ml-1" />
                                 </p>
                                 <p style={{ color: "#666", fontSize: 10 }}>Average Rating</p>
                             </div>
@@ -1196,7 +1247,7 @@ export default function SuryaLandingPage() {
                                     icon: <svg viewBox="0 0 24 24" width="20" height="20" fill="#8B2020"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 5v5.25l4.5 2.67-.75 1.23L11 13V7h1.5z" /></svg>,
                                     title: "Timings",
                                     body: "Open Daily  11:00 AM – 10:00 PM",
-                                    sub: "We Close at 10:00 PM • Currently Open ✓",
+                                    sub: "We Close at 10:00 PM • Currently Open",
                                     subGreen: true,
                                 },
                                 {
@@ -1297,8 +1348,9 @@ export default function SuryaLandingPage() {
 
                     {/* Timings */}
                     <div>
-                        <h4 style={{ color: "#D4AF37", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>
-                            🕐 Timings
+                        <h4 className="flex items-center gap-1.5" style={{ color: "#D4AF37", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>
+                            <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>Timings</span>
                         </h4>
                         <div className="space-y-2">
                             <div className="flex items-center gap-2" style={{ color: "rgba(255,255,255,.55)", fontSize: 12.5 }}>
@@ -1312,8 +1364,9 @@ export default function SuryaLandingPage() {
 
                     {/* Reservation */}
                     <div>
-                        <h4 style={{ color: "#D4AF37", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>
-                            🍽 Make a Reservation / Order
+                        <h4 className="flex items-center gap-1.5" style={{ color: "#D4AF37", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>
+                            <UtensilsCrossed className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>Make a Reservation / Order</span>
                         </h4>
                         <p style={{ color: "rgba(255,255,255,.4)", fontSize: 11, marginBottom: 10 }}>Call Us</p>
                         <a href={`tel:${PHONE_TEL}`}
@@ -1353,8 +1406,10 @@ export default function SuryaLandingPage() {
                         <p style={{ color: "rgba(255,255,255,.3)", fontSize: 11 }}>
                             © 2025 Surya Family Restaurant, Kadiri. All Rights Reserved.
                         </p>
-                        <p style={{ color: "rgba(255,255,255,.3)", fontSize: 11 }}>
-                            Made with <span style={{ color: "#D4AF37" }}>❤️</span> for Our Valuable Customers
+                        <p style={{ color: "rgba(255,255,255,.3)", fontSize: 11 }} className="flex items-center gap-1">
+                            <span>Made with</span>
+                            <Heart className="w-3.5 h-3.5 fill-[#D4AF37] text-[#D4AF37] inline" />
+                            <span>for Our Valuable Customers</span>
                         </p>
                     </div>
                 </div>
