@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { StaffPortalModal } from "@/components/home/StaffPortalModal";
 
 /* ─── SVG Sun Logo (matches design exactly) ──────────────────── */
 // Ray coords are pre-computed (inner r=25, outer r=38, center=50,50)
@@ -48,6 +49,8 @@ const NAV = [
     { label: "Home", href: "#home" },
     { label: "About Us", href: "#about" },
     { label: "Menu", href: "/order?branch=1&table=T1" },
+    { label: "Book Table", href: "/book-table" },
+    { label: "Delivery", href: "/delivery" },
     { label: "Gallery", href: "#gallery" },
     { label: "Reviews", href: "#reviews" },
     { label: "Location", href: "#location" },
@@ -129,6 +132,7 @@ export default function SuryaLandingPage() {
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState("home");
     const [lightbox, setLightbox] = useState<number | null>(null);
+    const [staffModalOpen, setStaffModalOpen] = useState(false);
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 10);
@@ -228,10 +232,31 @@ export default function SuryaLandingPage() {
                     {/* Spacer for md screens without lg nav */}
                     <div className="flex-1 lg:hidden" />
 
+                    {/* Staff & Admin Button */}
+                    <button
+                        onClick={() => setStaffModalOpen(true)}
+                        title="Staff & Management Portals"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D4AF37]/40 bg-[#150600] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37] text-[#D4AF37] text-xs font-bold tracking-wider transition cursor-pointer"
+                    >
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        <span>STAFF</span>
+                    </button>
+
+                    {/* Quick Order Now CTA */}
+                    <Link
+                        href="/order?branch=1&table=T1"
+                        className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition shadow-md hover:brightness-110"
+                        style={{ background: "#E5A93C", color: "#1A0800" }}
+                    >
+                        Order Now
+                    </Link>
+
                     {/* Phone CTA + Hamburger — right */}
                     <div className="flex items-center gap-3 shrink-0">
                         <a href={`tel:${PHONE_TEL}`}
-                            className="hidden md:flex items-center gap-2 font-bold transition-all hover:opacity-90"
+                            className="hidden xl:flex items-center gap-2 font-bold transition-all hover:opacity-90"
                             style={{
                                 background: "#8B2020",
                                 color: "#fff",
@@ -281,8 +306,14 @@ export default function SuryaLandingPage() {
                                     {n.label}
                                 </Link>
                             ))}
+                            <button
+                                onClick={() => { setMobileOpen(false); setStaffModalOpen(true); }}
+                                className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold border border-[#D4AF37]/50 text-[#D4AF37] bg-[#1A0800]"
+                            >
+                                🛡️ Staff & Operations Cockpit
+                            </button>
                             <a href={`tel:${PHONE_TEL}`}
-                                className="mt-3 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white"
+                                className="mt-2 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white"
                                 style={{ background: "#8B2020" }}>
                                 📞 {PHONE}
                             </a>
@@ -402,8 +433,17 @@ export default function SuryaLandingPage() {
                                 Explore Menu
                             </Link>
 
+                            <Link href="/book-table"
+                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all hover:bg-white/10"
+                                style={{ background: "rgba(21, 6, 0, 0.7)", border: "1.5px solid rgba(212, 175, 55, 0.6)", color: "#D4AF37" }}>
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                                    <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
+                                </svg>
+                                Book Table
+                            </Link>
+
                             <a href={GOOGLE_MAPS} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all hover:bg-white/10"
+                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all hover:bg-white/10"
                                 style={{ background: "rgba(21, 6, 0, 0.6)", border: "1.5px solid rgba(255, 255, 255, 0.4)", color: "#FFFFFF" }}>
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
@@ -906,12 +946,13 @@ export default function SuryaLandingPage() {
                             {[
                                 { label: "About Us", href: "#about" },
                                 { label: "Our Menu", href: "/order?branch=1&table=T1" },
+                                { label: "Book a Table", href: "/book-table" },
+                                { label: "Delivery Orders", href: "/delivery" },
+                                { label: "Admin & Staff Login", href: "/admin/login" },
                                 { label: "Gallery", href: "#gallery" },
                                 { label: "Reviews", href: "#reviews" },
                                 { label: "Location", href: "#location" },
                                 { label: "Contact Us", href: "#contact" },
-                                { label: "Privacy Policy", href: "#" },
-                                { label: "Terms & Conditions", href: "#" },
                             ].map(l => (
                                 <li key={l.label}>
                                     {l.href.startsWith("#") ? (
@@ -971,6 +1012,14 @@ export default function SuryaLandingPage() {
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" /></svg>
                             Delivery Orders
                         </Link>
+                        <button
+                            onClick={() => setStaffModalOpen(true)}
+                            className="flex items-center gap-2 mt-3 pt-3 border-t border-white/10 hover:text-amber-400 transition-all text-left w-full cursor-pointer"
+                            style={{ color: "#D4AF37", fontSize: 12, fontWeight: 700 }}
+                        >
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                            Staff & Operations Cockpit
+                        </button>
                     </div>
                 </div>
 
@@ -1004,6 +1053,9 @@ export default function SuryaLandingPage() {
                     <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 font-mono">Menu</span>
                 </Link>
             </div>
+
+            {/* Staff & Operations Cockpit Modal */}
+            <StaffPortalModal isOpen={staffModalOpen} onClose={() => setStaffModalOpen(false)} />
         </div>
     );
 }
