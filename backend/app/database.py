@@ -6,7 +6,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 # Load environment variables
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./teatime.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./surya_restaurant.db")
 
 # Fix common Heroku/Render/Railway 'postgres://' URI prefix to 'postgresql://'
 if DATABASE_URL.startswith("postgres://"):

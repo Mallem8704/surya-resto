@@ -17,7 +17,7 @@ from app.rate_limiter import order_creation_limiter
 
 router = APIRouter(prefix="", tags=["Orders"])
 
-VALID_STATUSES = ["placed", "accepted", "preparing", "ready", "out_for_delivery", "delivered", "served", "cancelled"]
+VALID_STATUSES = ["placed", "accepted", "preparing", "ready", "out_for_delivery", "delivered", "served", "completed", "cancelled"]
 
 
 def generate_order_number():

@@ -423,6 +423,16 @@ async def request_table_service(
         .first()
     )
     if existing_call:
+        await manager.broadcast_service_call(
+            outlet_id=table.outlet_id,
+            data={
+                "id": existing_call.id,
+                "table_id": table_id,
+                "table_label": table.label,
+                "call_type": existing_call.call_type,
+                "created_at": existing_call.created_at.isoformat(),
+            },
+        )
         return ServiceCallOut(
             id=existing_call.id,
             outlet_id=existing_call.outlet_id,

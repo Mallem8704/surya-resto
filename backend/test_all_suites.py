@@ -6,14 +6,8 @@ if sys.platform == "win32":
     sys.stderr.reconfigure(encoding="utf-8")
 
 TEST_FILES = [
-    "test_auth.py",
-    "test_menu_tables.py",
-    "test_orders.py",
+    "test_surya_full_operations.py",
     "test_ws.py",
-    "test_remaining_routers.py",
-    "test_admin_operations.py",
-    "test_final_verification.py",
-    "test_qr_ordering_upgrade.py",
 ]
 
 def run_all():

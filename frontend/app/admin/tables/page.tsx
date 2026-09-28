@@ -50,7 +50,7 @@ export default function AdminTablesPage() {
     const [editTableStatus, setEditTableStatus] = useState("free");
     const [deletingTable, setDeletingTable] = useState<any | null>(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
-    const [qrTargetDomain, setQrTargetDomain] = useState("https://arabic-restaurant-dineos.vercel.app");
+    const [qrTargetDomain, setQrTargetDomain] = useState("https://surya-resto.vercel.app");
 
     // Auth Guard
     useEffect(() => {
@@ -244,7 +244,7 @@ export default function AdminTablesPage() {
                         </Button>
 
                         <a
-                            href={outlet?.id === 2 ? "/Arabieq_Branch2_Table_QR_Stands.pdf" : "/Arabieq_Branch1_Table_QR_Stands.pdf"}
+                            href="/Surya_Table_QR_Stands.pdf"
                             target="_blank"
                             rel="noopener noreferrer"
                             download
@@ -597,14 +597,17 @@ export default function AdminTablesPage() {
                                     onChange={(e) => setQrTargetDomain(e.target.value)}
                                     className="w-full p-2 rounded-xl border border-cream-300 bg-white font-mono text-xs font-semibold"
                                 >
-                                    <option value="https://arabic-restaurant-dineos.vercel.app">
-                                        Production (Vercel): https://arabic-restaurant-dineos.vercel.app
+                                    <option value="https://surya-resto.vercel.app">
+                                        Production (Vercel): https://surya-resto.vercel.app
                                     </option>
-                                    <option value="http://192.168.101.4:3000">
-                                        Local Wi-Fi Network: http://192.168.101.4:3000
+                                    <option value="https://frontend-lake-iota-65.vercel.app">
+                                        Vercel Preview: https://frontend-lake-iota-65.vercel.app
                                     </option>
                                     <option value="http://localhost:3000">
-                                        Localhost (This PC only): http://localhost:3000
+                                        Localhost (Port 3000): http://localhost:3000
+                                    </option>
+                                    <option value="http://localhost:3002">
+                                        Localhost (Port 3002): http://localhost:3002
                                     </option>
                                 </select>
                                 <span className="text-[10px] text-espresso-500 font-mono">

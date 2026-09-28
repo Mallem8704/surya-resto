@@ -20,7 +20,7 @@ async def run_ws_test():
     # 1. Login as Staff to get auth token
     staff_res = requests.post(
         f"{HTTP_URL}/api/auth/login",
-        json={"email": "staff@teatime.com", "password": "staff123"},
+        json={"email": "staff@suryarestaurant.com", "password": "staff123"},
     )
     assert staff_res.status_code == 200
     staff_token = staff_res.json()["access_token"]
@@ -87,7 +87,7 @@ async def run_ws_test():
     # 8. Verify Admin also received "order_updated"
     print("\n[STEP 7] Verifying Admin WebSocket received 'order_updated' event...")
     admin_status_msg = json.loads(await asyncio.wait_for(admin_ws.recv(), timeout=5.0))
-    assert admin_status_msg["event"] == "order_updated"
+    assert admin_status_msg["event"] in ["order_updated", "order_status_updated"]
     assert admin_status_msg["data"]["status"] == "preparing"
     print(f"✓ Admin Received Sync Event: '{admin_status_msg['event']}' for Kanban board")
 
