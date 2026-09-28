@@ -31,10 +31,10 @@ export function Cart3DFab({ cartCount, cartTotalPaise, onClick }: Cart3DFabProps
     if (cartCount === 0) return null;
 
     return (
-        <div className="fixed bottom-5 inset-x-0 z-40 max-w-lg mx-auto px-4 animate-card-entrance">
+        <div className="fixed bottom-4 sm:bottom-5 inset-x-0 z-40 max-w-lg mx-auto px-3 sm:px-4 animate-card-entrance pb-safe">
             <button
                 onClick={onClick}
-                className="w-full bg-gradient-to-r from-espresso-900 via-espresso-800 to-espresso-900 text-white rounded-2xl p-4 px-5 shadow-2xl border border-espresso-700/50 flex items-center justify-between gap-3 hover:shadow-3xl transition-all duration-300 active:scale-[0.98] cursor-pointer group"
+                className="w-full bg-gradient-to-r from-espresso-900 via-espresso-800 to-espresso-900 text-white rounded-2xl p-3.5 sm:p-4 px-4 sm:px-5 shadow-2xl border border-espresso-700/50 flex items-center justify-between gap-3 hover:shadow-3xl transition-all duration-300 active:scale-[0.98] cursor-pointer group"
             >
                 {/* Left: Icon + Count */}
                 <div className="flex items-center gap-3">

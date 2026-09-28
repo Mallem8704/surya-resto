@@ -66,6 +66,7 @@ import {
 import { SURYA_CATEGORIES, SURYA_MENU_ITEMS } from "@/lib/suryaMenuData";
 import { MenuGridSkeleton } from "@/components/order/MenuGridSkeleton";
 import { UpiPaymentModal } from "@/components/order/UpiPaymentModal";
+import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 
 interface MenuItemData extends CustomizerItemData {
     category_id: number;
@@ -897,16 +898,17 @@ function DeliveryOrderContent() {
             <div className="max-w-5xl mx-auto px-4 pt-4 pb-2">
                 <div className="bg-white p-3.5 rounded-2xl border border-amber-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-black flex items-center justify-center text-lg shrink-0">
-                            ☀️
-                        </div>
+                        <SuryaSunLogo size={36} className="shrink-0" />
                         <div>
                             <div className="flex items-center gap-2">
                                 <span className="font-bold text-sm text-espresso-950">Surya Family Restaurant</span>
                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">4.8★ (69+ Google Reviews)</span>
                             </div>
-                            <p className="text-xs text-espresso-600">
-                                Dhandubatu Street, Bypass road, Opp. RTC Bus Stand, Kadiri &bull; 📞 098803 58634
+                            <p className="text-xs text-espresso-600 flex flex-wrap items-center gap-1 mt-0.5">
+                                <span>Dhandubatu Street, Bypass road, Opp. RTC Bus Stand, Kadiri</span>
+                                <span>&bull;</span>
+                                <Phone className="w-3 h-3 text-amber-700 shrink-0 inline" />
+                                <span>098803 58634</span>
                             </p>
                         </div>
                     </div>
@@ -928,8 +930,8 @@ function DeliveryOrderContent() {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={
                                 language === "te"
-                                    ? "బిర్యానీ, మండి, చికెన్ కబాబ్స్ కోసం వెతకండి..."
-                                    : "Search chicken mandi, mutton biryani, starters, shakes..."
+                                    ? "బిర్యానీ, పంజాబీ కర్రీలు, స్టార్టర్స్, రోటీల కోసం వెతకండి..."
+                                    : "Search chicken biryani, punjabi curry, starters, naan..."
                             }
                             className="w-full pl-10 pr-4 py-2.5 text-xs bg-white border border-terracotta-100 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-terracotta-500 shadow-xs text-espresso-900 placeholder:text-espresso-400"
                         />
@@ -1120,7 +1122,7 @@ function DeliveryOrderContent() {
 
             {/* Floating Bottom Cart Bar (if items in cart) */}
             {cartCount > 0 && !isCartOpen && (
-                <div className="fixed bottom-4 left-4 right-4 z-40 max-w-xl mx-auto animate-in slide-in-from-bottom-6">
+                <div className="fixed bottom-4 left-4 right-4 z-40 max-w-xl mx-auto animate-in slide-in-from-bottom-6 pb-safe">
                     <button
                         onClick={() => setIsCartOpen(true)}
                         className="w-full bg-gradient-to-r from-terracotta-600 via-terracotta-700 to-espresso-950 text-white p-4 rounded-2xl shadow-xl shadow-terracotta-600/30 flex items-center justify-between border border-terracotta-500/30 transform active:scale-98 transition-all"

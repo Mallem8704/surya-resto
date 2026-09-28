@@ -518,43 +518,38 @@ function CustomerOrderContent() {
     }
 
     return (
-        <main className="min-h-screen bg-cream-50 text-espresso-950 flex flex-col justify-between pb-28">
+        <main className="min-h-screen bg-cream-50 text-espresso-950 flex flex-col justify-between pb-32">
             {/* Header */}
             <header className="border-b border-cream-200 bg-white/90 backdrop-blur-md sticky top-0 z-40">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-2">
-                    <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition">
-                        <SuryaSunLogo size={38} />
-                        <div>
-                            <span className="text-xs font-black uppercase tracking-wider text-amber-800 block">
-                                {branchOutlet?.name || "Surya Family Restaurant"}
+                <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
+                    <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition min-w-0 shrink">
+                        <SuryaSunLogo size={34} className="shrink-0" />
+                        <div className="min-w-0">
+                            <span className="text-xs font-black uppercase tracking-wider text-amber-800 block truncate">
+                                {branchOutlet?.name || "Surya Restaurant"}
                             </span>
-                            <span className="text-[10px] text-espresso-500 font-medium">
+                            <span className="text-[10px] text-espresso-500 font-medium hidden xs:block truncate">
                                 Opp. RTC Bus Stand, Kadiri
                             </span>
                         </div>
                     </Link>
 
-                    <div className="flex items-center gap-2">
-                        {/* Branch indicator on mobile */}
-                        <span className="sm:hidden text-[10px] font-black px-2 py-0.5 rounded-full bg-terracotta-100 text-terracotta-800">
-                            B{outletId || 1}
-                        </span>
-
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                         {/* Table Selector Pill */}
                         <button
                             onClick={() => setShowTablePicker(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-terracotta-300 bg-terracotta-50 text-terracotta-800 text-xs font-bold shadow-2xs hover:bg-terracotta-100 transition cursor-pointer"
+                            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full border border-terracotta-300 bg-terracotta-50 text-terracotta-800 text-[11px] sm:text-xs font-bold shadow-2xs hover:bg-terracotta-100 transition cursor-pointer"
                         >
-                            <MapPin className="w-3.5 h-3.5 text-terracotta-600" />
+                            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-terracotta-600 shrink-0" />
                             <span>{t("table")} {tableLabel}</span>
                         </button>
 
                         {/* Call Waiter Pill */}
                         <button
                             onClick={() => setShowServiceModal(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-400/80 bg-amber-50 hover:bg-amber-100 text-amber-950 text-xs font-extrabold shadow-2xs transition cursor-pointer"
+                            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full border border-amber-400/80 bg-amber-50 hover:bg-amber-100 text-amber-950 text-[11px] sm:text-xs font-extrabold shadow-2xs transition cursor-pointer"
                         >
-                            <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
+                            <Bell className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 animate-bounce shrink-0" />
                             <span className="hidden sm:inline">Call Waiter</span>
                             <span className="sm:hidden">Bell</span>
                         </button>
@@ -597,7 +592,7 @@ function CustomerOrderContent() {
                         <Search className="w-4 h-4 text-espresso-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
                             type="text"
-                            placeholder={language === "en" ? "Search Mandi, Biryani, Shawarma, Grills, Starters..." : "మండి, బిర్యానీ, షవర్మా, గ్రిల్స్ వెతకండి..."}
+                            placeholder={language === "en" ? "Search Biryani, Punjabi Curries, Tandoori, Starters, Naan..." : "బిర్యానీ, పంజాబీ కర్రీలు, తందూరీ, స్టార్టర్స్ వెతకండి..."}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-cream-300 bg-white placeholder:text-espresso-400 text-xs sm:text-sm focus:outline-none focus:border-terracotta-500 shadow-2xs"
@@ -605,10 +600,10 @@ function CustomerOrderContent() {
                     </div>
 
                     {/* Veg / Non-Veg Toggle */}
-                    <div className="flex items-center p-1 rounded-2xl bg-white border border-cream-300 shadow-2xs self-start sm:self-auto">
+                    <div className="flex items-center justify-between sm:justify-start p-1 rounded-2xl bg-white border border-cream-300 shadow-2xs w-full sm:w-auto">
                         <button
                             onClick={() => setVegFilter("all")}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-center ${
                                 vegFilter === "all" ? "bg-espresso-900 text-white" : "text-espresso-600 hover:bg-cream-100"
                             }`}
                         >
@@ -616,20 +611,20 @@ function CustomerOrderContent() {
                         </button>
                         <button
                             onClick={() => setVegFilter("veg")}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                            className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
                                 vegFilter === "veg" ? "bg-emerald-600 text-white" : "text-emerald-800 hover:bg-emerald-50"
                             }`}
                         >
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shrink-0" />
                             <span>{t("veg")}</span>
                         </button>
                         <button
                             onClick={() => setVegFilter("non_veg")}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                            className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
                                 vegFilter === "non_veg" ? "bg-red-600 text-white" : "text-red-800 hover:bg-red-50"
                             }`}
                         >
-                            <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+                            <span className="w-2 h-2 rounded-full bg-red-500 inline-block shrink-0" />
                             <span>{t("non_veg")}</span>
                         </button>
                     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { UtensilsCrossed, RefreshCw } from "lucide-react";
 
 export default function OrderError({
   error,
@@ -11,14 +12,15 @@ export default function OrderError({
 }) {
   return (
     <main
-      className="min-h-screen flex items-center justify-center p-6"
+      className="min-h-screen flex items-center justify-center p-6 bg-[#FAF7F2]"
       style={{
         fontFamily: "system-ui, -apple-system, sans-serif",
-        background: "#faf7f2",
       }}
     >
       <div className="text-center max-w-sm">
-        <div className="text-5xl mb-3">🍽️</div>
+        <div className="w-16 h-16 rounded-3xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <UtensilsCrossed className="w-8 h-8" />
+        </div>
         <h2 className="text-lg font-extrabold text-gray-900 mb-2">
           Menu couldn&apos;t load
         </h2>
@@ -36,9 +38,10 @@ export default function OrderError({
             }
             reset();
           }}
-          className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-xl shadow-lg transition"
+          className="inline-flex items-center gap-2 px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm rounded-xl shadow-lg transition active:scale-95 cursor-pointer"
         >
-          🔄 Try Again
+          <RefreshCw className="w-4 h-4" />
+          <span>Try Again</span>
         </button>
       </div>
     </main>

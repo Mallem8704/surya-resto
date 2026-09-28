@@ -89,7 +89,7 @@ function BookTableContent() {
     const todayStr = new Date().toISOString().split("T")[0];
     const [reservationDate, setReservationDate] = useState<string>(todayStr);
     const [reservationTime, setReservationTime] = useState<string>("07:30 PM");
-    const [seatingPreference, setSeatingPreference] = useState<string>("majlis");
+    const [seatingPreference, setSeatingPreference] = useState<string>("family_ac");
     const [occasion, setOccasion] = useState<string>("casual");
     
     const [customerName, setCustomerName] = useState<string>("");
@@ -242,9 +242,9 @@ function BookTableContent() {
 
                             <div className="grid grid-cols-2 gap-3 text-xs">
                                 <div>
-                                    <span className="text-white/40 block text-[10px] uppercase font-bold">Branch</span>
+                                    <span className="text-white/40 block text-[10px] uppercase font-bold">Restaurant</span>
                                     <span className="text-white font-bold">
-                                        {confirmedReservation.outlet_id === 2 ? "Branch 2 (Bypass Rd)" : "Branch 1 (Main Rd)"}
+                                        Surya Family Restaurant (Kadiri)
                                     </span>
                                 </div>
                                 <div>
