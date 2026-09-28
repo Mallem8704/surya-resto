@@ -40,7 +40,9 @@ import {
     Bookmark,
     QrCode,
     Smartphone,
+    Info,
 } from "lucide-react";
+import { getDishImage } from "@/lib/dishImages";
 import { useCustomer } from "@/context/CustomerContext";
 import { useOffline } from "@/context/OfflineContext";
 import { CustomerAuthModal } from "@/components/customer/CustomerAuthModal";
@@ -109,6 +111,262 @@ interface DeliveryOrder {
         total_price_paise: number;
         notes?: string;
     }>;
+}
+
+interface DeliveryDishCardProps {
+    item: MenuItemData;
+    countInCart: number;
+    language: string;
+    onAddClick: (item: MenuItemData) => void;
+    onUpdateQty: (cartKey: string, delta: number) => void;
+}
+
+function DeliveryDishCard({
+    item,
+    countInCart,
+    language,
+    onAddClick,
+    onUpdateQty,
+}: DeliveryDishCardProps) {
+    const [imageError, setImageError] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
+
+    const hasVariants = Boolean(item.variants && item.variants.length > 0);
+    const hasAddons = Boolean(item.addons && item.addons.length > 0);
+    const isOutOfStock = !item.is_available;
+
+    const displayName = language === "te" && item.name_te ? item.name_te : item.name;
+    const displayDesc = item.description || "";
+    const finalImageSrc = imageError ? "/dishes/3d_biryani.jpg" : getDishImage(item);
+
+    const displayPricePaise =
+        hasVariants && item.variants && item.variants[0]
+            ? item.variants[0].price_paise
+            : item.price_paise;
+
+    return (
+        <>
+            <div
+                className={`bg-white rounded-3xl border-2 overflow-hidden flex flex-col justify-between shadow-xs hover:shadow-xl transition-all duration-200 group h-full ${
+                    isOutOfStock
+                        ? "border-cream-200 opacity-60"
+                        : "border-cream-200/90 hover:border-terracotta-400"
+                }`}
+            >
+                {/* Dish Image Header (Matching Table Ordering 3D Cards) */}
+                <div className="relative h-44 sm:h-48 bg-gradient-to-br from-cream-100 to-cream-200 overflow-hidden flex items-center justify-center">
+                    <img
+                        src={finalImageSrc}
+                        alt={displayName}
+                        onError={() => setImageError(true)}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                    />
+
+                    {/* Veg / Non-Veg & Special Badges */}
+                    <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+                        <VegBadge isVeg={item.is_veg} showText={false} />
+                        {item.is_special && <SpecialBadge />}
+                        {hasVariants && (
+                            <span className="text-[10px] font-bold text-white bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                                <SlidersHorizontal className="w-2.5 h-2.5 text-[#D4AF37]" />
+                                Portions
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Stock Alert Badge */}
+                    {isOutOfStock && (
+                        <div className="absolute top-3 right-3 z-10">
+                            <span className="px-2.5 py-1 rounded-full bg-red-600/95 text-white text-[11px] font-extrabold shadow-sm">
+                                Out of Stock
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Info Button */}
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowDetails(true);
+                        }}
+                        className="absolute bottom-2.5 right-2.5 z-10 w-7 h-7 rounded-full bg-white/90 backdrop-blur-xs shadow-md flex items-center justify-center text-espresso-700 hover:text-espresso-950 hover:bg-white transition active:scale-90 cursor-pointer"
+                        title="View dish details & info"
+                    >
+                        <Info className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+
+                {/* Content & Actions */}
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                            <h3 className="text-[15px] sm:text-base font-serif font-black text-espresso-950 leading-snug group-hover:text-terracotta-700 transition-colors line-clamp-1">
+                                {displayName}
+                            </h3>
+                        </div>
+
+                        {displayDesc && (
+                            <p className="text-xs text-espresso-500 line-clamp-2 mt-1 leading-relaxed">
+                                {displayDesc}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    <div className="flex items-center justify-between pt-3 mt-3 border-t border-cream-100">
+                        <div>
+                            <span className="text-[10px] text-espresso-400 block font-medium">
+                                {hasVariants ? "Starts from" : "Price"}
+                            </span>
+                            <span className="text-base font-mono font-black text-espresso-950">
+                                {formatRupees(displayPricePaise)}
+                            </span>
+                        </div>
+
+                        {/* Add to Cart / Customizer Trigger */}
+                        {isOutOfStock ? (
+                            <button
+                                disabled
+                                className="px-3.5 py-1.5 rounded-xl bg-cream-200 text-espresso-400 text-xs font-bold cursor-not-allowed"
+                            >
+                                Out of Stock
+                            </button>
+                        ) : hasVariants || hasAddons ? (
+                            <button
+                                type="button"
+                                onClick={() => onAddClick(item)}
+                                className="px-3.5 py-2 rounded-xl bg-terracotta-50 hover:bg-terracotta-600 text-terracotta-700 hover:text-white border border-terracotta-200 hover:border-terracotta-600 font-bold text-xs shadow-2xs transition-all transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>CUSTOMIZE</span>
+                                {countInCart > 0 && (
+                                    <span className="ml-1 bg-terracotta-600 text-white group-hover:bg-white group-hover:text-terracotta-700 text-[10px] font-mono font-black w-4 h-4 rounded-full flex items-center justify-center">
+                                        {countInCart}
+                                    </span>
+                                )}
+                            </button>
+                        ) : countInCart > 0 ? (
+                            <div
+                                className="inline-flex items-center gap-1.5 p-1 rounded-xl border border-terracotta-200 bg-terracotta-50 shadow-xs"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => onUpdateQty(`item_${item.id}`, -1)}
+                                    className="w-7 h-7 rounded-lg bg-white hover:bg-cream-100 text-espresso-800 flex items-center justify-center font-bold shadow-xs transition active:scale-90 cursor-pointer"
+                                >
+                                    <Minus className="w-3.5 h-3.5" />
+                                </button>
+                                <span className="w-5 text-center text-sm font-black text-espresso-950 font-mono">
+                                    {countInCart}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => onUpdateQty(`item_${item.id}`, 1)}
+                                    className="w-7 h-7 rounded-lg text-white bg-terracotta-500 hover:bg-terracotta-600 flex items-center justify-center font-bold shadow-xs transition active:scale-90 cursor-pointer"
+                                >
+                                    <Plus className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => onAddClick(item)}
+                                className="px-4 py-2 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white font-bold text-xs shadow-2xs transition-all transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>ADD</span>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Dish Details Modal */}
+            {showDetails && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-espresso-950/60 backdrop-blur-xs animate-in fade-in"
+                    onClick={() => setShowDetails(false)}
+                >
+                    <div
+                        className="bg-white rounded-3xl max-w-sm w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-cream-300 animate-in zoom-in-95"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="px-5 py-4 bg-gradient-to-r from-terracotta-500 to-terracotta-700 text-white flex items-center justify-between sticky top-0 z-10">
+                            <div>
+                                <h3 className="text-base font-extrabold leading-tight">{displayName}</h3>
+                                <span className="text-sm font-mono font-bold opacity-95">
+                                    {formatRupees(displayPricePaise)}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowDetails(false)}
+                                className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition cursor-pointer"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-5 space-y-4">
+                            <div className="relative h-44 rounded-2xl overflow-hidden bg-cream-100">
+                                <img
+                                    src={finalImageSrc}
+                                    alt={displayName}
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute top-2.5 left-2.5">
+                                    <VegBadge isVeg={item.is_veg} />
+                                </div>
+                            </div>
+
+                            {displayDesc && (
+                                <div>
+                                    <h5 className="text-xs font-bold text-espresso-400 uppercase tracking-wider mb-1">
+                                        Description
+                                    </h5>
+                                    <p className="text-xs text-espresso-700 leading-relaxed">{displayDesc}</p>
+                                </div>
+                            )}
+
+                            {hasVariants && item.variants && (
+                                <div>
+                                    <h5 className="text-xs font-bold text-espresso-400 uppercase tracking-wider mb-1.5">
+                                        Available Portions
+                                    </h5>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {item.variants.map((v) => (
+                                            <span
+                                                key={v.id}
+                                                className="px-2.5 py-1 rounded-lg bg-cream-100 text-espresso-800 text-xs font-medium border border-cream-200"
+                                            >
+                                                {v.name}: <strong className="font-mono">{formatRupees(v.price_paise)}</strong>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowDetails(false);
+                                    onAddClick(item);
+                                }}
+                                className="w-full py-2.5 rounded-xl bg-terracotta-500 hover:bg-terracotta-600 text-white font-bold text-xs shadow-md transition cursor-pointer"
+                            >
+                                {hasVariants || hasAddons ? "Customize & Add to Cart" : "Add to Delivery Cart"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
 }
 
 function DeliveryOrderContent() {
@@ -397,6 +655,17 @@ function DeliveryOrderContent() {
             return true;
         });
     }, [menuItems, selectedCategory, vegFilter, searchQuery]);
+
+    // Group items by category for the full delivery menu view
+    const groupedByCategory = useMemo(() => {
+        return categories
+            .map((cat) => ({
+                category: cat,
+                categoryId: cat.id,
+                items: filteredItems.filter((i) => i.category_id === cat.id),
+            }))
+            .filter((g) => g.items.length > 0);
+    }, [categories, filteredItems]);
 
     // Place Delivery Order with Idempotency Key
     const handlePlaceDeliveryOrder = async (e: React.FormEvent) => {
@@ -1028,77 +1297,65 @@ function DeliveryOrderContent() {
                             Reset Filters
                         </Button>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredItems.map((item) => {
-                            const hasVariants = item.variants && item.variants.length > 0;
-                            const hasAddons = item.addons && item.addons.length > 0;
+                ) : selectedCategory === "all" && !searchQuery.trim() ? (
+                    /* ═══ GROUPED BY CATEGORY (Consistent with Table Ordering) ═══ */
+                    <div className="space-y-10">
+                        {groupedByCategory.map((group) => (
+                            <section key={group.categoryId} className="space-y-4">
+                                <div className="flex items-center gap-3 border-b border-terracotta-100/80 pb-2">
+                                    <div className="w-8 h-8 rounded-xl bg-terracotta-500/10 flex items-center justify-center text-terracotta-700 font-black">
+                                        <UtensilsCrossed className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-serif font-black text-espresso-950">
+                                            {language === "te" && group.category.name_te
+                                                ? group.category.name_te
+                                                : group.category.name}
+                                        </h2>
+                                        <p className="text-xs text-espresso-400">
+                                            {group.items.length} {group.items.length === 1 ? "dish" : "dishes"} available for delivery
+                                        </p>
+                                    </div>
+                                </div>
 
-                            // Find total items of this dish in cart across variants
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                    {group.items.map((item) => {
+                                        const countInCart = cart
+                                            .filter((ci) => ci.item.id === item.id)
+                                            .reduce((sum, ci) => sum + ci.qty, 0);
+
+                                        return (
+                                            <DeliveryDishCard
+                                                key={item.id}
+                                                item={item}
+                                                countInCart={countInCart}
+                                                language={language}
+                                                onAddClick={handleDishCardClick}
+                                                onUpdateQty={handleUpdateCartQty}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </section>
+                        ))}
+                    </div>
+                ) : (
+                    /* ═══ FILTERED / SEARCH GRID ═══ */
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {filteredItems.map((item) => {
                             const countInCart = cart
                                 .filter((ci) => ci.item.id === item.id)
                                 .reduce((sum, ci) => sum + ci.qty, 0);
 
                             return (
-                                <div
+                                <DeliveryDishCard
                                     key={item.id}
-                                    className="bg-white rounded-2xl p-4 border border-terracotta-100/80 hover:border-terracotta-300 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
-                                >
-                                    <div>
-                                        <div className="flex items-start justify-between gap-2 mb-2">
-                                            <div className="flex items-center gap-1.5">
-                                                <VegBadge isVeg={item.is_veg} />
-                                                {item.is_special && <SpecialBadge />}
-                                                {hasVariants && (
-                                                    <span className="text-[10px] font-bold text-terracotta-700 bg-terracotta-50 border border-terracotta-200/60 px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                                                        <SlidersHorizontal className="w-2.5 h-2.5" />
-                                                        Portions
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <h3 className="text-base font-serif font-black text-espresso-950 leading-snug group-hover:text-terracotta-700 transition-colors">
-                                            {language === "te" && item.name_te ? item.name_te : item.name}
-                                        </h3>
-
-                                        {item.description && (
-                                            <p className="text-xs text-espresso-500 line-clamp-2 mt-1 leading-relaxed">
-                                                {item.description}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="flex items-center justify-between pt-4 mt-3 border-t border-terracotta-50">
-                                        <div>
-                                            <span className="text-[10px] text-espresso-400 block font-medium">
-                                                {hasVariants ? "Starts from" : "Price"}
-                                            </span>
-                                            <span className="text-base font-mono font-black text-espresso-950">
-                                                {formatRupees(
-                                                    hasVariants && item.variants && item.variants[0]
-                                                        ? item.variants[0].price_paise
-                                                        : item.price_paise
-                                                )}
-                                            </span>
-                                        </div>
-
-                                        {/* Add to Cart / Customizer Trigger */}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleDishCardClick(item)}
-                                            className="px-4 py-2 rounded-xl bg-terracotta-50 hover:bg-terracotta-600 text-terracotta-700 hover:text-white border border-terracotta-200 hover:border-terracotta-600 font-bold text-xs shadow-2xs transition-all transform active:scale-95 flex items-center gap-1.5"
-                                        >
-                                            <Plus className="w-3.5 h-3.5" />
-                                            <span>{hasVariants || hasAddons ? "CUSTOMIZE" : "ADD"}</span>
-                                            {countInCart > 0 && (
-                                                <span className="ml-1 bg-terracotta-600 text-white group-hover:bg-white group-hover:text-terracotta-700 text-[10px] font-mono font-black w-4 h-4 rounded-full flex items-center justify-center">
-                                                    {countInCart}
-                                                </span>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
+                                    item={item}
+                                    countInCart={countInCart}
+                                    language={language}
+                                    onAddClick={handleDishCardClick}
+                                    onUpdateQty={handleUpdateCartQty}
+                                />
                             );
                         })}
                     </div>
