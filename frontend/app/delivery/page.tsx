@@ -6,6 +6,7 @@ import { dispatchCustomerWhatsApp } from "@/lib/whatsapp";
 
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
     ShoppingBag,
     Search,
@@ -1085,43 +1086,35 @@ function DeliveryOrderContent() {
     // ── MAIN MENU & ORDERING VIEW ───────────────────────────────────────────
     return (
         <div className="min-h-screen bg-[#FDFBF7] pb-28">
-            {/* Top Announcement Bar */}
-            <div className="bg-gradient-to-r from-espresso-950 via-terracotta-900 to-espresso-950 text-white text-[11px] font-bold py-2 px-4 text-center tracking-wide flex items-center justify-center gap-2 shadow-inner">
-                <Bike className="w-3.5 h-3.5 text-saffron-400 animate-bounce" />
-                <span>⚡ 100% FREE Home Delivery Anywhere in Kadiri Town Limits &bull; 0 Delivery Charges &bull; Hot & Fresh</span>
-            </div>
-
-            {/* Sticky Header with Branch Switcher */}
-            <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-terracotta-100 px-4 py-3 shadow-xs">
-                <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
-                    {/* Logo & Branch Info */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white text-xl shadow-md">
-                            ☀️
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <h1 className="text-sm sm:text-lg font-serif font-black text-espresso-950 leading-tight">
-                                    Surya Online Food Delivery
-                                </h1>
-                                <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                                    Doorstep Delivery
+            {/* Top Sticky Header — Clean & Direct Link to Home */}
+            <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-cream-200 shadow-xs">
+                <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+                    {/* Logo & Brand Link */}
+                    <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition min-w-0 shrink">
+                        <SuryaSunLogo size={36} className="shrink-0" />
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-black uppercase tracking-wider text-amber-800 block truncate">
+                                    Surya Restaurant
+                                </span>
+                                <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full hidden sm:inline-block">
+                                    Delivery
                                 </span>
                             </div>
-                            <p className="text-xs text-espresso-600 mt-1 flex items-center gap-1 font-medium">
-                                <Store className="w-3 h-3 text-amber-600" />
-                                <span>{currentBranchInfo.name} &bull; {currentBranchInfo.hours}</span>
-                            </p>
+                            <span className="text-[10px] text-espresso-500 font-medium block truncate">
+                                Opp. RTC Bus Stand, Kadiri
+                            </span>
                         </div>
-                    </div>
+                    </Link>
 
-                    <LanguageToggle />
-                    {/* Floating Cart Button */}
-                    <div className="flex items-center gap-2">
+                    {/* Right Controls */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                        <LanguageToggle />
+
                         {isCustomerLoggedIn ? (
                             <button
                                 onClick={() => setShowAuthModal(true)}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 font-bold text-xs hover:bg-amber-100 transition cursor-pointer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 font-bold text-xs hover:bg-amber-100 transition cursor-pointer"
                             >
                                 <UserCheck className="w-3.5 h-3.5 text-amber-600" />
                                 <span className="hidden sm:inline">Hi, {customer?.name || customer?.phone}</span>
@@ -1129,29 +1122,30 @@ function DeliveryOrderContent() {
                         ) : (
                             <button
                                 onClick={() => setShowAuthModal(true)}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-cream-100 hover:bg-cream-200 border border-cream-300 text-espresso-900 font-bold text-xs transition cursor-pointer"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cream-100 hover:bg-cream-200 border border-cream-300 text-espresso-900 font-bold text-xs transition cursor-pointer"
                             >
                                 <LogIn className="w-3.5 h-3.5 text-espresso-700" />
-                                <span className="hidden sm:inline">Customer Login</span>
+                                <span className="hidden sm:inline">Login</span>
                             </button>
                         )}
+
                         <button
-                        onClick={() => setIsCartOpen(true)}
-                        className="relative flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-amber-600/30 transition-all transform active:scale-95 cursor-pointer"
-                    >
-                        <ShoppingBag className="w-4 h-4" />
-                        <span className="hidden sm:inline">Delivery Cart</span>
-                        {cartCount > 0 && (
-                            <span className="bg-saffron-400 text-espresso-950 text-[11px] font-black font-mono w-5 h-5 rounded-full flex items-center justify-center">
-                                {cartCount}
-                            </span>
-                        )}
-                        {cartCount > 0 && (
-                            <span className="hidden sm:inline font-mono font-black border-l border-white/20 pl-2">
-                                {formatRupees(totalPaise)}
-                            </span>
-                        )}
-                    </button>
+                            onClick={() => setIsCartOpen(true)}
+                            className="relative flex items-center gap-1.5 bg-terracotta-500 hover:bg-terracotta-600 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs shadow-sm transition-all transform active:scale-95 cursor-pointer"
+                        >
+                            <ShoppingBag className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Cart</span>
+                            {cartCount > 0 && (
+                                <span className="bg-white text-terracotta-700 text-[10px] font-black font-mono w-4 h-4 rounded-full flex items-center justify-center">
+                                    {cartCount}
+                                </span>
+                            )}
+                            {cartCount > 0 && (
+                                <span className="hidden sm:inline font-mono font-black border-l border-white/30 pl-1.5">
+                                    {formatRupees(totalPaise)}
+                                </span>
+                            )}
+                        </button>
                     </div>
                 </div>
             </header>
@@ -1163,25 +1157,36 @@ function DeliveryOrderContent() {
                 </div>
             )}
 
-            {/* Restaurant Info Header Card */}
-            <div className="max-w-5xl mx-auto px-4 pt-4 pb-2">
-                <div className="bg-white p-3.5 rounded-2xl border border-amber-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            {/* Delivery Service Banner (Single Source of Truth, Non-Redundant) */}
+            <div className="max-w-5xl mx-auto px-4 pt-4 pb-1">
+                <div className="p-3.5 rounded-2xl bg-white border border-amber-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <SuryaSunLogo size={36} className="shrink-0" />
+                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-800 flex items-center justify-center shrink-0">
+                            <Bike className="w-5 h-5 text-amber-600" />
+                        </div>
                         <div>
-                            <div className="flex items-center gap-2">
-                                <span className="font-bold text-sm text-espresso-950">Surya Family Restaurant</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">4.8★ (69+ Google Reviews)</span>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-bold text-espresso-950">100% Free Doorstep Delivery in Kadiri Town</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200/60 flex items-center gap-1">
+                                    <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                                    4.8 (69+ Google Reviews)
+                                </span>
                             </div>
-                            <p className="text-xs text-espresso-600 flex flex-wrap items-center gap-1 mt-0.5">
-                                <span>Dhandubatu Street, Bypass road, Opp. RTC Bus Stand, Kadiri</span>
+                            <p className="text-[11px] text-espresso-500 flex flex-wrap items-center gap-1.5 mt-0.5">
+                                <span>30–40 Mins</span>
                                 <span>&bull;</span>
-                                <Phone className="w-3 h-3 text-amber-700 shrink-0 inline" />
-                                <span>098803 58634</span>
+                                <span>0 Delivery Charges</span>
+                                <span>&bull;</span>
+                                <a href="tel:+919880358634" className="text-amber-800 font-bold hover:underline inline-flex items-center gap-0.5">
+                                    <Phone className="w-2.5 h-2.5 text-amber-700" />
+                                    098803 58634
+                                </a>
                             </p>
                         </div>
                     </div>
-                    <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-bold shrink-0">
+
+                    <span className="text-[11px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full font-bold self-start sm:self-center shrink-0 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         Open &bull; 11:00 AM – 10:30 PM
                     </span>
                 </div>
@@ -1247,7 +1252,7 @@ function DeliveryOrderContent() {
             </div>
 
             {/* Category Pills (Horizontal Scroll) */}
-            <div className="sticky top-[69px] z-20 bg-[#FDFBF7]/95 backdrop-blur-md py-2 border-b border-terracotta-100/60 shadow-2xs">
+            <div className="sticky top-[56px] z-20 bg-[#FDFBF7]/95 backdrop-blur-md py-2 border-b border-terracotta-100/60 shadow-2xs">
                 <div className="max-w-5xl mx-auto px-4 flex items-center gap-2 overflow-x-auto no-scrollbar">
                     <button
                         onClick={() => setSelectedCategory("all")}
