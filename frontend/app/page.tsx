@@ -32,6 +32,8 @@ import {
     Star,
     CheckCircle2,
     Heart,
+    Menu as MenuIcon,
+    X,
 } from "lucide-react";
 
 /* ─── SVG Sun Logo (matches design exactly) ──────────────────── */
@@ -76,15 +78,15 @@ const PHONE_TEL = "+919880358634";
 
 const NAV = [
     { label: "Home", href: "#home" },
-    { label: "About Us", href: "#about" },
-    { label: "Pre-Book Table", href: "#book-table" },
+    { label: "About", href: "#about", fullLabel: "About Us" },
+    { label: "Menu", href: "/order?branch=1&table=T1" },
+    { label: "Book Table", href: "#book-table", fullLabel: "Pre-Book Table" },
     { label: "Smart QR", href: "#smart-table" },
     { label: "Delivery", href: "#delivery" },
-    { label: "Menu", href: "/order?branch=1&table=T1" },
     { label: "Gallery", href: "#gallery" },
     { label: "Reviews", href: "#reviews" },
     { label: "Location", href: "#location" },
-    { label: "Contact", href: "#contact" },
+    { label: "Contact", href: "#contact", fullLabel: "Contact Us" },
 ];
 
 const SPECIALTIES = [
@@ -194,20 +196,20 @@ export default function SuryaLandingPage() {
             {/* ═══════════════════ HEADER ═══════════════════ */}
             <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
                 style={{ background: "#1A0800", boxShadow: scrolled ? "0 2px 24px rgba(0,0,0,.6)" : "none" }}>
-                <div className="max-w-7xl mx-auto px-5 h-[64px] flex items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[64px] flex items-center justify-between gap-2 lg:gap-3">
 
                     {/* Logo — left */}
-                    <Link href="/" className="flex items-center gap-2.5 shrink-0 mr-8">
-                        <SuryaSunLogo size={44} />
+                    <Link href="/" className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                        <SuryaSunLogo size={42} />
                         <div className="leading-none">
-                            <div style={{ color: "#D4AF37", fontWeight: 900, fontSize: 19, letterSpacing: 2.5 }}>SURYA</div>
-                            <div style={{ color: "#BFA882", fontSize: 8, letterSpacing: 2.5, fontWeight: 700, marginTop: 1 }}>FAMILY RESTAURANT</div>
-                            <div style={{ color: "#8A7055", fontSize: 7.5, letterSpacing: 2.5, fontWeight: 600 }}>KADIRI</div>
+                            <div style={{ color: "#D4AF37", fontWeight: 900, fontSize: 18, letterSpacing: 2 }}>SURYA</div>
+                            <div style={{ color: "#BFA882", fontSize: 7.5, letterSpacing: 2, fontWeight: 700, marginTop: 1 }}>FAMILY RESTAURANT</div>
+                            <div style={{ color: "#8A7055", fontSize: 7, letterSpacing: 2, fontWeight: 600 }}>KADIRI</div>
                         </div>
                     </Link>
 
-                    {/* Desktop Nav — centered absolutely so it's truly centered in header */}
-                    <nav className="hidden lg:flex items-stretch h-full flex-1 justify-center">
+                    {/* Desktop Nav */}
+                    <nav className="hidden lg:flex items-center justify-center h-full flex-1 min-w-0 px-1">
                         {NAV.map(n => {
                             const isActive = n.href === "#home"
                                 ? activeSection === "home"
@@ -216,12 +218,9 @@ export default function SuryaLandingPage() {
                             const linkStyle: React.CSSProperties = {
                                 color: isActive ? "#D4AF37" : "rgba(255,255,255,.82)",
                                 fontWeight: isActive ? 700 : 500,
-                                fontSize: 14,
-                                letterSpacing: 0.2,
                                 position: "relative",
                                 display: "flex",
                                 alignItems: "center",
-                                padding: "0 14px",
                                 height: "100%",
                                 border: "none",
                                 background: "none",
@@ -231,27 +230,21 @@ export default function SuryaLandingPage() {
                                 whiteSpace: "nowrap",
                             };
 
+                            const linkClasses = "px-1.5 xl:px-2.5 2xl:px-3 text-xs xl:text-[13px] 2xl:text-sm";
+
                             const underline = isActive && (
-                                <span style={{
-                                    position: "absolute",
-                                    bottom: 0,
-                                    left: 10,
-                                    right: 10,
-                                    height: 2.5,
-                                    borderRadius: "2px 2px 0 0",
-                                    background: "#D4AF37",
-                                }} />
+                                <span className="absolute bottom-0 left-1.5 right-1.5 xl:left-2 xl:right-2 h-[2.5px] rounded-t bg-[#D4AF37]" />
                             );
 
                             return n.href.startsWith("#") ? (
-                                <button key={n.label} onClick={() => goto(n.href)} style={linkStyle}
+                                <button key={n.label} onClick={() => goto(n.href)} style={linkStyle} className={linkClasses}
                                     onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "#fff"; }}
                                     onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,.82)"; }}>
                                     {n.label}
                                     {underline}
                                 </button>
                             ) : (
-                                <Link key={n.label} href={n.href} style={linkStyle}
+                                <Link key={n.label} href={n.href} style={linkStyle} className={linkClasses}
                                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#fff"; }}
                                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,.82)"; }}>
                                     {n.label}
@@ -261,57 +254,58 @@ export default function SuryaLandingPage() {
                         })}
                     </nav>
 
-                    {/* Spacer for md screens without lg nav */}
-                    <div className="flex-1 lg:hidden" />
+                    {/* Right Actions */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                        {/* Staff & Admin Button */}
+                        <button
+                            onClick={() => setStaffModalOpen(true)}
+                            title="Staff & Management Portals"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-[#D4AF37]/40 bg-[#150600] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37] text-[#D4AF37] text-[11px] xl:text-xs font-bold tracking-wider transition cursor-pointer shrink-0"
+                        >
+                            <Shield className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>STAFF</span>
+                        </button>
 
-                    {/* Staff & Admin Button */}
-                    <button
-                        onClick={() => setStaffModalOpen(true)}
-                        title="Staff & Management Portals"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#D4AF37]/40 bg-[#150600] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37] text-[#D4AF37] text-xs font-bold tracking-wider transition cursor-pointer"
-                    >
-                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        </svg>
-                        <span>STAFF</span>
-                    </button>
+                        {/* Quick Order Now CTA */}
+                        <Link
+                            href="/order?branch=1&table=T1"
+                            className="hidden sm:inline-flex items-center gap-1.5 px-3 xl:px-4 py-1.5 rounded-full font-bold text-[11px] xl:text-xs uppercase tracking-wider transition shadow-md hover:brightness-110 shrink-0"
+                            style={{ background: "#E5A93C", color: "#1A0800" }}
+                        >
+                            Order Now
+                        </Link>
 
-                    {/* Quick Order Now CTA */}
-                    <Link
-                        href="/order?branch=1&table=T1"
-                        className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition shadow-md hover:brightness-110"
-                        style={{ background: "#E5A93C", color: "#1A0800" }}
-                    >
-                        Order Now
-                    </Link>
-
-                    {/* Phone CTA + Hamburger — right */}
-                    <div className="flex items-center gap-3 shrink-0">
-                        <a href={`tel:${PHONE_TEL}`}
-                            className="hidden xl:flex items-center gap-2 font-bold transition-all hover:opacity-90"
+                        {/* Phone CTA */}
+                        <a
+                            href={`tel:${PHONE_TEL}`}
+                            title={`Call Surya Restaurant: ${PHONE}`}
+                            className="hidden lg:inline-flex items-center gap-1.5 font-bold transition-all hover:opacity-90 shrink-0"
                             style={{
                                 background: "#8B2020",
                                 color: "#fff",
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: 700,
-                                padding: "8px 16px",
+                                padding: "6px 12px",
                                 borderRadius: 24,
-                                letterSpacing: 0.3,
-                            }}>
-                            {/* Phone icon */}
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                            </svg>
-                            {PHONE}
+                                letterSpacing: 0.2,
+                            }}
+                        >
+                            <Phone className="w-3.5 h-3.5 shrink-0" />
+                            <span className="hidden xl:inline">{PHONE}</span>
+                            <span className="xl:hidden text-[11px]">Call</span>
                         </a>
 
                         {/* Hamburger for mobile/tablet */}
-                        <button onClick={() => setMobileOpen(!mobileOpen)}
-                            className="lg:hidden p-2 rounded-lg transition-colors"
-                            style={{ color: "#fff", background: "rgba(255,255,255,.08)" }}>
-                            {mobileOpen
-                                ? <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                                : <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12h18M3 6h18M3 18h18" /></svg>}
+                        <button
+                            onClick={() => setMobileOpen(!mobileOpen)}
+                            aria-label="Toggle navigation menu"
+                            className="lg:hidden p-2 rounded-lg transition-colors text-white bg-white/10 hover:bg-white/15"
+                        >
+                            {mobileOpen ? (
+                                <X className="w-5 h-5 text-white" />
+                            ) : (
+                                <MenuIcon className="w-5 h-5 text-white" />
+                            )}
                         </button>
                     </div>
                 </div>
@@ -329,13 +323,13 @@ export default function SuryaLandingPage() {
                                             ? "#D4AF37" : "rgba(255,255,255,.7)",
                                         borderColor: "rgba(255,255,255,.05)",
                                     }}>
-                                    {n.label}
+                                    {n.fullLabel || n.label}
                                 </button>
                             ) : (
                                 <Link key={n.label} href={n.href} onClick={() => setMobileOpen(false)}
                                     className="py-3 border-b text-sm font-medium"
                                     style={{ color: "rgba(255,255,255,.7)", borderColor: "rgba(255,255,255,.05)" }}>
-                                    {n.label}
+                                    {n.fullLabel || n.label}
                                 </Link>
                             ))}
                             <button
