@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { StaffPortalModal } from "@/components/home/StaffPortalModal";
 import { HowItWorksModal } from "@/components/home/HowItWorksModal";
-import { OurStoryModal } from "@/components/home/OurStoryModal";
 import { BranchSelectorModal } from "@/components/home/BranchSelectorModal";
 
 /* ─── SVG Sun Logo (matches design exactly) ──────────────────── */
@@ -138,7 +137,6 @@ export default function SuryaLandingPage() {
     const [lightbox, setLightbox] = useState<number | null>(null);
     const [staffModalOpen, setStaffModalOpen] = useState(false);
     const [howItWorksOpen, setHowItWorksOpen] = useState(false);
-    const [storyOpen, setStoryOpen] = useState(false);
     const [branchModalOpen, setBranchModalOpen] = useState(false);
 
     useEffect(() => {
@@ -590,10 +588,10 @@ export default function SuryaLandingPage() {
                         <div style={{ width: 48, height: 3, background: "linear-gradient(90deg,#C8960C,#D4AF37)", borderRadius: 2, marginBottom: 16 }} />
                         <button
                             type="button"
-                            onClick={() => setStoryOpen(true)}
+                            onClick={() => document.getElementById("reviews")?.scrollIntoView({ behavior: "smooth" })}
                             className="flex items-center gap-2 font-bold text-sm px-5 py-2.5 rounded-lg transition-all hover:opacity-90 cursor-pointer"
                             style={{ background: "#8B2020", color: "#fff" }}>
-                            Know More &bull; Our Story
+                            Know More About Us
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" /></svg>
                         </button>
                     </div>
@@ -1385,9 +1383,6 @@ export default function SuryaLandingPage() {
 
             {/* Smart Table How-It-Works Modal */}
             <HowItWorksModal isOpen={howItWorksOpen} onClose={() => setHowItWorksOpen(false)} />
-
-            {/* Our Story Heritage Modal */}
-            <OurStoryModal isOpen={storyOpen} onClose={() => setStoryOpen(false)} />
 
             {/* Branch & Dining Table Picker Modal */}
             <BranchSelectorModal isOpen={branchModalOpen} onClose={() => setBranchModalOpen(false)} />
