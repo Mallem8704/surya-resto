@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { StaffPortalModal } from "@/components/home/StaffPortalModal";
+import { HowItWorksModal } from "@/components/home/HowItWorksModal";
+import { OurStoryModal } from "@/components/home/OurStoryModal";
+import { BranchSelectorModal } from "@/components/home/BranchSelectorModal";
 
 /* ─── SVG Sun Logo (matches design exactly) ──────────────────── */
 // Ray coords are pre-computed (inner r=25, outer r=38, center=50,50)
@@ -48,9 +51,10 @@ const PHONE_TEL = "+919880358634";
 const NAV = [
     { label: "Home", href: "#home" },
     { label: "About Us", href: "#about" },
+    { label: "Pre-Book Table", href: "#book-table" },
+    { label: "Smart QR", href: "#smart-table" },
+    { label: "Delivery", href: "#delivery" },
     { label: "Menu", href: "/order?branch=1&table=T1" },
-    { label: "Book Table", href: "/book-table" },
-    { label: "Delivery", href: "/delivery" },
     { label: "Gallery", href: "#gallery" },
     { label: "Reviews", href: "#reviews" },
     { label: "Location", href: "#location" },
@@ -133,6 +137,9 @@ export default function SuryaLandingPage() {
     const [activeSection, setActiveSection] = useState("home");
     const [lightbox, setLightbox] = useState<number | null>(null);
     const [staffModalOpen, setStaffModalOpen] = useState(false);
+    const [howItWorksOpen, setHowItWorksOpen] = useState(false);
+    const [storyOpen, setStoryOpen] = useState(false);
+    const [branchModalOpen, setBranchModalOpen] = useState(false);
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 10);
@@ -141,7 +148,7 @@ export default function SuryaLandingPage() {
     }, []);
 
     useEffect(() => {
-        const ids = ["home", "about", "gallery", "reviews", "location", "contact"];
+        const ids = ["home", "about", "book-table", "smart-table", "delivery", "gallery", "reviews", "location", "contact"];
         const io = new IntersectionObserver(
             (entries) => entries.forEach(e => { if (e.isIntersecting) setActiveSection(e.target.id); }),
             { rootMargin: "-35% 0px -55% 0px" }
@@ -422,33 +429,62 @@ export default function SuryaLandingPage() {
                             ))}
                         </div>
 
-                        {/* CTA buttons (Exact matching 2nd image: Explore Menu in solid gold, Get Directions in outlined) */}
-                        <div className="flex flex-wrap items-center gap-3.5">
-                            <Link href="/order?branch=1&table=T1"
-                                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all hover:brightness-110 shadow-lg"
-                                style={{ background: "#E5A93C", color: "#1A0800" }}>
-                                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
-                                    <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" />
+                        {/* 3 Primary Action Buttons matching DineOS Luxury Style */}
+                        <div className="flex flex-wrap items-center gap-3 pt-1">
+                            {/* Button 1: Order at Table (Scan QR) */}
+                            <button
+                                type="button"
+                                onClick={() => setBranchModalOpen(true)}
+                                className="px-5 py-3 rounded-xl bg-[#142318] hover:bg-[#1A3320] text-[#4ADE80] border-2 border-[#22C55E]/60 font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg transition active:scale-95 cursor-pointer"
+                            >
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
                                 </svg>
-                                Explore Menu
+                                <div className="text-left">
+                                    <span className="block text-[11px] leading-tight font-extrabold text-white">ORDER AT TABLE</span>
+                                    <span className="text-[9px] font-mono tracking-widest text-[#4ADE80]">SCAN QR STAND</span>
+                                </div>
+                            </button>
+
+                            {/* Button 2: Free Delivery */}
+                            <Link
+                                href="/delivery?branch=1"
+                                className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#E5C058] to-[#C59B27] hover:from-[#E5C058] hover:to-[#D4AF37] text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-[#D4AF37]/20 transition active:scale-95"
+                            >
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" />
+                                </svg>
+                                <div className="text-left">
+                                    <span className="block text-[11px] leading-tight font-extrabold text-black">FREE DELIVERY</span>
+                                    <span className="text-[9px] font-mono tracking-widest text-black/75">HOT &amp; FRESH</span>
+                                </div>
                             </Link>
 
-                            <Link href="/book-table"
-                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all hover:bg-white/10"
-                                style={{ background: "rgba(21, 6, 0, 0.7)", border: "1.5px solid rgba(212, 175, 55, 0.6)", color: "#D4AF37" }}>
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                            {/* Button 3: Pre-Book Table */}
+                            <Link
+                                href="/book-table"
+                                className="px-5 py-3 rounded-xl bg-[#200A02] hover:bg-[#2C1004] text-[#F3E5AB] border-2 border-[#D4AF37]/70 font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg transition active:scale-95"
+                            >
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
                                     <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
                                 </svg>
-                                Book Table
+                                <div className="text-left">
+                                    <span className="block text-[11px] leading-tight font-extrabold text-[#D4AF37]">PRE-BOOK TABLE</span>
+                                    <span className="text-[9px] font-mono tracking-widest text-white/80">ZERO WAIT VIP</span>
+                                </div>
                             </Link>
+                        </div>
 
+                        {/* Secondary Row: Explore Menu & Get Directions */}
+                        <div className="flex flex-wrap items-center gap-3 pt-3">
+                            <Link href="/order?branch=1&table=T1"
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] hover:underline py-1">
+                                <span>Explore 48 Authentic Dishes &rarr;</span>
+                            </Link>
+                            <span className="text-white/30">&bull;</span>
                             <a href={GOOGLE_MAPS} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all hover:bg-white/10"
-                                style={{ background: "rgba(21, 6, 0, 0.6)", border: "1.5px solid rgba(255, 255, 255, 0.4)", color: "#FFFFFF" }}>
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                                </svg>
-                                Get Directions
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-white/70 hover:text-white py-1">
+                                <span>Get Google Directions &rarr;</span>
                             </a>
                         </div>
                     </div>
@@ -553,10 +589,11 @@ export default function SuryaLandingPage() {
                         <h2 style={{ color: "#1A0800", fontSize: 42, fontWeight: 900, lineHeight: 1.1, marginBottom: 12 }}>Special</h2>
                         <div style={{ width: 48, height: 3, background: "linear-gradient(90deg,#C8960C,#D4AF37)", borderRadius: 2, marginBottom: 16 }} />
                         <button
-                            onClick={() => document.getElementById("reviews")?.scrollIntoView({ behavior: "smooth" })}
-                            className="flex items-center gap-2 font-bold text-sm px-5 py-2.5 rounded-lg transition-all hover:opacity-90"
+                            type="button"
+                            onClick={() => setStoryOpen(true)}
+                            className="flex items-center gap-2 font-bold text-sm px-5 py-2.5 rounded-lg transition-all hover:opacity-90 cursor-pointer"
                             style={{ background: "#8B2020", color: "#fff" }}>
-                            Know More About Us
+                            Know More &bull; Our Story
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" /></svg>
                         </button>
                     </div>
@@ -613,6 +650,295 @@ export default function SuryaLandingPage() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════ DINE-IN PRE-BOOKING (VIP TABLE RESERVATION) ═══════════════════ */}
+            <section id="book-table" className="py-20 bg-[#150600] text-white relative overflow-hidden border-t border-[#D4AF37]/20">
+                {/* Decorative background glow */}
+                <div className="absolute top-1/2 left-0 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#8B2020]/20 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="max-w-7xl mx-auto px-5 relative z-10">
+                    <div className="grid lg:grid-cols-12 gap-12 items-center">
+                        {/* Left Column: Why Pre-Book & Perks */}
+                        <div className="lg:col-span-6 space-y-6">
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-mono font-bold uppercase tracking-wider">
+                                <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-ping" />
+                                <span>Zero Waiting Time &bull; VIP Dine-In Experience</span>
+                            </div>
+
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+                                DINE-IN PRE-BOOKING<br />
+                                <span className="text-[#D4AF37] font-serif italic text-2xl sm:text-3xl block mt-1">
+                                    ముందస్తు టేబుల్ రిజర్వేషన్
+                                </span>
+                            </h2>
+
+                            <p className="text-sm sm:text-base text-white/70 leading-relaxed font-light">
+                                Planning a family gathering, birthday dinner, or special occasion in Kadiri? Pre-book your table in advance. We reserve your dedicated AC family table or VIP cabin, so you step in and dine without waiting in queues.
+                            </p>
+
+                            {/* 4 Pre-booking perks */}
+                            <div className="grid grid-cols-2 gap-3.5 pt-2">
+                                <div className="p-4 rounded-2xl bg-[#200A02] border border-[#D4AF37]/20">
+                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold mb-2 text-base">
+                                        ⏱️
+                                    </div>
+                                    <h4 className="font-bold text-sm text-white">Instant Seating</h4>
+                                    <p className="text-[11px] text-white/50 mt-0.5">Your table is kept reserved &amp; sanitized for your arrival</p>
+                                </div>
+
+                                <div className="p-4 rounded-2xl bg-[#200A02] border border-[#D4AF37]/20">
+                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold mb-2 text-base">
+                                        ❄️
+                                    </div>
+                                    <h4 className="font-bold text-sm text-white">AC Family Section</h4>
+                                    <p className="text-[11px] text-white/50 mt-0.5">Private dining for couples, elders &amp; large groups</p>
+                                </div>
+
+                                <div className="p-4 rounded-2xl bg-[#200A02] border border-[#D4AF37]/20">
+                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold mb-2 text-base">
+                                        📱
+                                    </div>
+                                    <h4 className="font-bold text-sm text-white">WhatsApp Updates</h4>
+                                    <p className="text-[11px] text-white/50 mt-0.5">Receive booking reference &amp; table details directly on WhatsApp</p>
+                                </div>
+
+                                <div className="p-4 rounded-2xl bg-[#200A02] border border-[#D4AF37]/20">
+                                    <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold mb-2 text-base">
+                                        🍲
+                                    </div>
+                                    <h4 className="font-bold text-sm text-white">Pre-Order Dishes</h4>
+                                    <p className="text-[11px] text-white/50 mt-0.5">Request your Biryani, Naan &amp; Starters ready when you arrive</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Column: Interactive Booking Card with Instant CTA to /book-table */}
+                        <div className="lg:col-span-6 flex justify-center">
+                            <div className="w-full max-w-md rounded-3xl p-6 sm:p-8 bg-gradient-to-b from-[#240C03] via-[#1E0902] to-[#150600] border-2 border-[#D4AF37]/40 shadow-2xl shadow-black/80 space-y-5">
+                                <div className="flex items-center justify-between pb-3 border-b border-[#D4AF37]/20">
+                                    <div>
+                                        <span className="text-[10px] font-mono text-[#D4AF37] font-bold uppercase tracking-wider block">
+                                            Table Reservation System
+                                        </span>
+                                        <h3 className="font-serif font-black text-xl text-white">
+                                            Reserve Your Dining Table
+                                        </h3>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-lg">
+                                        👑
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3 text-xs">
+                                    <div className="p-3 rounded-xl bg-[#150600] border border-[#D4AF37]/20 flex items-center justify-between">
+                                        <span className="text-white/70">📅 Timing:</span>
+                                        <span className="font-bold text-[#D4AF37]">Lunch (11 AM - 4 PM) &bull; Dinner (6 PM - 10 PM)</span>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-[#150600] border border-[#D4AF37]/20 flex items-center justify-between">
+                                        <span className="text-white/70">👥 Group Size:</span>
+                                        <span className="font-bold text-white">2 to 20+ Guests (Family / Friends / Corporate)</span>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-[#150600] border border-[#D4AF37]/20 flex items-center justify-between">
+                                        <span className="text-white/70">📍 Location:</span>
+                                        <span className="font-bold text-white">Opp. RTC Bus Stand, Bypass Road, Kadiri</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3 pt-2">
+                                    <Link
+                                        href="/book-table"
+                                        className="w-full py-3.5 rounded-xl font-bold text-sm text-[#1A0800] bg-gradient-to-r from-[#D4AF37] via-[#E5C058] to-[#C59B27] hover:from-[#E5C058] hover:to-[#D4AF37] flex items-center justify-center gap-2 shadow-lg shadow-[#D4AF37]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                    >
+                                        <span>PRE-BOOK TABLE ONLINE NOW</span>
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                            <path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42L16.86 11H5v2z" />
+                                        </svg>
+                                    </Link>
+
+                                    <a
+                                        href={`tel:${PHONE_TEL}`}
+                                        className="w-full py-2.5 rounded-xl font-bold text-xs text-white/90 border border-white/20 hover:border-[#D4AF37] hover:text-[#D4AF37] bg-white/5 flex items-center justify-center gap-2 transition"
+                                    >
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                        </svg>
+                                        <span>Prefer Calling? Tap to Dial {PHONE}</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════ SMART QR TABLE ORDERING SECTION ═══════════════════ */}
+            <section id="smart-table" className="py-24 bg-[#0F0500] text-white relative overflow-hidden border-t border-[#D4AF37]/20">
+                <div className="max-w-7xl mx-auto px-5 relative z-10">
+                    <div className="grid lg:grid-cols-12 gap-12 items-center">
+                        {/* Left: 4-Step QR Ordering Flow */}
+                        <div className="lg:col-span-5 space-y-6">
+                            <div>
+                                <span className="text-[10px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold block mb-1">
+                                    DineOS Smart Restaurant Experience
+                                </span>
+                                <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight uppercase">
+                                    YOUR TABLE<br />IS YOUR MENU
+                                </h2>
+                                <div className="w-12 h-1 bg-[#D4AF37] my-3 rounded-full" />
+                                <p className="text-xs sm:text-sm text-white/70 max-w-sm leading-relaxed font-light">
+                                    Scan the QR standee on your dining table and order in just a few taps. No waiting for busy waiters. Your order prints instantly in the kitchen.
+                                </p>
+                            </div>
+
+                            {/* 4 Process Icons */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                                <div className="p-3 rounded-2xl bg-[#1C0A02] border border-[#D4AF37]/20 text-center">
+                                    <span className="text-xs font-mono font-black text-[#D4AF37] block">01</span>
+                                    <span className="text-[10px] font-bold text-white block mt-1 uppercase">SCAN QR CODE</span>
+                                </div>
+                                <div className="p-3 rounded-2xl bg-[#1C0A02] border border-[#D4AF37]/20 text-center">
+                                    <span className="text-xs font-mono font-black text-[#D4AF37] block">02</span>
+                                    <span className="text-[10px] font-bold text-white block mt-1 uppercase">CHOOSE DISHES</span>
+                                </div>
+                                <div className="p-3 rounded-2xl bg-[#1C0A02] border border-[#D4AF37]/20 text-center">
+                                    <span className="text-xs font-mono font-black text-[#D4AF37] block">03</span>
+                                    <span className="text-[10px] font-bold text-white block mt-1 uppercase">KITCHEN KOT</span>
+                                </div>
+                                <div className="p-3 rounded-2xl bg-[#1C0A02] border border-[#D4AF37]/20 text-center">
+                                    <span className="text-xs font-mono font-black text-[#D4AF37] block">04</span>
+                                    <span className="text-[10px] font-bold text-white block mt-1 uppercase">ENJOY &amp; PAY</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Center: Smartphone Live Preview */}
+                        <div className="lg:col-span-4 flex justify-center">
+                            <div className="relative w-64 rounded-[36px] p-3 bg-gradient-to-b from-[#333] via-[#1A1A1A] to-[#111] border-4 border-[#D4AF37]/50 shadow-2xl shadow-black/80">
+                                <div className="w-20 h-3 bg-black rounded-b-lg mx-auto mb-2" />
+                                <div className="bg-[#1A0800] rounded-[24px] p-3.5 text-white overflow-hidden text-xs space-y-2.5">
+                                    <div className="flex items-center justify-between border-b border-[#D4AF37]/20 pb-2">
+                                        <div>
+                                            <span className="text-[9px] text-[#A6957E] block">Surya Restaurant</span>
+                                            <span className="font-bold text-xs text-[#D4AF37]">Table T1 (Kadiri)</span>
+                                        </div>
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    </div>
+                                    <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] text-white/50">
+                                        🔍 48 Dishes Available
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
+                                            <span>🍗 Chicken Dum Biryani</span>
+                                            <span className="font-mono text-[#D4AF37] font-bold">₹240</span>
+                                        </div>
+                                        <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
+                                            <span>🫓 Butter Naan (2 Pcs)</span>
+                                            <span className="font-mono text-[#D4AF37] font-bold">₹90</span>
+                                        </div>
+                                        <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
+                                            <span>🥘 Punjabi Chicken Curry</span>
+                                            <span className="font-mono text-[#D4AF37] font-bold">₹280</span>
+                                        </div>
+                                    </div>
+                                    <Link
+                                        href="/order?branch=1&table=T1"
+                                        className="block p-2 rounded-lg bg-[#E5A93C] text-black text-center font-bold text-[10px] uppercase tracking-wider"
+                                    >
+                                        Open Table 1 Menu 🛍️
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right: Scannable Standee QR Card */}
+                        <div className="lg:col-span-3">
+                            <div className="bg-[#1C0A02] border-2 border-emerald-500/40 rounded-3xl p-5 text-center space-y-3.5 shadow-xl">
+                                <div className="w-10 h-10 rounded-2xl bg-[#142618] text-emerald-400 flex items-center justify-center mx-auto text-lg">
+                                    📱
+                                </div>
+                                <div>
+                                    <h4 className="font-black text-sm text-white uppercase">
+                                        NO APP REQUIRED
+                                    </h4>
+                                    <p className="text-[10px] text-white/60 mt-0.5">
+                                        Open iPhone or Android camera &amp; scan
+                                    </p>
+                                </div>
+                                <div className="bg-white p-2.5 rounded-2xl inline-block shadow-md border-2 border-[#D4AF37]">
+                                    <img
+                                        src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fsurya-resto.vercel.app%2Forder%3Fbranch%3D1%26table%3DT1"
+                                        alt="Scan QR code for Table 1"
+                                        className="w-28 h-28 object-contain"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setHowItWorksOpen(true)}
+                                    className="w-full py-2 rounded-xl bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 text-[#D4AF37] border border-[#D4AF37]/40 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer"
+                                >
+                                    <span>SEE HOW IT WORKS</span>
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════ DOORSTEP DELIVERY SHOWCASE BANNER ═══════════════════ */}
+            <section id="delivery" className="py-16 bg-gradient-to-r from-[#180700] via-[#240C03] to-[#180700] text-white relative overflow-hidden border-t border-[#D4AF37]/20">
+                <div className="max-w-7xl mx-auto px-5 relative z-10">
+                    <div className="grid lg:grid-cols-12 gap-8 items-center">
+                        <div className="lg:col-span-8 space-y-4">
+                            <span className="text-[10px] font-mono tracking-widest text-[#D4AF37] uppercase font-bold block">
+                                Kadiri Town Delivery Service
+                            </span>
+                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+                                CRAVING SURYA'S BIRYANI?<br />
+                                <span className="text-[#D4AF37]">WE'LL DELIVER IT PIPING HOT TO YOUR DOORSTEP.</span>
+                            </h2>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                    <span className="text-sm block">🚀</span>
+                                    <span className="text-xs font-bold text-white block mt-0.5">30-40 Mins Fast</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                    <span className="text-sm block">🛡️</span>
+                                    <span className="text-xs font-bold text-white block mt-0.5">Hygienic Pack</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                    <span className="text-sm block">📲</span>
+                                    <span className="text-xs font-bold text-white block mt-0.5">WhatsApp Updates</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                    <span className="text-sm block">💳</span>
+                                    <span className="text-xs font-bold text-white block mt-0.5">UPI / Cash on Delivery</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="lg:col-span-4 flex flex-col gap-3 justify-center items-start lg:items-end">
+                            <Link
+                                href="/delivery?branch=1"
+                                className="px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-[#E5A93C] hover:bg-[#F2BC5C] shadow-lg transition"
+                            >
+                                Order For Delivery Now 🛵
+                            </Link>
+                            <button
+                                type="button"
+                                onClick={() => setBranchModalOpen(true)}
+                                className="px-6 py-2.5 rounded-xl font-bold text-xs text-[#D4AF37] border border-[#D4AF37]/40 bg-[#1A0800] hover:bg-[#2A1005] transition cursor-pointer"
+                            >
+                                Select Table / Takeaway Mode
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1056,6 +1382,15 @@ export default function SuryaLandingPage() {
 
             {/* Staff & Operations Cockpit Modal */}
             <StaffPortalModal isOpen={staffModalOpen} onClose={() => setStaffModalOpen(false)} />
+
+            {/* Smart Table How-It-Works Modal */}
+            <HowItWorksModal isOpen={howItWorksOpen} onClose={() => setHowItWorksOpen(false)} />
+
+            {/* Our Story Heritage Modal */}
+            <OurStoryModal isOpen={storyOpen} onClose={() => setStoryOpen(false)} />
+
+            {/* Branch & Dining Table Picker Modal */}
+            <BranchSelectorModal isOpen={branchModalOpen} onClose={() => setBranchModalOpen(false)} />
         </div>
     );
 }

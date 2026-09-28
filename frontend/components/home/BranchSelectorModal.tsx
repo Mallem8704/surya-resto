@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { X, QrCode, Truck, ArrowRight, Store, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { ArabesqueDivider } from "./ArabiqBrandIcons";
+import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 
 interface BranchSelectorModalProps {
     isOpen: boolean;
@@ -22,18 +22,21 @@ export function BranchSelectorModal({ isOpen, onClose, mode = "all" }: BranchSel
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
             <div
-                className="bg-[#120E0A] border-2 border-amber-500/50 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl text-white flex flex-col animate-in zoom-in-95"
+                className="bg-[#150600] border-2 border-amber-500/50 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl text-white flex flex-col animate-in zoom-in-95"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="p-5 border-b border-amber-500/20 flex items-center justify-between bg-gradient-to-r from-[#1A140F] via-[#241B13] to-[#1A140F]">
-                    <div>
-                        <span className="text-[10px] font-mono tracking-widest text-amber-400 uppercase font-bold block">
-                            Surya Family Restaurant
-                        </span>
-                        <h3 className="font-serif text-lg font-black text-[#F8F3EB]">
-                            {mode === "delivery" ? "Surya Restaurant Takeaway / Delivery" : "Select Your Dining Table"}
-                        </h3>
+                <div className="p-5 border-b border-amber-500/20 flex items-center justify-between bg-gradient-to-r from-[#1A0800] via-[#2A1005] to-[#1A0800]">
+                    <div className="flex items-center gap-3">
+                        <SuryaSunLogo size={32} />
+                        <div>
+                            <span className="text-[10px] font-mono tracking-widest text-amber-400 uppercase font-bold block">
+                                Surya Family Restaurant
+                            </span>
+                            <h3 className="font-serif text-lg font-black text-[#F8F3EB]">
+                                {mode === "delivery" ? "Surya Restaurant Takeaway / Delivery" : "Select Your Dining Table"}
+                            </h3>
+                        </div>
                     </div>
                     <button
                         onClick={onClose}
@@ -67,7 +70,7 @@ export function BranchSelectorModal({ isOpen, onClose, mode = "all" }: BranchSel
                                         className={`py-2.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
                                             selectedTable === tbl
                                                 ? "border-amber-400 bg-amber-500 text-black font-black shadow-md shadow-amber-500/30"
-                                                : "border-amber-500/20 bg-[#1A140F] text-[#F8F3EB] hover:border-amber-500/50"
+                                                : "border-amber-500/20 bg-[#200A02] text-[#F8F3EB] hover:border-amber-500/50"
                                         }`}
                                     >
                                         {tbl}
@@ -77,10 +80,8 @@ export function BranchSelectorModal({ isOpen, onClose, mode = "all" }: BranchSel
                         </div>
                     )}
 
-                    <ArabesqueDivider className="my-2" />
-
                     {/* Action CTAs */}
-                    <div className="space-y-2.5">
+                    <div className="space-y-2.5 pt-2">
                         {mode !== "delivery" && (
                             <Link
                                 href={`/order?branch=1&table=${selectedTable}`}
@@ -95,7 +96,7 @@ export function BranchSelectorModal({ isOpen, onClose, mode = "all" }: BranchSel
                         <Link
                             href={`/delivery?branch=1`}
                             onClick={onClose}
-                            className="w-full py-3.5 rounded-2xl bg-[#1A140F] border border-amber-500/40 hover:bg-[#2A1F17] text-amber-400 font-bold text-sm flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
+                            className="w-full py-3.5 rounded-2xl bg-[#200A02] border border-amber-500/40 hover:bg-[#2C1004] text-amber-400 font-bold text-sm flex items-center justify-center gap-2 transition active:scale-98 cursor-pointer"
                         >
                             <Truck className="w-4 h-4" />
                             <span>Takeaway / Home Order (Kadiri Town)</span>
