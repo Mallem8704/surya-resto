@@ -25,7 +25,7 @@ def generate_order_number():
     import uuid
     date_part = datetime.date.today().strftime("%y%m%d")
     unique_part = uuid.uuid4().hex[:6].upper()
-    return f"AR-{date_part}-{unique_part}"
+    return f"SRY-{date_part}-{unique_part}"
 
 
 def format_order_response(order: Order) -> OrderOut:
