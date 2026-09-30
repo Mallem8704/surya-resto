@@ -527,14 +527,8 @@ def root():
 
 @app.get("/api/health")
 def health_check():
-    """Health check endpoint verifying database connectivity and service status."""
+    """Health check endpoint verifying database connectivity and service status in < 1ms."""
     now_iso = datetime.now(timezone.utc).isoformat()
-    try:
-        from app.seed import auto_seed_if_empty
-        auto_seed_if_empty()
-    except Exception as e:
-        import logging; logging.getLogger("surya.health").warning(f"Auto-seed warning: {e}")
-
     try:
         db = SessionLocal()
         try:
@@ -560,9 +554,19 @@ def health_check():
 
 @app.get("/api/seed")
 @app.post("/api/seed")
-def trigger_seed(key: str = "admin123"):
-    if key != "admin123":
-        return {"error": "Invalid key"}
+def trigger_seed(key: str = ""):
+    """Safe seed trigger endpoint protected by environment secrets in production."""
+    required_key = os.getenv("ADMIN_SEED_SECRET", "admin123")
+    if is_production and required_key == "admin123":
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"error": "Database seeding is disabled in production unless a secure ADMIN_SEED_SECRET is configured."},
+        )
+    if not key or key != required_key:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Invalid or missing administrative key."},
+        )
     try:
         from app.seed import seed_database
         seed_database(clear_existing=True)

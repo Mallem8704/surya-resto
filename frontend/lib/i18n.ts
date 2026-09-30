@@ -1,5 +1,5 @@
 /**
- * Bilingual English & Telugu (తెలుగు) Dictionary for Tea Time Cafe.
+ * Bilingual English & Telugu (తెలుగు) Dictionary for Surya Family Restaurant Kadiri.
  */
 
 export type Language = "en" | "te";

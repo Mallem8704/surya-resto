@@ -1,5 +1,5 @@
 /**
- * Format currency and date utilities for Tea Time Cafe.
+ * Format currency and date utilities for Surya Family Restaurant Kadiri.
  */
 
 export function formatRupees(paise: number, includeDecimals = true): string {

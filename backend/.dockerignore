@@ -9,7 +9,6 @@ env/
 venv/
 .venv/
 surya_restaurant.db
-teatime.db
 *.sqlite3
 .git
 .gitignore

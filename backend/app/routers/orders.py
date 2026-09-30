@@ -563,7 +563,43 @@ def list_orders(
             )
 
     orders = query.order_by(Order.created_at.desc()).limit(limit).all()
-    return [format_order_response(o, db=db) for o in orders]
+
+    # High-Performance Batch Optimization: precalculate customer order counts to eliminate N+1 queries
+    customer_ids = {o.customer_id for o in orders if o.customer_id}
+    customer_phones = {o.customer_phone for o in orders if o.customer_phone and not o.customer_id}
+
+    counts_by_id = {}
+    if customer_ids:
+        from sqlalchemy import func
+        id_counts = (
+            db.query(Order.customer_id, func.count(Order.id))
+            .filter(Order.customer_id.in_(customer_ids))
+            .group_by(Order.customer_id)
+            .all()
+        )
+        counts_by_id = {cid: cnt for cid, cnt in id_counts}
+
+    counts_by_phone = {}
+    if customer_phones:
+        from sqlalchemy import func
+        phone_counts = (
+            db.query(Order.customer_phone, func.count(Order.id))
+            .filter(Order.customer_phone.in_(customer_phones))
+            .group_by(Order.customer_phone)
+            .all()
+        )
+        counts_by_phone = {phone: cnt for phone, cnt in phone_counts}
+
+    formatted_orders = []
+    for o in orders:
+        out = format_order_response(o, db=None)
+        if o.customer_id and o.customer_id in counts_by_id:
+            out.customer_order_count = counts_by_id[o.customer_id]
+        elif o.customer_phone and o.customer_phone in counts_by_phone:
+            out.customer_order_count = counts_by_phone[o.customer_phone]
+        formatted_orders.append(out)
+
+    return formatted_orders
 
 
 @router.get("/{order_id}", response_model=OrderOut)

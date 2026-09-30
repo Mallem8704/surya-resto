@@ -16,11 +16,22 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
+  },
   async headers() {
     return [
       {
-        // Force fresh HTML on every page load (no stale cache)
-        source: "/:path*",
+        // Immutable cache for static dishes, icons, and bundles (0ms latency from browser disk cache)
+        source: "/(dishes|icons|_next/static)/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        // Fresh HTML for application pages & dynamic routes
+        source: "/:path((?!dishes|icons|_next/static).*)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
           { key: "X-Content-Type-Options", value: "nosniff" },

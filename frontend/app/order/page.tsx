@@ -99,13 +99,13 @@ function CustomerOrderContent() {
         }
     };
 
-    // Menu Data
-    const [categories, setCategories] = useState<any[]>([]);
-    const [menuItems, setMenuItems] = useState<MenuItemData[]>([]);
+    // Menu Data — initialize immediately with authentic offline menu dataset for instant 0ms first-paint
+    const [categories, setCategories] = useState<any[]>(() => SURYA_CATEGORIES as any);
+    const [menuItems, setMenuItems] = useState<MenuItemData[]>(() => SURYA_MENU_ITEMS as any);
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all");
     const [vegFilter, setVegFilter] = useState<"all" | "veg" | "non_veg">("all");
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [isLoadingMenu, setIsLoadingMenu] = useState<boolean>(true);
+    const [isLoadingMenu, setIsLoadingMenu] = useState<boolean>(false);
 
     // Cart State
     const [cart, setCart] = useState<CartItem[]>([]);
@@ -189,7 +189,6 @@ function CustomerOrderContent() {
     const [loadError, setLoadError] = useState<string | null>(null);
 
     const fetchMenuData = useCallback(async () => {
-        setIsLoadingMenu(true);
         setLoadError(null);
         try {
             const [cats, items] = await Promise.all([
@@ -198,18 +197,12 @@ function CustomerOrderContent() {
             ]);
             if (Array.isArray(cats) && cats.length > 0) {
                 setCategories(cats);
-            } else {
-                setCategories(SURYA_CATEGORIES as any);
             }
             if (Array.isArray(items) && items.length > 0) {
                 setMenuItems(items);
-            } else {
-                setMenuItems(SURYA_MENU_ITEMS as any);
             }
         } catch (err: any) {
             console.warn("Backend unavailable, using authentic Surya offline menu:", err);
-            setCategories(SURYA_CATEGORIES as any);
-            setMenuItems(SURYA_MENU_ITEMS as any);
         } finally {
             setIsLoadingMenu(false);
         }

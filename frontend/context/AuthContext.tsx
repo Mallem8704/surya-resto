@@ -35,16 +35,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = useCallback(() => {
         safeStorage.removeItem("surya_token");
         safeStorage.removeItem("surya_user");
-        safeStorage.removeItem("teatime_token");
-        safeStorage.removeItem("teatime_user");
         setUser(null);
         setToken(null);
         router.push("/admin/login");
     }, [router]);
 
     useEffect(() => {
-        const storedToken = safeStorage.getItem("surya_token") || safeStorage.getItem("teatime_token");
-        const storedUser = safeStorage.getItem("surya_user") || safeStorage.getItem("teatime_user");
+        const storedToken = safeStorage.getItem("surya_token");
+        const storedUser = safeStorage.getItem("surya_user");
 
         if (storedToken && storedUser) {
             try {
@@ -52,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setUser(JSON.parse(storedUser));
             } catch {
                 safeStorage.removeItem("surya_user");
-                safeStorage.removeItem("teatime_user");
             }
         }
         setIsLoading(false);
