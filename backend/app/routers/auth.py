@@ -8,7 +8,7 @@ from app.models import User
 from app.schemas import LoginRequest, TokenResponse, UserOut, ChangePasswordRequest, SwitchBranchRequest
 from app.auth_utils import verify_password, create_access_token, decode_access_token, get_password_hash
 from app.audit_utils import log_audit
-from app.rate_limiter import auth_limiter
+from app.rate_limiter import auth_limiter, auth_login_limiter
 
 router = APIRouter(prefix="", tags=["Authentication"])
 
@@ -122,7 +122,8 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
     """Authenticate owner or staff user with brute-force protection & audit logging."""
     email_clean = request_data.email.strip().lower()
 
-    # 1. Check brute force lockout
+    # 1. Check brute force lockout & IP sliding window rate limit
+    auth_login_limiter.check_pre_attempt(request)
     auth_limiter.check_pre_login(request, email_clean)
 
     forwarded = request.headers.get("X-Forwarded-For")
@@ -153,6 +154,9 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
         except Exception:
             pass
 
+        # Record failure in IP sliding window rate limiter (max 10 failed login attempts per minute per IP)
+        auth_login_limiter.record_failure(request)
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -161,6 +165,7 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
 
     # 2. Record successful login
     auth_limiter.record_success(request, email_clean)
+    auth_login_limiter.record_success(request)
 
     try:
         log_audit(
@@ -260,10 +265,10 @@ def get_me(current_user: User = Depends(get_current_user)):
 
 
 @router.get("/owner-check")
-def test_owner_check(current_user: User = Depends(require_owner)):
-    """Test endpoint to verify owner-only access."""
+def verify_owner_access(current_user: User = Depends(require_owner)):
+    """Verification endpoint for administrative owner privileges."""
     return {
-        "message": f"Welcome Owner {current_user.name}",
+        "message": f"Welcome {current_user.name}",
         "role": current_user.role,
         "outlet_id": current_user.outlet_id,
     }

@@ -45,7 +45,26 @@ async def run_ws_test():
             {"item_id": 5, "qty": 1, "notes": "Osmania Biscuits"},
         ],
     }
-    order_res = requests.post(f"{HTTP_URL}/api/orders", json=order_payload)
+    # Register/Login customer for mandatory order authentication
+    cust_res = requests.post(f"{HTTP_URL}/api/customer/register", json={
+        "phone": "9880358634",
+        "name": "Suresh Kadiri",
+        "password": "surya_password_123"
+    })
+    if cust_res.status_code == 200:
+        cust_token = cust_res.json()["access_token"]
+    else:
+        cust_login_res = requests.post(f"{HTTP_URL}/api/customer/login", json={
+            "phone": "9880358634",
+            "password": "surya_password_123"
+        })
+        cust_token = cust_login_res.json()["access_token"]
+
+    order_res = requests.post(
+        f"{HTTP_URL}/api/orders",
+        json=order_payload,
+        headers={"X-Customer-Token": cust_token}
+    )
     assert order_res.status_code == 201
     created_order = order_res.json()
     order_id = created_order["id"]

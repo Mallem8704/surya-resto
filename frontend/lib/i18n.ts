@@ -99,6 +99,7 @@ export const dictionary = {
         captain_pos: "Captain Waiter POS",
         cashier_pos: "Cashier POS Terminal ⚡",
         table_reservations: "Table Reservations",
+        customers_crm: "Customers CRM",
     },
     te: {
         // App & Header
@@ -194,6 +195,7 @@ export const dictionary = {
         captain_pos: "కెప్టెన్ వెయిటర్ POS",
         cashier_pos: "క్యాషియర్ POS టెర్మినల్ ⚡",
         table_reservations: "టేబుల్ రిజర్వేషన్లు",
+        customers_crm: "కస్టమర్ల వివరాలు (CRM)",
     },
 };
 

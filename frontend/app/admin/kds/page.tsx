@@ -23,6 +23,7 @@ import {
     Bell,
 } from "lucide-react";
 import { printKOT } from "@/lib/thermalPrint";
+import { AudioUnlockBanner } from "@/components/admin/AudioUnlockBanner";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/Button";
@@ -171,6 +172,7 @@ export default function KitchenDisplaySystemPage() {
             <AdminSidebar />
 
             <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+                <AudioUnlockBanner />
                 <AdminHeader
                     pendingServiceCalls={pendingServiceCalls}
                     wsConnected={wsConnected}
@@ -207,10 +209,13 @@ export default function KitchenDisplaySystemPage() {
                         {/* Audio Chime Toggle */}
                         <button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                                 const next = !soundEnabled;
                                 setSoundEnabled(next);
-                                if (next) soundManager.playNewOrderChime();
+                                if (next) {
+                                    await soundManager.unlockAudio();
+                                    soundManager.playNewOrderChime();
+                                }
                             }}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                                 soundEnabled

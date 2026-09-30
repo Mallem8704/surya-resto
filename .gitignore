@@ -1,5 +1,5 @@
 # ==========================================
-# Tea Time Cafe — Root .gitignore
+# Surya Family Restaurant Kadiri — .gitignore
 # ==========================================
 
 # Python & Backend
@@ -12,7 +12,7 @@ __pycache__/
 *.sqlite
 *.sqlite3
 backend/*.db
-backend/teatime.db
+backend/surya_restaurant.db
 backend/uploads/*
 !backend/uploads/.gitkeep
 

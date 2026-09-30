@@ -30,8 +30,17 @@ import { useAuth } from "@/context/AuthContext";
 import { useOutlet } from "@/context/OutletContext";
 import { useToast } from "@/context/ToastContext";
 import { useAdminSocket, SocketEvent } from "@/hooks/useSockets";
-import { printKOT, printRunningKOT, printPOSReceipt, printTestReceipt } from "@/lib/thermalPrint";
+import {
+    printKOT,
+    printRunningKOT,
+    printPOSReceipt,
+    printTestReceipt,
+    ThermalPaperWidth,
+    getThermalPaperSize,
+    setThermalPaperSize,
+} from "@/lib/thermalPrint";
 import { soundManager } from "@/lib/sound";
+import { AudioUnlockBanner } from "@/components/admin/AudioUnlockBanner";
 import { PaymentSettlementModal } from "@/components/admin/PaymentSettlementModal";
 import { POSMenuGrid } from "@/components/admin/pos/POSMenuGrid";
 import { POSTicketCart, POSCartItem } from "@/components/admin/pos/POSTicketCart";
@@ -39,6 +48,7 @@ import { POSTableSelectorModal } from "@/components/admin/pos/POSTableSelectorMo
 import { PettyCashModal } from "@/components/admin/pos/PettyCashModal";
 import { POSRecentBillsModal } from "@/components/admin/pos/POSRecentBillsModal";
 import { POSShiftModal } from "@/components/admin/pos/POSShiftModal";
+import { POSKioskPrintModal } from "@/components/admin/pos/POSKioskPrintModal";
 import { Briefcase } from "lucide-react";
 
 export default function CashierPOSTerminalPage() {
@@ -76,6 +86,12 @@ export default function CashierPOSTerminalPage() {
     const [isShiftModalOpen, setIsShiftModalOpen] = useState<boolean>(false);
     const [isSettlementModalOpen, setIsSettlementModalOpen] = useState<boolean>(false);
     const [settlementOrder, setSettlementOrder] = useState<any | null>(null);
+    const [isKioskModalOpen, setIsKioskModalOpen] = useState<boolean>(false);
+    const [paperWidth, setPaperWidth] = useState<ThermalPaperWidth>("80mm");
+
+    useEffect(() => {
+        setPaperWidth(getThermalPaperSize());
+    }, []);
 
     // Menu search & category filter
     const [searchQuery, setSearchQuery] = useState<string>("");
@@ -460,6 +476,7 @@ export default function CashierPOSTerminalPage() {
 
     return (
         <div className="h-screen flex flex-col bg-[#0D0A08] text-white overflow-hidden font-sans select-none">
+            <AudioUnlockBanner />
             {/* ══════════════════════════════════════════════════════════════
                 TOP POS COMMAND BAR (TMbill / Petpooja Style)
                ══════════════════════════════════════════════════════════════ */}
@@ -595,18 +612,62 @@ export default function CashierPOSTerminalPage() {
                         <span className="hidden sm:inline">Shift</span>
                     </button>
 
+                    {/* Paper Roll Size Selector (80mm / 58mm) */}
+                    <div
+                        className="hidden md:flex items-center rounded-xl bg-black/50 border border-white/10 p-0.5 text-[11px]"
+                        title="Active Thermal Roll Width (Saved locally)"
+                    >
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setPaperWidth("80mm");
+                                setThermalPaperSize("80mm");
+                                toast.success("Thermal printer roll set to 80mm (Standard)");
+                            }}
+                            className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${
+                                paperWidth === "80mm" ? "bg-[#D4AF37] text-black" : "text-white/60 hover:text-white"
+                            }`}
+                        >
+                            80mm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setPaperWidth("58mm");
+                                setThermalPaperSize("58mm");
+                                toast.success("Thermal printer roll set to 58mm (Paper-Saver)");
+                            }}
+                            className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${
+                                paperWidth === "58mm" ? "bg-[#D4AF37] text-black" : "text-white/60 hover:text-white"
+                            }`}
+                        >
+                            58mm
+                        </button>
+                    </div>
+
+                    {/* Kiosk Silent Print Setup Guide */}
+                    <button
+                        type="button"
+                        onClick={() => setIsKioskModalOpen(true)}
+                        className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1 transition cursor-pointer"
+                        title="Windows Kiosk Silent Printing Setup (--kiosk-printing)"
+                    >
+                        <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <span className="hidden sm:inline">Kiosk Setup</span>
+                    </button>
+
                     {/* Test Print Button */}
                     <button
                         type="button"
                         onClick={() => {
-                            printTestReceipt(outlet);
-                            toast.success("🖨️ Sample receipt sent to thermal printer");
+                            printTestReceipt(outlet, paperWidth);
+                            toast.success(`🖨️ Sample ${paperWidth} receipt sent to printer`);
                         }}
                         className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white/80 hover:text-white flex items-center gap-1 transition cursor-pointer"
-                        title="Test Thermal Receipt Printer (80mm / 58mm)"
+                        title={`Test Thermal Receipt Printer (${paperWidth})`}
                     >
                         <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
-                        <span className="hidden sm:inline">Test Print</span>
+                        <span className="hidden sm:inline">Test ({paperWidth})</span>
                     </button>
 
                     {/* Petty Cash Button */}
@@ -750,6 +811,17 @@ export default function CashierPOSTerminalPage() {
                     }}
                 />
             )}
+            {/* KIOSK SILENT PRINTING SETUP MODAL */}
+            <POSKioskPrintModal
+                isOpen={isKioskModalOpen}
+                onClose={() => setIsKioskModalOpen(false)}
+                outlet={outlet}
+                activePaperWidth={paperWidth}
+                onPaperWidthChange={(size) => {
+                    setPaperWidth(size);
+                    setThermalPaperSize(size);
+                }}
+            />
         </div>
     );
 }

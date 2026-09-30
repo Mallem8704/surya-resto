@@ -7,6 +7,7 @@ import { OutletProvider } from "@/context/OutletContext";
 import { OfflineProvider } from "@/context/OfflineContext";
 import { CustomerProvider } from "@/context/CustomerContext";
 import { OfflineBanner } from "@/components/offline/OfflineBanner";
+import { PWAInstallPrompt } from "@/components/common/PWAInstallPrompt";
 
 export const viewport: Viewport = {
   themeColor: "#f97316",
@@ -187,6 +188,7 @@ export default function RootLayout({
                   <OfflineProvider>
                     {children}
                     <OfflineBanner />
+                    <PWAInstallPrompt />
                   </OfflineProvider>
                 </ToastProvider>
               </LanguageProvider>

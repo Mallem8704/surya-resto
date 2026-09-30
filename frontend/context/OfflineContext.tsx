@@ -46,12 +46,12 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
       }
 
       const handleOnline = () => {
-        console.log("[Network] Connection RESTORED - Online");
+        if (process.env.NODE_ENV === "development") console.log("[Network] Connection RESTORED - Online");
         setIsOnline(true);
       };
 
       const handleOffline = () => {
-        console.log("[Network] Connection LOST - Offline mode activated");
+        if (process.env.NODE_ENV === "development") console.log("[Network] Connection LOST - Offline mode activated");
         setIsOnline(false);
       };
 
@@ -93,15 +93,15 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     if (!isOnline || isSyncing || queuedOrders.length === 0) return;
 
     setIsSyncing(true);
-    console.log(`[OfflineSync] Syncing ${queuedOrders.length} pending offline orders...`);
+    if (process.env.NODE_ENV === "development") console.log(`[OfflineSync] Syncing ${queuedOrders.length} pending offline orders...`);
 
     const remainingQueue: QueuedOfflineOrder[] = [];
 
     for (const item of queuedOrders) {
       try {
-        console.log(`[OfflineSync] Submitting queued order #${item.id}...`);
+        if (process.env.NODE_ENV === "development") console.log(`[OfflineSync] Submitting queued order #${item.id}...`);
         await api.createOrder(item.orderPayload);
-        console.log(`[OfflineSync] Successfully synced queued order #${item.id}!`);
+        if (process.env.NODE_ENV === "development") console.log(`[OfflineSync] Successfully synced queued order #${item.id}!`);
       } catch (err: any) {
         console.error(`[OfflineSync] Failed to sync order #${item.id}:`, err);
         remainingQueue.push({

@@ -306,6 +306,7 @@ class OrderCreate(BaseModel):
     outlet_id: Optional[int] = None
     idempotency_key: Optional[str] = Field(None, max_length=100)
     order_type: str = "dine_in"  # 'dine_in', 'delivery', 'takeaway'
+    customer_id: Optional[int] = None
     customer_name: Optional[str] = Field(None, max_length=100)
     customer_phone: Optional[str] = Field(None, max_length=20)
     delivery_address: Optional[str] = Field(None, max_length=1000)
@@ -338,8 +339,10 @@ class OrderOut(BaseModel):
     table_label: Optional[str] = None
     idempotency_key: Optional[str] = None
     order_type: str = "dine_in"
+    customer_id: Optional[int] = None
     customer_name: Optional[str] = None
     customer_phone: Optional[str] = None
+    customer_order_count: Optional[int] = None
     delivery_address: Optional[str] = None
     delivery_status: Optional[str] = None
     delivery_fee_paise: int = 0
@@ -447,6 +450,19 @@ class DynamicUpiQrResponse(BaseModel):
     upi_vpa: str
 
 
+class UpiRefSubmitRequest(BaseModel):
+    order_id: int
+    utr_number: Optional[str] = None
+    notes: Optional[str] = None
+    amount_paise: Optional[int] = None
+
+
+class VerifyUpiPaymentRequest(BaseModel):
+    utr_number: Optional[str] = None
+    notes: Optional[str] = None
+    amount_paise: Optional[int] = None
+
+
 class PaymentOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -505,6 +521,22 @@ class AuditLogOut(BaseModel):
 # CUSTOMER & OTP SCHEMAS
 # ==========================================
 
+class CustomerRegisterReq(BaseModel):
+    phone: str = Field(..., description="10-digit mobile number")
+    password: str = Field(..., min_length=4, max_length=100, description="Password")
+    name: Optional[str] = Field(None, max_length=100)
+    email: Optional[str] = None
+
+
+class CustomerLoginReq(BaseModel):
+    phone: str = Field(..., description="10-digit mobile number")
+    password: str = Field(..., min_length=4, max_length=100)
+
+
+class CustomerCheckPhoneReq(BaseModel):
+    phone: str = Field(..., description="10-digit mobile number")
+
+
 class CustomerQuickLoginReq(BaseModel):
     phone: str = Field(..., description="10-digit mobile number")
     name: Optional[str] = None
@@ -556,6 +588,34 @@ class CustomerAuthResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     customer: CustomerOut
+
+
+class AdminCustomerListItem(BaseModel):
+    id: int
+    phone: str
+    name: Optional[str] = None
+    email: Optional[str] = None
+    default_address: Optional[str] = None
+    created_at: datetime.datetime
+    last_order_at: Optional[datetime.datetime] = None
+    total_orders: int = 0
+    total_spent_paise: int = 0
+    tier: str = "new"  # 'vip', 'returning', 'new'
+    addresses_count: int = 0
+    latest_order_number: Optional[str] = None
+
+
+class AdminCustomersSummary(BaseModel):
+    total_customers: int
+    vip_count: int
+    returning_count: int
+    new_count: int
+    total_revenue_paise: int
+
+
+class AdminCustomersResponse(BaseModel):
+    summary: AdminCustomersSummary
+    customers: List[AdminCustomerListItem]
 
 
 # ==========================================

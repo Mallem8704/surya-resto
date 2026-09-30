@@ -1,10 +1,38 @@
 /**
- * Web Audio API Sound Generator for Tea Time Cafe.
+ * Web Audio API Sound Generator for Surya Family Restaurant Kadiri.
  * Generates synthetic bell & chime notifications without external mp3 files.
+ * Supports Autoplay Unlock detection and automatic gesture resumption for kitchen & cashier tablets.
  */
 
 class SoundManager {
     private ctx: AudioContext | null = null;
+    private listeners: Set<(unlocked: boolean) => void> = new Set();
+    private hasUserUnlocked: boolean = false;
+    private globalListenersAttached: boolean = false;
+
+    constructor() {
+        if (typeof window !== "undefined") {
+            this.attachGlobalUnlockListeners();
+        }
+    }
+
+    /**
+     * Listen to global user gestures (tap, touch, click, keydown) to seamlessly unlock AudioContext
+     */
+    private attachGlobalUnlockListeners() {
+        if (this.globalListenersAttached || typeof window === "undefined") return;
+        this.globalListenersAttached = true;
+
+        const onFirstInteraction = () => {
+            if (!this.hasUserUnlocked) {
+                this.unlockAudio().catch(() => {});
+            }
+        };
+
+        window.addEventListener("pointerdown", onFirstInteraction, { passive: true, once: true });
+        window.addEventListener("keydown", onFirstInteraction, { passive: true, once: true });
+        window.addEventListener("touchstart", onFirstInteraction, { passive: true, once: true });
+    }
 
     private getContext(): AudioContext | null {
         if (typeof window === "undefined") return null;
@@ -12,12 +40,91 @@ class SoundManager {
             const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
             if (AudioCtx) {
                 this.ctx = new AudioCtx();
+                this.ctx.addEventListener("statechange", () => {
+                    const running = this.ctx?.state === "running";
+                    if (running) {
+                        this.hasUserUnlocked = true;
+                    }
+                    this.notifyListeners();
+                });
             }
         }
         if (this.ctx && this.ctx.state === "suspended") {
             this.ctx.resume().catch(() => {});
         }
         return this.ctx;
+    }
+
+    private notifyListeners() {
+        const unlocked = this.isUnlocked();
+        this.listeners.forEach((listener) => {
+            try {
+                listener(unlocked);
+            } catch (err) {
+                console.error("Error in sound listener:", err);
+            }
+        });
+    }
+
+    /**
+     * Subscribe to changes in AudioContext unlock state
+     */
+    public subscribe(listener: (unlocked: boolean) => void): () => void {
+        this.listeners.add(listener);
+        // Immediately notify with current state
+        listener(this.isUnlocked());
+        return () => {
+            this.listeners.delete(listener);
+        };
+    }
+
+    /**
+     * Returns true if AudioContext exists and is running (not suspended or blocked by browser)
+     */
+    public isUnlocked(): boolean {
+        if (typeof window === "undefined") return false;
+        if (this.hasUserUnlocked) return true;
+        if (this.ctx && this.ctx.state === "running") {
+            this.hasUserUnlocked = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Return raw AudioContextState
+     */
+    public getAudioState(): AudioContextState | "uninitialized" {
+        return this.ctx ? this.ctx.state : "uninitialized";
+    }
+
+    /**
+     * Proactively initialize AudioContext so browser state can be inspected
+     */
+    public init(): AudioContext | null {
+        return this.getContext();
+    }
+
+    /**
+     * Explicitly unlock / resume AudioContext upon user click or tap
+     */
+    public async unlockAudio(): Promise<boolean> {
+        if (typeof window === "undefined") return false;
+        try {
+            const ctx = this.getContext();
+            if (!ctx) return false;
+            if (ctx.state === "suspended") {
+                await ctx.resume();
+            }
+            if (ctx.state === "running") {
+                this.hasUserUnlocked = true;
+                this.notifyListeners();
+                return true;
+            }
+        } catch (err) {
+            console.warn("Could not unlock Web Audio:", err);
+        }
+        return false;
     }
 
     /**

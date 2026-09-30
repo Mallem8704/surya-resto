@@ -48,7 +48,7 @@ export function useOrderSocket(
 
             ws.onopen = () => {
                 if (!isMountedRef.current) { ws.close(); return; }
-                console.log(`[WS:Order] Connected to order #${orderId}`);
+                if (process.env.NODE_ENV === "development") console.log(`[WS:Order] Connected to order #${orderId}`);
                 setIsConnected(true);
                 setError(null);
                 backoffRef.current = 1000; // Reset backoff on success
@@ -143,7 +143,7 @@ export function useAdminSocket(
 
             ws.onopen = () => {
                 if (!isMountedRef.current) { ws.close(); return; }
-                console.log(`[WS:Admin] Connected to outlet #${outletId}`);
+                if (process.env.NODE_ENV === "development") console.log(`[WS:Admin] Connected to outlet #${outletId}`);
                 setIsConnected(true);
                 setError(null);
                 backoffRef.current = 1000;

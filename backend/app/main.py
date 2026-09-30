@@ -1,9 +1,12 @@
 import os
-from fastapi import FastAPI
+from datetime import datetime, timezone
+from fastapi import FastAPI, status
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
-from app.database import Base, engine
+from app.database import Base, engine, SessionLocal
 from app.routers import (
     auth,
     categories,
@@ -21,6 +24,7 @@ from app.routers import (
     coupons,
     reservations,
     shifts,
+    sync,
 )
 
 # Initialize database schema tables
@@ -53,12 +57,17 @@ def on_startup():
                 ("orders", "discount_paise", "INTEGER DEFAULT 0"),
                 ("orders", "coupon_code", "VARCHAR(50)"),
                 ("orders", "coupon_id", "INTEGER"),
+                ("orders", "customer_id", "INTEGER"),
+                ("customers", "hashed_password", "VARCHAR(255)"),
                 ("outlets", "opening_hours", "VARCHAR(100)"),
                 ("outlets", "tagline", "VARCHAR(255)"),
                 ("outlets", "logo_url", "VARCHAR(500)"),
                 ("order_items", "variant_id", "INTEGER"),
                 ("order_items", "variant_name", "VARCHAR(100)"),
                 ("order_items", "selected_addons_json", "TEXT"),
+                ("orders", "synced_to_cloud", "BOOLEAN DEFAULT 0"),
+                ("payments", "synced_to_cloud", "BOOLEAN DEFAULT 0"),
+                ("customers", "synced_to_cloud", "BOOLEAN DEFAULT 0"),
             ]:
                 try:
                     columns = [row[1] for row in conn.exec_driver_sql(f"PRAGMA table_info({table_name})").fetchall()]
@@ -77,6 +86,12 @@ def on_startup():
                 "ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_fee_paise INTEGER DEFAULT 0;",
                 "ALTER TABLE orders ADD COLUMN IF NOT EXISTS idempotency_key VARCHAR(100);",
                 "CREATE UNIQUE INDEX IF NOT EXISTS ix_orders_idempotency_key ON orders(idempotency_key) WHERE idempotency_key IS NOT NULL;",
+                "ALTER TABLE customers ADD COLUMN IF NOT EXISTS hashed_password VARCHAR(255);",
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL;",
+                "CREATE INDEX IF NOT EXISTS ix_orders_customer_id ON orders(customer_id);",
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS synced_to_cloud BOOLEAN DEFAULT FALSE;",
+                "ALTER TABLE payments ADD COLUMN IF NOT EXISTS synced_to_cloud BOOLEAN DEFAULT FALSE;",
+                "ALTER TABLE customers ADD COLUMN IF NOT EXISTS synced_to_cloud BOOLEAN DEFAULT FALSE;",
                 "ALTER TABLE outlets ADD COLUMN IF NOT EXISTS opening_hours VARCHAR(100);",
                 "ALTER TABLE outlets ADD COLUMN IF NOT EXISTS tagline VARCHAR(255);",
                 "ALTER TABLE outlets ADD COLUMN IF NOT EXISTS logo_url VARCHAR(500);",
@@ -187,19 +202,15 @@ def on_startup():
         if len(outlets) >= 1:
             outlets[0].phone = "+91 98803 58634"
         db.commit()
-
-        # Purge legacy duplicate dummy credentials
-        db.query(User).filter(User.email.in_(["owner@teatime.com", "staff@teatime.com", "owner@arabieq.com", "staff1@arabieq.com"])).delete(synchronize_session=False)
-        db.commit()
         db.close()
     except Exception as c_err:
-        print(f"[COUPON-OUTLET-SEED] Note: {c_err}")
+        import logging; logging.getLogger("surya.startup").warning(f"Startup seed note: {c_err}")
 
     try:
         from app.seed import auto_seed_if_empty
         auto_seed_if_empty()
     except Exception as e:
-        print(f"[STARTUP] Auto-seed warning: {e}")
+        import logging; logging.getLogger("surya.startup").warning(f"Auto-seed warning: {e}")
 
 
 @app.get("/api/migrate-db")
@@ -379,29 +390,52 @@ def seed_portion_variants():
         db.close()
 
 # CORS configuration
-frontend_env_raw = os.getenv("FRONTEND_URL", "http://localhost:3000")
-frontend_origins = [u.strip() for u in frontend_env_raw.split(",") if u.strip()]
+environment = os.getenv("ENVIRONMENT", "development").strip().lower()
+is_production = environment == "production"
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-    "http://localhost:3002",
-    "http://127.0.0.1:3002",
-    "https://surya-resto.vercel.app",
-    "https://frontend-lake-iota-65.vercel.app",
-    *frontend_origins,
-]
+# Read ALLOWED_ORIGINS from environment variable (with fallback to FRONTEND_URL)
+allowed_origins_raw = os.getenv("ALLOWED_ORIGINS") or os.getenv("FRONTEND_URL", "")
+env_origins = [u.strip() for u in allowed_origins_raw.split(",") if u.strip()]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_origin_regex=r"https?://.*",
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if is_production:
+    # Strictly use the explicit list from ALLOWED_ORIGINS (or production defaults)
+    default_prod_origins = [
+        "https://surya-resto.vercel.app",
+        "https://suryafamilyrestaurant.in",
+        "https://admin.suryafamilyrestaurant.in",
+        "https://frontend-lake-iota-65.vercel.app",
+    ]
+    origins = list(dict.fromkeys(env_origins if env_origins else default_prod_origins))
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    # Development: allow localhost origins and regex pattern
+    dev_origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+        "http://localhost:3002",
+        "http://127.0.0.1:3002",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://surya-resto.vercel.app",
+        *env_origins,
+    ]
+    origins = list(dict.fromkeys(dev_origins))
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_origin_regex=r"https?://.*",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # Ensure uploads directory exists and mount static files
 os.makedirs("uploads", exist_ok=True)
@@ -435,6 +469,8 @@ app.include_router(stock.router, prefix="/stock", tags=["Inventory & Stock (Alia
 
 app.include_router(payments.router, prefix="/api/payments", tags=["Payments & Cashier"])
 app.include_router(payments.router, prefix="/payments", tags=["Payments & Cashier (Alias)"])
+app.add_api_route("/razorpay-webhook", payments.razorpay_webhook_safe_handler, methods=["POST"], tags=["Payments & Cashier"])
+app.add_api_route("/api/razorpay-webhook", payments.razorpay_webhook_safe_handler, methods=["POST"], tags=["Payments & Cashier"])
 
 app.include_router(service_calls.router, prefix="/api/service-calls", tags=["Service Calls"])
 app.include_router(service_calls.router, prefix="/service-calls", tags=["Service Calls (Alias)"])
@@ -462,6 +498,9 @@ app.include_router(reservations.router, prefix="/reservations", tags=["Table Pre
 app.include_router(shifts.router, prefix="/api/shifts", tags=["Cashier Shifts & Cash Register"])
 app.include_router(shifts.router, prefix="/shifts", tags=["Cashier Shifts & Cash Register (Alias)"])
 
+app.include_router(sync.router, prefix="/api/sync", tags=["Hybrid Cloud Sync"])
+app.include_router(sync.router, prefix="/sync", tags=["Hybrid Cloud Sync (Alias)"])
+
 
 @app.get("/")
 def root():
@@ -488,16 +527,35 @@ def root():
 
 @app.get("/api/health")
 def health_check():
+    """Health check endpoint verifying database connectivity and service status."""
+    now_iso = datetime.now(timezone.utc).isoformat()
     try:
         from app.seed import auto_seed_if_empty
         auto_seed_if_empty()
     except Exception as e:
-        print(f"[HEALTH] Auto-seed warning: {e}")
-    return {
-        "status": "healthy",
-        "service": "surya-resto-backend",
-        "timestamp": "ok",
-    }
+        import logging; logging.getLogger("surya.health").warning(f"Auto-seed warning: {e}")
+
+    try:
+        db = SessionLocal()
+        try:
+            db.execute(text("SELECT 1"))
+        finally:
+            db.close()
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "timestamp": now_iso,
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "status": "unhealthy",
+                "database": "disconnected",
+                "timestamp": now_iso,
+                "detail": str(e),
+            },
+        )
 
 
 @app.get("/api/seed")

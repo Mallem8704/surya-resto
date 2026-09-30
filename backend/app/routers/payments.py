@@ -3,8 +3,9 @@ import hmac
 import hashlib
 import datetime
 import uuid
+import logging
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session, joinedload
 from dotenv import load_dotenv
 
@@ -19,6 +20,8 @@ from app.schemas import (
     RecordPaymentRequest,
     SplitPaymentRequest,
     DynamicUpiQrResponse,
+    UpiRefSubmitRequest,
+    VerifyUpiPaymentRequest,
     PaymentOut,
     OrderOut,
 )
@@ -27,11 +30,15 @@ from app.routers.ws import manager
 from app.audit_utils import log_audit
 
 load_dotenv()
+logger = logging.getLogger("surya_payments")
 
 router = APIRouter(prefix="", tags=["Payments & Cashier"])
 
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_sampleKey123")
-RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "sampleSecretKey123")
+DEFAULT_MERCHANT_VPA = os.getenv("UPI_MERCHANT_VPA", "9880358634@upi")
+DEFAULT_MERCHANT_NAME = os.getenv("UPI_MERCHANT_NAME", "Surya Family Restaurant")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_direct_merchant_upi")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
 
 
 # ==========================================
@@ -75,7 +82,7 @@ async def verify_razorpay_payment(
     data: RazorpayVerifyRequest,
     db: Session = Depends(get_db),
 ):
-    """Verify Razorpay payment signature and mark order as paid."""
+    """Verify payment signature and mark order as paid (zero-fee direct merchant compatible)."""
     order = db.query(Order).options(joinedload(Order.items), joinedload(Order.table)).filter(Order.id == data.order_id).first()
     if not order:
         raise HTTPException(
@@ -83,30 +90,21 @@ async def verify_razorpay_payment(
             detail=f"Order with ID {data.order_id} not found",
         )
 
-    # Validate HMAC signature if non-test secret or verify structure
-    expected_msg = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
-    generated_sig = hmac.new(
-        RAZORPAY_KEY_SECRET.encode(),
-        expected_msg.encode(),
-        hashlib.sha256,
-    ).hexdigest()
-
-    # In test sandbox mode, allow simulated signatures or verified HMAC signatures
+    # Optional signature check only when RAZORPAY_KEY_SECRET is configured
     is_production = os.getenv("ENVIRONMENT", "development") == "production"
-    if is_production:
+    if RAZORPAY_KEY_SECRET and is_production:
+        expected_msg = f"{data.razorpay_order_id}|{data.razorpay_payment_id}"
+        generated_sig = hmac.new(
+            RAZORPAY_KEY_SECRET.encode(),
+            expected_msg.encode(),
+            hashlib.sha256,
+        ).hexdigest()
         is_valid = hmac.compare_digest(generated_sig, data.razorpay_signature)
-    else:
-        # In development/sandbox, allow mock signatures for testing
-        is_valid = (
-            hmac.compare_digest(generated_sig, data.razorpay_signature)
-            or data.razorpay_signature.startswith("mock_sig_")
-        )
-
-    if not is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid Razorpay payment signature",
-        )
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid payment signature",
+            )
 
     # Update order payment state
     order.payment_status = "paid"
@@ -119,7 +117,7 @@ async def verify_razorpay_payment(
         amount_paise=order.total_paise,
         status="completed",
         paid_at=datetime.datetime.utcnow(),
-        notes=f"Razorpay UPI/Online payment verified (Order: {data.razorpay_order_id})",
+        notes=f"UPI payment verified (Order: {data.razorpay_order_id})",
     )
     db.add(payment)
 
@@ -145,12 +143,26 @@ async def verify_razorpay_payment(
     # Broadcast live payment update to customer and admin
     from app.routers.orders import format_order_response
     formatted = format_order_response(order)
-    await manager.broadcast_to_order(
-        order_id=order.id,
-        event_type="order_status_updated",
-        data=formatted.model_dump(mode="json"),
-        outlet_id=order.outlet_id,
-    )
+    order_data = formatted.model_dump(mode="json")
+    try:
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_payment_updated",
+            data=order_data,
+        )
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_status_updated",
+            data=order_data,
+        )
+        await manager.broadcast_to_order(
+            order_id=order.id,
+            event_type="order_status_updated",
+            data=order_data,
+            outlet_id=order.outlet_id,
+        )
+    except Exception as ws_err:
+        logger.warning(f"[WS] Broadcast error in verify_razorpay_payment: {ws_err}")
 
     return {
         "success": True,
@@ -159,6 +171,17 @@ async def verify_razorpay_payment(
         "amount_paise": order.total_paise,
         "amount_formatted": f"₹{order.total_paise / 100:.2f}",
         "payment_status": "paid",
+    }
+
+
+@router.post("/razorpay-webhook")
+async def razorpay_webhook_safe_handler(request: Request):
+    """Direct Merchant UPI mode active - gateway webhooks handled safely with zero external fees."""
+    logger.info("[PAYMENTS] Webhook received. System operates on Direct Merchant UPI.")
+    return {
+        "status": "ok",
+        "gateway": "direct_merchant_upi",
+        "message": "Direct Merchant UPI active with zero gateway fees",
     }
 
 
@@ -246,10 +269,29 @@ async def mark_cash_payment_paid(
 
 
 # ==========================================
-# DYNAMIC ZERO-FEE NPCI UPI QR GENERATION
+# DYNAMIC ZERO-FEE NPCI UPI QR GENERATION & DIRECT MERCHANT SETTLEMENT
 # ==========================================
 
+def generate_dynamic_upi_qr(
+    upi_vpa: str = DEFAULT_MERCHANT_VPA,
+    payee_name: str = DEFAULT_MERCHANT_NAME,
+    amount_rupees: float = 0.0,
+    order_number: str = "",
+) -> str:
+    """Generate official NPCI Dynamic UPI Intent URI strictly conforming to NPCI standard:
+    upi://pay?pa={upi_vpa}&pn={payee_name}&am={amount_rupees}&cu=INR&tn={order_number}&tr={order_number}
+    """
+    clean_vpa = (upi_vpa or DEFAULT_MERCHANT_VPA).strip()
+    clean_name = (payee_name or DEFAULT_MERCHANT_NAME).replace("&", "and").strip()
+    encoded_name = urllib.parse.quote(clean_name)
+    clean_order_no = str(order_number or "").strip()
+    encoded_tn = urllib.parse.quote(clean_order_no if clean_order_no else "Surya Kadiri")
+    encoded_tr = urllib.parse.quote(clean_order_no if clean_order_no else "SURYA")
+    return f"upi://pay?pa={clean_vpa}&pn={encoded_name}&am={amount_rupees:.2f}&cu=INR&tn={encoded_tn}&tr={encoded_tr}"
+
+
 @router.get("/{order_id}/dynamic-upi", response_model=DynamicUpiQrResponse)
+@router.get("/{order_id}/dynamic-upi-qr", response_model=DynamicUpiQrResponse)
 def get_dynamic_upi_qr(
     order_id: int,
     db: Session = Depends(get_db),
@@ -260,8 +302,8 @@ def get_dynamic_upi_qr(
         raise HTTPException(status_code=404, detail=f"Order #{order_id} not found")
 
     outlet = db.query(Outlet).filter(Outlet.id == order.outlet_id).first()
-    outlet_name = outlet.name if outlet else "Surya Family Restaurant"
-    upi_vpa = (outlet.upi_vpa if outlet and outlet.upi_vpa else "9880358634@upi").strip()
+    outlet_name = outlet.name if outlet and outlet.name else DEFAULT_MERCHANT_NAME
+    upi_vpa = (outlet.upi_vpa if outlet and outlet.upi_vpa else DEFAULT_MERCHANT_VPA).strip()
 
     # Calculate remaining balance to pay
     paid_paise = sum(
@@ -273,11 +315,12 @@ def get_dynamic_upi_qr(
     balance_paise = max(0, order.total_paise - paid_paise)
     amount_rs = round(balance_paise / 100.0, 2)
 
-    # Standard NPCI UPI URI: upi://pay?pa={vpa}&pn={name}&am={amount}&tn={note}&cu=INR
-    encoded_name = urllib.parse.quote(outlet_name.replace("&", "and"))
-    clean_note = f"Bill {order.order_number}".replace("_", " ")
-    encoded_note = urllib.parse.quote(clean_note)
-    upi_uri = f"upi://pay?pa={upi_vpa}&pn={encoded_name}&am={amount_rs:.2f}&tn={encoded_note}&cu=INR"
+    upi_uri = generate_dynamic_upi_qr(
+        upi_vpa=upi_vpa,
+        payee_name=outlet_name,
+        amount_rupees=amount_rs,
+        order_number=order.order_number,
+    )
 
     return DynamicUpiQrResponse(
         upi_uri=upi_uri,
@@ -287,6 +330,246 @@ def get_dynamic_upi_qr(
         outlet_name=outlet_name,
         upi_vpa=upi_vpa,
     )
+
+
+@router.post("/submit-upi-ref")
+@router.post("/upi-confirm")
+@router.post("/{order_id}/submit-upi-ref")
+@router.post("/{order_id}/upi-confirm")
+async def submit_upi_reference(
+    data: Optional[UpiRefSubmitRequest] = None,
+    order_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
+    """Customer UPI Intent / UTR submission endpoint: submit 12-digit UPI reference number to confirm payment."""
+    target_order_id = data.order_id if (data and data.order_id) else order_id
+    if not target_order_id:
+        raise HTTPException(status_code=400, detail="Missing order_id")
+
+    order = (
+        db.query(Order)
+        .options(joinedload(Order.items), joinedload(Order.table))
+        .filter(Order.id == target_order_id)
+        .first()
+    )
+    if not order:
+        raise HTTPException(status_code=404, detail=f"Order with ID {target_order_id} not found")
+
+    # Calculate remaining balance to pay
+    all_payments = db.query(Payment).filter(Payment.order_id == order.id, Payment.status == "completed").all()
+    paid_paise = sum(p.amount_paise for p in all_payments)
+    balance_paise = max(0, order.total_paise - paid_paise)
+    amount_to_pay = (
+        data.amount_paise
+        if (data and data.amount_paise and data.amount_paise > 0)
+        else (balance_paise if balance_paise > 0 else order.total_paise)
+    )
+
+    raw_utr = (data.utr_number if data and data.utr_number else "").strip()
+    txn_id = raw_utr if raw_utr else f"UPI-{order.order_number}-{uuid.uuid4().hex[:6]}"
+    notes = (data.notes if data and data.notes else "").strip()
+    full_notes = f"Direct Merchant UPI payment (UTR: {txn_id})" + (f" - {notes}" if notes else "")
+
+    order.payment_status = "paid"
+    order.payment_method = "upi"
+
+    payment = Payment(
+        order_id=order.id,
+        method="upi",
+        txn_id=txn_id,
+        amount_paise=amount_to_pay,
+        status="completed",
+        paid_at=datetime.datetime.utcnow(),
+        notes=full_notes,
+    )
+    db.add(payment)
+
+    log_audit(
+        db=db,
+        outlet_id=order.outlet_id,
+        user_id=None,
+        action="merchant_upi_submitted",
+        entity_type="payment",
+        entity_id=order.id,
+        details={
+            "order_number": order.order_number,
+            "amount_paise": amount_to_pay,
+            "amount_formatted": f"₹{amount_to_pay / 100:.2f}",
+            "utr_number": txn_id,
+            "method": "upi",
+        },
+    )
+
+    db.commit()
+    db.refresh(order)
+
+    # Broadcast real-time WebSocket notifications to Cashier POS, Captain POS, and KDS
+    from app.routers.orders import format_order_response
+    formatted = format_order_response(order)
+    order_data = formatted.model_dump(mode="json")
+
+    try:
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_payment_updated",
+            data=order_data,
+        )
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_status_updated",
+            data=order_data,
+        )
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_updated",
+            data=order_data,
+        )
+        await manager.broadcast_to_order(
+            order_id=order.id,
+            event_type="order_status_updated",
+            data=order_data,
+            outlet_id=order.outlet_id,
+        )
+    except Exception as ws_err:
+        logger.warning(f"[WS] Broadcast error in submit_upi_reference: {ws_err}")
+
+    return {
+        "success": True,
+        "message": f"Merchant UPI payment of ₹{amount_to_pay / 100:.2f} recorded successfully",
+        "order_number": order.order_number,
+        "utr_number": txn_id,
+        "amount_paise": amount_to_pay,
+        "amount_formatted": f"₹{amount_to_pay / 100:.2f}",
+        "payment_status": "paid",
+        "payment_method": "upi",
+    }
+
+
+@router.post("/{order_id}/verify-upi")
+@router.post("/verify-upi")
+async def verify_cashier_upi_payment(
+    order_id: Optional[int] = None,
+    data: Optional[VerifyUpiPaymentRequest] = None,
+    current_user: User = Depends(require_staff_or_owner),
+    db: Session = Depends(get_db),
+):
+    """Cashier 1-click settlement: verify direct UPI received (matching Soundbox voice alert or bank notification) and mark as paid."""
+    target_order_id = order_id
+    if target_order_id is None and data and hasattr(data, "order_id"):
+        target_order_id = getattr(data, "order_id")
+    if not target_order_id:
+        raise HTTPException(status_code=400, detail="Missing order_id")
+
+    order = (
+        db.query(Order)
+        .options(joinedload(Order.items), joinedload(Order.table))
+        .filter(Order.id == target_order_id, Order.outlet_id == current_user.outlet_id)
+        .first()
+    )
+    if not order:
+        raise HTTPException(status_code=404, detail=f"Order with ID {target_order_id} not found in this outlet")
+
+    if order.payment_status == "paid":
+        return {
+            "success": True,
+            "message": f"Order #{order.order_number} was already marked as paid",
+            "order_number": order.order_number,
+            "payment_status": "paid",
+            "amount_paise": order.total_paise,
+            "amount_formatted": f"₹{order.total_paise / 100:.2f}",
+            "verified_by": current_user.name,
+        }
+
+    # Calculate remaining balance
+    all_payments = db.query(Payment).filter(Payment.order_id == order.id, Payment.status == "completed").all()
+    paid_paise = sum(p.amount_paise for p in all_payments)
+    balance_paise = max(0, order.total_paise - paid_paise)
+    amount_to_pay = (
+        data.amount_paise
+        if (data and data.amount_paise and data.amount_paise > 0)
+        else (balance_paise if balance_paise > 0 else order.total_paise)
+    )
+
+    order.payment_status = "paid"
+    order.payment_method = "upi"
+
+    raw_utr = (data.utr_number if data and data.utr_number else "").strip()
+    txn_id = raw_utr if raw_utr else f"UPI-VERIFIED-{order.order_number}-{uuid.uuid4().hex[:6]}"
+    notes = (data.notes if data and data.notes else "").strip()
+    full_notes = f"Direct UPI verified by {current_user.name} via Soundbox / Bank alert (UTR: {txn_id})" + (f" - {notes}" if notes else "")
+
+    payment = Payment(
+        order_id=order.id,
+        method="upi",
+        txn_id=txn_id,
+        amount_paise=amount_to_pay,
+        status="completed",
+        paid_at=datetime.datetime.utcnow(),
+        notes=full_notes,
+    )
+    db.add(payment)
+
+    log_audit(
+        db=db,
+        outlet_id=current_user.outlet_id,
+        user_id=current_user.id,
+        action="cashier_upi_verified",
+        entity_type="payment",
+        entity_id=order.id,
+        details={
+            "order_number": order.order_number,
+            "amount_paise": amount_to_pay,
+            "amount_formatted": f"₹{amount_to_pay / 100:.2f}",
+            "utr_number": txn_id,
+            "method": "upi",
+            "verified_by": current_user.name,
+        },
+    )
+
+    db.commit()
+    db.refresh(order)
+
+    # Broadcast real-time WebSocket notifications to Cashier POS, Captain POS, and KDS
+    from app.routers.orders import format_order_response
+    formatted = format_order_response(order)
+    order_data = formatted.model_dump(mode="json")
+
+    try:
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_payment_updated",
+            data=order_data,
+        )
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_status_updated",
+            data=order_data,
+        )
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_updated",
+            data=order_data,
+        )
+        await manager.broadcast_to_order(
+            order_id=order.id,
+            event_type="order_status_updated",
+            data=order_data,
+            outlet_id=order.outlet_id,
+        )
+    except Exception as ws_err:
+        logger.warning(f"[WS] Broadcast error in verify_cashier_upi_payment: {ws_err}")
+
+    return {
+        "success": True,
+        "message": f"Order #{order.order_number} UPI payment verified & settled by {current_user.name}",
+        "order_number": order.order_number,
+        "amount_paise": amount_to_pay,
+        "amount_formatted": f"₹{amount_to_pay / 100:.2f}",
+        "payment_status": "paid",
+        "payment_method": "upi",
+        "verified_by": current_user.name,
+        "txn_id": txn_id,
+    }
 
 
 # ==========================================

@@ -603,10 +603,13 @@ def get_table_active_order(
     balance_paise = max(0, order.total_paise - paid_paise)
     amount_rs = round(balance_paise / 100.0, 2)
 
-    encoded_name = urllib.parse.quote(outlet_name.replace("&", "and"))
-    clean_note = f"Table {table.label} Bill {order.order_number}".replace("_", " ")
-    encoded_note = urllib.parse.quote(clean_note)
-    upi_uri = f"upi://pay?pa={upi_vpa}&pn={encoded_name}&am={amount_rs:.2f}&tn={encoded_note}&cu=INR"
+    from app.routers.payments import generate_dynamic_upi_qr
+    upi_uri = generate_dynamic_upi_qr(
+        upi_vpa=upi_vpa,
+        payee_name=outlet_name,
+        amount_rupees=amount_rs,
+        order_number=order.order_number,
+    )
 
     from app.routers.orders import format_order_response
     formatted_order = format_order_response(order)

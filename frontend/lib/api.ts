@@ -40,15 +40,22 @@ export async function apiFetch<T = any>(endpoint: string, options: FetchOptions 
     }
 
     // Inject JWT token if available in client storage
+    const custToken = safeStorage.getItem("surya_customer_token");
+    const staffToken = safeStorage.getItem("surya_token");
+
+    if (custToken) {
+        defaultHeaders["X-Customer-Token"] = custToken;
+    }
+
     if (endpoint.startsWith("/api/customer") || endpoint.startsWith("/customer")) {
-        const custToken = safeStorage.getItem("surya_customer_token");
         if (custToken) {
             defaultHeaders["Authorization"] = `Bearer ${custToken}`;
         }
     } else {
-        const token = safeStorage.getItem("surya_token") || safeStorage.getItem("teatime_token");
-        if (token) {
-            defaultHeaders["Authorization"] = `Bearer ${token}`;
+        if (staffToken) {
+            defaultHeaders["Authorization"] = `Bearer ${staffToken}`;
+        } else if (custToken) {
+            defaultHeaders["Authorization"] = `Bearer ${custToken}`;
         }
     }
 
@@ -237,6 +244,10 @@ export const api = {
         apiFetch(`/api/payments/${orderId}/split-payment`, { method: "POST", body: JSON.stringify(data) }),
     getDynamicUpi: (orderId: number) =>
         apiFetch(`/api/payments/${orderId}/dynamic-upi`),
+    submitUpiRef: (data: { order_id: number; utr_number?: string; notes?: string; amount_paise?: number }) =>
+        apiFetch("/api/payments/submit-upi-ref", { method: "POST", body: JSON.stringify(data) }),
+    verifyUpiPayment: (orderId: number, data?: { utr_number?: string; notes?: string; amount_paise?: number }) =>
+        apiFetch(`/api/payments/${orderId}/verify-upi`, { method: "POST", body: JSON.stringify(data || {}) }),
     getPayments: (params?: { outlet_id?: number; method?: string; status?: string }) =>
         apiFetch("/api/payments", { params }),
 
@@ -342,7 +353,13 @@ export const api = {
     updateOutlet: (outletId: number, data: any) =>
         apiFetch(`/api/outlets?outlet_id=${outletId}`, { method: "PUT", body: JSON.stringify(data) }),
 
-    // Customer Auth & Reorder (Zero-Cost Instant Phone Recognition)
+    // Customer Auth & Reorder (Option B: Mobile Number + Password, Zero OTP)
+    registerCustomer: (data: { phone: string; password: string; name?: string; email?: string }) =>
+        apiFetch("/api/customer/register", { method: "POST", body: JSON.stringify(data) }),
+    loginCustomerWithPassword: (data: { phone: string; password: string }) =>
+        apiFetch("/api/customer/login", { method: "POST", body: JSON.stringify(data) }),
+    checkCustomerPhone: (phone: string) =>
+        apiFetch("/api/customer/check-phone", { method: "POST", body: JSON.stringify({ phone }) }),
     quickLoginCustomer: (data: { phone: string; name?: string }) =>
         apiFetch("/api/customer/quick-login", { method: "POST", body: JSON.stringify(data) }),
     sendCustomerOtp: (phone: string) =>
@@ -358,6 +375,12 @@ export const api = {
     getReorderPayload: (orderId: number) =>
         apiFetch(`/api/customer/reorder/${orderId}`),
 
+    // Customer CRM (Admin & Staff)
+    getAdminCustomers: (params?: { search?: string; tier?: string }) =>
+        apiFetch("/api/customer/admin/list", { params }),
+    getAdminCustomerDetails: (customerId: number) =>
+        apiFetch(`/api/customer/admin/${customerId}`),
+
     // Promo Codes & Coupons
     validateCoupon: (data: { code: string; subtotal_paise: number; outlet_id?: number }) =>
         apiFetch("/api/coupons/validate", { method: "POST", body: JSON.stringify(data) }),
@@ -367,4 +390,10 @@ export const api = {
         apiFetch("/api/coupons", { method: "POST", body: JSON.stringify(data) }),
     deleteCoupon: (id: number) =>
         apiFetch(`/api/coupons/${id}`, { method: "DELETE" }),
+
+    // Zero-Cost Hybrid Cloud Sync
+    getHybridSyncStatus: () =>
+        apiFetch("/api/sync/status"),
+    triggerHybridSync: () =>
+        apiFetch("/api/sync/trigger", { method: "POST" }),
 };

@@ -27,6 +27,7 @@ import { OrderTracker, OrderDetail } from "@/components/order/OrderTracker";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/Button";
 import { SuryaSunLogo } from "@/components/SuryaSunLogo";
+import { CustomerAuthModal } from "@/components/customer/CustomerAuthModal";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import { formatRupees } from "@/lib/formatters";
@@ -47,7 +48,7 @@ function CustomerOrderContent() {
     const searchParams = useSearchParams();
     const { language, t } = useLanguage();
     const { isOnline, enqueueOrder } = useOffline();
-    const { customer } = useCustomer();
+    const { customer, isCustomerLoggedIn, logoutCustomer, authModalOpen, setAuthModalOpen, requireCustomerAuth } = useCustomer();
     const { taxRate, outlet } = useOutlet();
     const toast = useToast();
 
@@ -130,7 +131,7 @@ function CustomerOrderContent() {
 
     // 1. Initialize Table from URL or Storage with instant reflection and fuzzy matching
     useEffect(() => {
-        const savedTable = safeStorage.getItem("surya_table", "session") || safeStorage.getItem("teatime_table", "session");
+        const savedTable = safeStorage.getItem("surya_table", "session");
         const targetLabel = (tableParam || savedTable || "T1").toUpperCase();
         setTableLabel(targetLabel);
 
@@ -168,7 +169,7 @@ function CustomerOrderContent() {
             .catch(() => {});
 
         // Check if there is an existing active order in session
-        const savedOrderId = safeStorage.getItem("surya_active_order_id", "session") || safeStorage.getItem("teatime_active_order_id", "session");
+        const savedOrderId = safeStorage.getItem("surya_active_order_id", "session");
         if (savedOrderId) {
             api.getOrder(Number(savedOrderId))
                 .then((ord) => {
@@ -176,12 +177,10 @@ function CustomerOrderContent() {
                         setActiveOrder(ord);
                     } else {
                         safeStorage.removeItem("surya_active_order_id", "session");
-                        safeStorage.removeItem("teatime_active_order_id", "session");
                     }
                 })
                 .catch(() => {
                     safeStorage.removeItem("surya_active_order_id", "session");
-                    safeStorage.removeItem("teatime_active_order_id", "session");
                 });
         }
     }, [tableParam, outletId]);
@@ -398,6 +397,14 @@ function CustomerOrderContent() {
 
     // Checkout Flow with Idempotency Key
     const handleCheckout = async (paymentMethod: "counter" | "upi", customerNotes: string) => {
+        // Enforce mandatory customer login gate before placing order
+        if (!isCustomerLoggedIn) {
+            requireCustomerAuth(() => {
+                handleCheckout(paymentMethod, customerNotes);
+            });
+            return;
+        }
+
         setIsPlacingOrder(true);
         try {
             const idempotencyKey =
@@ -409,6 +416,8 @@ function CustomerOrderContent() {
                 table_id: tableId,
                 outlet_id: outletId,
                 idempotency_key: idempotencyKey,
+                customer_name: customer?.name || undefined,
+                customer_phone: customer?.phone || undefined,
                 customer_notes: customerNotes,
                 payment_method: paymentMethod,
                 items: cart.map((i) => ({
@@ -510,7 +519,6 @@ function CustomerOrderContent() {
                     onOrderMore={() => {
                         setActiveOrder(null);
                         safeStorage.removeItem("surya_active_order_id", "session");
-                        safeStorage.removeItem("teatime_active_order_id", "session");
                     }}
                 />
             </main>
@@ -553,6 +561,30 @@ function CustomerOrderContent() {
                             <span className="hidden sm:inline">Call Waiter</span>
                             <span className="sm:hidden">Bell</span>
                         </button>
+
+                        {/* Customer Session Status Pill */}
+                        {isCustomerLoggedIn ? (
+                            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-amber-400/80 bg-amber-500/10 text-espresso-950 text-[11px] sm:text-xs font-bold shadow-2xs">
+                                <span className="text-xs">👤</span>
+                                <span className="max-w-[70px] sm:max-w-[110px] truncate">{customer?.name ? customer.name.split(' ')[0] : customer?.phone}</span>
+                                <button
+                                    type="button"
+                                    onClick={logoutCustomer}
+                                    title="Sign Out"
+                                    className="ml-0.5 text-[10px] text-terracotta-700 hover:text-terracotta-900 cursor-pointer font-bold"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => requireCustomerAuth()}
+                                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full border border-espresso-900 bg-espresso-900 hover:bg-espresso-800 text-amber-300 text-[11px] sm:text-xs font-bold shadow-2xs transition cursor-pointer"
+                            >
+                                <span>Sign In</span>
+                            </button>
+                        )}
 
                         <LanguageToggle />
                     </div>
@@ -892,6 +924,12 @@ function CustomerOrderContent() {
                     </div>
                 </div>
             )}
+
+            {/* Customer Authentication Modal (Mobile + Password, Zero OTP) */}
+            <CustomerAuthModal
+                isOpen={authModalOpen}
+                onClose={() => setAuthModalOpen(false)}
+            />
         </main>
     );
 }

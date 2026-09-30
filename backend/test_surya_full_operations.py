@@ -111,7 +111,24 @@ def run_tests():
         "payment_method": "counter"
     }
 
-    create_order_res = requests.post(f"{BASE_URL}/api/orders", json=order_payload)
+    # Register/Login customer (Mandatory Zero-OTP Authentication Gate)
+    cust_res = requests.post(f"{BASE_URL}/api/customer/register", json={
+        "phone": "9880358634",
+        "name": "Suresh Kadiri",
+        "password": "surya_password_123"
+    })
+    if cust_res.status_code == 200:
+        cust_token = cust_res.json()["access_token"]
+    else:
+        cust_login_res = requests.post(f"{BASE_URL}/api/customer/login", json={
+            "phone": "9880358634",
+            "password": "surya_password_123"
+        })
+        cust_token = cust_login_res.json()["access_token"]
+
+    cust_headers = {"X-Customer-Token": cust_token}
+
+    create_order_res = requests.post(f"{BASE_URL}/api/orders", json=order_payload, headers=cust_headers)
     assert create_order_res.status_code == 201, f"Create order failed: {create_order_res.text}"
     order = create_order_res.json()
     order_id = order["id"]

@@ -59,29 +59,34 @@ function AdminLoginContent() {
                         <span className="text-[11px] text-espresso-400 font-mono">11 AM – 10:30 PM</span>
                     </div>
 
-                    {/* 1-Tap Quick Fill demo accounts */}
+                    {/* 1-Tap Quick Login — only visible on on-premise localhost POS or when explicitly enabled */}
+                    {(typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || process.env.NEXT_PUBLIC_SHOW_DEMO_LOGIN === "true")) && (
                     <div className="p-3 bg-cream-100 rounded-2xl border border-cream-300 space-y-2">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-espresso-700">
-                            <UserCheck className="w-3.5 h-3.5 text-amber-600" />
-                            <span>1-Tap Demo Quick Fill:</span>
+                        <div className="flex items-center justify-between text-xs font-bold text-espresso-700">
+                            <div className="flex items-center gap-1.5">
+                                <UserCheck className="w-3.5 h-3.5 text-amber-600" />
+                                <span>1-Tap Staff Login:</span>
+                            </div>
+                            <span className="text-[10px] text-espresso-500 font-normal">Official Credentials</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <button
                                 type="button"
-                                onClick={() => handleQuickFill("owner@suryarestaurant.com", "admin123")}
+                                onClick={() => handleQuickFill("owner@suryafamilyrestaurant.in", "surya_admin_2026")}
                                 className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold transition shadow-sm cursor-pointer text-left"
                             >
                                 👑 Manager / Owner
                             </button>
                             <button
                                 type="button"
-                                onClick={() => handleQuickFill("staff@suryarestaurant.com", "staff123")}
+                                onClick={() => handleQuickFill("staff@suryafamilyrestaurant.in", "surya_staff_2026")}
                                 className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold transition shadow-sm cursor-pointer text-left"
                             >
-                                🧑‍🍳 Floor Staff
+                                🧑‍🍳 Floor Cashier
                             </button>
                         </div>
                     </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>

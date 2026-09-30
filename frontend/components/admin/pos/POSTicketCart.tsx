@@ -165,10 +165,11 @@ export function POSTicketCart({
                     <div className="relative">
                         <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
                         <input
-                            type="text"
-                            placeholder="Mobile No."
+                            type="tel"
+                            maxLength={10}
+                            placeholder="Mobile (10 Digits)"
                             value={customerPhone}
-                            onChange={(e) => onChangeCustomerPhone(e.target.value)}
+                            onChange={(e) => onChangeCustomerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                             className="w-full pl-8 pr-2 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white placeholder-white/30 text-xs font-mono focus:outline-none focus:border-[#D4AF37]"
                         />
                     </div>

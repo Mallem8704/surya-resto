@@ -8,9 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY", "surya_family_restaurant_jwt_key_kadiri_2026")
-if os.getenv("ENVIRONMENT") == "production" and SECRET_KEY == "surya_family_restaurant_jwt_key_kadiri_2026":
-    import warnings
-    warnings.warn("CRITICAL: Running in production with default SECRET_KEY! Set a strong SECRET_KEY environment variable.", RuntimeWarning)
+if os.getenv("ENVIRONMENT", "").strip().lower() == "production" and SECRET_KEY == "surya_family_restaurant_jwt_key_kadiri_2026":
+    raise RuntimeError("CRITICAL SECURITY ERROR: Default SECRET_KEY detected in production! Set a secure SECRET_KEY in your environment.")
 
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))

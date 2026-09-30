@@ -28,7 +28,7 @@ class Outlet(Base):
     logo_url = Column(String(500), nullable=True)  # e.g., "/uploads/logo.png"
     gstin = Column(String(30), nullable=True)  # GST Identification Number
     fssai_license_number = Column(String(30), nullable=True)  # FSSAI License Number
-    upi_vpa = Column(String(100), nullable=True)  # e.g. "arabieq@upi"
+    upi_vpa = Column(String(100), nullable=True)  # e.g. "9880358634@upi"
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relationships
@@ -168,10 +168,12 @@ class Order(Base):
     discount_paise = Column(Integer, default=0)  # Coupon discount
     coupon_code = Column(String(50), nullable=True)
     coupon_id = Column(Integer, ForeignKey("coupons.id", ondelete="SET NULL"), nullable=True)
+    customer_id = Column(Integer, ForeignKey("customers.id", ondelete="SET NULL"), index=True, nullable=True)
     total_paise = Column(Integer, default=0)
     payment_status = Column(String(20), default="pending")  # 'pending', 'paid', 'failed'
     payment_method = Column(String(20), default="counter")  # 'upi', 'card', 'cash', 'counter', 'cod'
     customer_notes = Column(Text, nullable=True)
+    synced_to_cloud = Column(Boolean, default=False, index=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
@@ -180,6 +182,7 @@ class Order(Base):
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
     payments = relationship("Payment", back_populates="order", cascade="all, delete-orphan")
     coupon = relationship("Coupon", back_populates="orders")
+    customer = relationship("Customer", back_populates="orders")
 
 
 class OrderItem(Base):
@@ -211,6 +214,7 @@ class Payment(Base):
     status = Column(String(20), default="completed")  # 'pending', 'completed', 'failed', 'refunded'
     paid_at = Column(DateTime, default=datetime.datetime.utcnow, index=True)
     notes = Column(String(255), nullable=True)
+    synced_to_cloud = Column(Boolean, default=False, index=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     order = relationship("Order", back_populates="payments")
@@ -267,10 +271,13 @@ class Customer(Base):
     name = Column(String(100), nullable=True)
     email = Column(String(120), nullable=True)
     default_address = Column(Text, nullable=True)
+    hashed_password = Column(String(255), nullable=True)
+    synced_to_cloud = Column(Boolean, default=False, index=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     last_order_at = Column(DateTime, nullable=True)
 
     addresses = relationship("CustomerAddress", back_populates="customer", cascade="all, delete-orphan")
+    orders = relationship("Order", back_populates="customer", cascade="all, delete-orphan", order_by="desc(Order.created_at)")
 
 
 class CustomerAddress(Base):

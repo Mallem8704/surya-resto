@@ -113,7 +113,7 @@ export default function AdminLiveOrdersKanbanPage() {
 
     // Real-Time WebSocket Hook with Audio Chimes
     const { isConnected: wsConnected } = useAdminSocket(outlet?.id || 1, (event) => {
-        console.log("[AdminKanban] Received event:", event);
+        if (process.env.NODE_ENV === "development") console.log("[AdminKanban] Received event:", event);
 
         if (event.event === "new_order" && event.data) {
             soundManager.playNewOrderChime();
@@ -448,26 +448,69 @@ export default function AdminLiveOrdersKanbanPage() {
                                                             </span>
                                                         </div>
 
-                                                        {/* Delivery Customer Details Box */}
-                                                        {isDelivery && (
-                                                            <div className="p-2.5 rounded-xl bg-cyan-50/70 border border-cyan-200 text-xs space-y-1">
-                                                                <div className="flex items-center justify-between font-bold text-cyan-950">
-                                                                    <span className="flex items-center gap-1">
-                                                                        <User className="w-3 h-3 text-cyan-700" />
-                                                                        {order.customer_name || "Customer"}
-                                                                    </span>
-                                                                    {order.customer_phone && (
-                                                                        <a
-                                                                            href={`tel:${order.customer_phone}`}
-                                                                            className="text-cyan-800 hover:text-cyan-950 underline flex items-center gap-1 text-[11px]"
-                                                                        >
-                                                                            <Phone className="w-3 h-3" />
-                                                                            {order.customer_phone}
-                                                                        </a>
-                                                                    )}
+                                                        {/* Customer Intelligence & Delivery Box */}
+                                                        {(order.customer_name || order.customer_phone || isDelivery) && (
+                                                            <div className={`p-2.5 rounded-xl text-xs space-y-1.5 ${
+                                                                isDelivery
+                                                                    ? "bg-cyan-50/80 border border-cyan-200"
+                                                                    : "bg-amber-50/60 border border-amber-200/70"
+                                                            }`}>
+                                                                <div className="flex items-center justify-between gap-1 flex-wrap font-bold">
+                                                                    <div className="flex items-center gap-1.5 min-w-0">
+                                                                        <User className={`w-3.5 h-3.5 shrink-0 ${isDelivery ? "text-cyan-700" : "text-amber-700"}`} />
+                                                                        <span className={`truncate text-xs ${isDelivery ? "text-cyan-950" : "text-amber-950"}`}>
+                                                                            {order.customer_name || "Surya Diner"}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {/* Customer Loyalty / Repeat Order Badge */}
+                                                                    {order.customer_order_count && order.customer_order_count >= 5 ? (
+                                                                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-200 text-amber-950 border border-amber-400 flex items-center gap-0.5">
+                                                                            <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                                                                            VIP ({order.customer_order_count} Orders)
+                                                                        </span>
+                                                                    ) : order.customer_order_count && order.customer_order_count > 1 ? (
+                                                                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                                                            Returning ({order.customer_order_count})
+                                                                        </span>
+                                                                    ) : order.customer_order_count === 1 ? (
+                                                                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-blue-100 text-blue-900 border border-blue-200">
+                                                                            New Diner
+                                                                        </span>
+                                                                    ) : null}
                                                                 </div>
-                                                                {order.delivery_address && (
-                                                                    <p className="text-[11px] text-cyan-900 flex items-start gap-1 leading-snug">
+
+                                                                {/* Phone & 1-Click Communications */}
+                                                                {order.customer_phone && (
+                                                                    <div className="flex items-center justify-between gap-2 pt-0.5">
+                                                                        <span className="font-mono text-[11px] font-bold text-espresso-700 flex items-center gap-1">
+                                                                            <Phone className="w-3 h-3 text-espresso-400" />
+                                                                            +91 {order.customer_phone}
+                                                                        </span>
+                                                                        <div className="flex items-center gap-1 shrink-0">
+                                                                            <a
+                                                                                href={`tel:${order.customer_phone}`}
+                                                                                className="p-1 rounded-md bg-white border border-cream-300 hover:bg-cream-100 text-espresso-700 transition"
+                                                                                title="Call Diner"
+                                                                            >
+                                                                                <PhoneCall className="w-3 h-3 text-emerald-600" />
+                                                                            </a>
+                                                                            <a
+                                                                                href={`https://wa.me/91${order.customer_phone.replace(/\D/g, "")}`}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="p-1 rounded-md bg-white border border-cream-300 hover:bg-emerald-50 text-espresso-700 transition"
+                                                                                title="Open WhatsApp Chat"
+                                                                            >
+                                                                                <MessageCircle className="w-3 h-3 text-emerald-600" />
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Delivery Address (if Delivery order) */}
+                                                                {isDelivery && order.delivery_address && (
+                                                                    <p className="text-[11px] text-cyan-900 flex items-start gap-1 leading-snug pt-1 border-t border-cyan-200/60">
                                                                         <MapPin className="w-3 h-3 text-cyan-700 shrink-0 mt-0.5" />
                                                                         <span>{order.delivery_address}</span>
                                                                     </p>

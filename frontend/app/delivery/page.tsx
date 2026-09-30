@@ -42,6 +42,7 @@ import {
     QrCode,
     Smartphone,
     Info,
+    LogOut,
 } from "lucide-react";
 import { getDishImage } from "@/lib/dishImages";
 import { useCustomer } from "@/context/CustomerContext";
@@ -388,7 +389,7 @@ function DeliveryOrderContent() {
     const [vegFilter, setVegFilter] = useState<"all" | "veg" | "non_veg">("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoadingMenu, setIsLoadingMenu] = useState(true);
-    const { customer, isCustomerLoggedIn, loginCustomer, logoutCustomer, pastOrders } = useCustomer();
+    const { customer, isCustomerLoggedIn, loginCustomer, logoutCustomer, pastOrders, authModalOpen, setAuthModalOpen } = useCustomer();
     const { isOnline, enqueueOrder } = useOffline();
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [showUpiModal, setShowUpiModal] = useState(false);
@@ -536,7 +537,7 @@ function DeliveryOrderContent() {
 
     // WebSocket real-time delivery tracking
     useOrderSocket(activeOrder?.id, (updatedData) => {
-        console.log("[DeliverySocket] Order updated:", updatedData);
+        if (process.env.NODE_ENV === "development") console.log("[DeliverySocket] Order updated:", updatedData);
         setActiveOrder((prev) => (prev ? { ...prev, ...updatedData } : null));
         if (updatedData.status === "out_for_delivery") {
             soundManager.playReadyChime();
@@ -677,7 +678,14 @@ function DeliveryOrderContent() {
             return;
         }
 
-        const phoneClean = customerPhone.trim().replace(/\D/g, "");
+        // Mandatory Customer Login Gate
+        if (!isCustomerLoggedIn) {
+            setShowAuthModal(true);
+            toast.error("Please sign in or create an account to place a delivery order");
+            return;
+        }
+
+        const phoneClean = (customer?.phone || customerPhone).trim().replace(/\D/g, "");
         if (phoneClean.length < 10) {
             toast.error("Please enter a valid 10-digit mobile number");
             return;
@@ -763,20 +771,18 @@ function DeliveryOrderContent() {
             safeStorage.setItem("surya_cust_landmark", landmark.trim());
             safeStorage.setItem("surya_delivery_order_id", String(createdOrder.id), "session");
 
-            if (!isCustomerLoggedIn) {
-                api.quickLoginCustomer({ phone: phoneClean, name: customerName.trim() || undefined })
-                    .then((res) => {
-                        loginCustomer(res.access_token, res.customer);
-                        if (deliveryAddress.trim()) {
-                            api.addCustomerAddress({
-                                label: "Home",
-                                address_line: deliveryAddress.trim(),
-                                landmark: landmark.trim() || undefined,
-                                is_default: true,
-                            }).catch(() => {});
-                        }
-                    })
-                    .catch(() => {});
+            if (isCustomerLoggedIn && deliveryAddress.trim()) {
+                const alreadyExists = customer?.addresses?.some(
+                    (a) => a.address_line.toLowerCase().trim() === deliveryAddress.trim().toLowerCase()
+                );
+                if (!alreadyExists) {
+                    api.addCustomerAddress({
+                        label: customer?.addresses && customer.addresses.length > 0 ? `Location ${customer.addresses.length + 1}` : "Home",
+                        address_line: deliveryAddress.trim(),
+                        landmark: landmark.trim() || undefined,
+                        is_default: !customer?.addresses || customer.addresses.length === 0,
+                    }).catch(() => {});
+                }
             }
 
             setCart([]);
@@ -1369,8 +1375,11 @@ function DeliveryOrderContent() {
 
                         {/* Customer Login Modal */}
             <CustomerAuthModal
-                isOpen={showAuthModal}
-                onClose={() => setShowAuthModal(false)}
+                isOpen={showAuthModal || authModalOpen}
+                onClose={() => {
+                    setShowAuthModal(false);
+                    setAuthModalOpen(false);
+                }}
             />
 
             {/* Customization Modal */}
@@ -1511,6 +1520,88 @@ function DeliveryOrderContent() {
                                     Kadiri Delivery Information
                                 </h3>
 
+                                {/* Customer Session Status / Mandatory Login Banner */}
+                                {isCustomerLoggedIn && customer ? (
+                                    <div className="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                                <UserCheck className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-xs font-bold text-emerald-950">{customer.name || "Surya Diner"}</span>
+                                                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">
+                                                        Active Session
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-emerald-700 font-mono">+91 {customer.phone}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                logoutCustomer();
+                                                toast.info("Logged out from Surya customer session");
+                                            }}
+                                            className="text-[11px] font-bold text-espresso-600 hover:text-espresso-950 hover:bg-white/80 px-2.5 py-1 rounded-lg border border-espresso-200 transition flex items-center gap-1"
+                                            title="Switch customer account"
+                                        >
+                                            <LogOut className="w-3 h-3" />
+                                            <span>Switch</span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="bg-amber-50/90 border border-amber-200 rounded-2xl p-3 text-xs space-y-2">
+                                        <div className="flex items-start gap-2.5">
+                                            <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                                                <ShieldCheck className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-amber-950 text-xs">Customer Login Required</p>
+                                                <p className="text-[11px] text-amber-800 leading-snug">
+                                                    Sign in with your 10-digit mobile number & password to place orders and track delivery live.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAuthModal(true)}
+                                            className="w-full py-2 bg-gradient-to-r from-terracotta-600 to-espresso-900 text-white font-bold text-xs rounded-xl shadow-xs hover:opacity-95 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                        >
+                                            <LogIn className="w-3.5 h-3.5" />
+                                            <span>Sign In / Create Account (No OTP Needed)</span>
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Saved Kadiri Addresses (if logged in and has addresses) */}
+                                {isCustomerLoggedIn && customer?.addresses && customer.addresses.length > 0 && (
+                                    <div className="space-y-1.5">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-espresso-500 flex items-center gap-1">
+                                            <Bookmark className="w-3 h-3 text-terracotta-600" />
+                                            1-Tap Saved Locations
+                                        </span>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {customer.addresses.map((addr) => (
+                                                <button
+                                                    key={addr.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setDeliveryAddress(addr.address_line);
+                                                        if (addr.landmark) setLandmark(addr.landmark);
+                                                        toast.success(`Selected "${addr.label}" address`);
+                                                    }}
+                                                    className="text-xs px-2.5 py-1 rounded-lg bg-cream-100/80 hover:bg-terracotta-100 hover:text-terracotta-900 text-espresso-800 border border-cream-200 transition font-medium flex items-center gap-1"
+                                                >
+                                                    <MapPin className="w-3 h-3 text-terracotta-600" />
+                                                    <span className="font-bold">{addr.label}:</span>
+                                                    <span className="truncate max-w-[150px]">{addr.address_line}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-xs font-bold text-espresso-800 mb-1">
@@ -1636,7 +1727,7 @@ function DeliveryOrderContent() {
                                 isLoading={isPlacingOrder}
                                 className="w-full py-3.5 text-sm font-bold shadow-lg shadow-terracotta-600/30 flex items-center justify-between"
                             >
-                                <span>Confirm & Order Free Delivery 🛵</span>
+                                <span>{isCustomerLoggedIn ? "Confirm & Order Free Delivery 🛵" : "Sign In & Order Delivery 🛵"}</span>
                                 <span className="font-mono font-black">{formatRupees(totalPaise)}</span>
                             </Button>
                         </div>

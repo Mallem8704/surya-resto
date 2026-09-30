@@ -66,7 +66,7 @@ export function UpiPaymentModal({
             .catch(() => {
                 // Fallback default VPA
                 const fallbackVpa = "9880358634@upi";
-                const uri = `upi://pay?pa=${fallbackVpa}&pn=Surya%20Family%20Restaurant&am=${amountRs}&tn=Order%20${orderNumber}&cu=INR`;
+                const uri = `upi://pay?pa=${fallbackVpa}&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=${encodeURIComponent(orderNumber)}&tr=${encodeURIComponent(orderNumber)}`;
                 setUpiData({
                     upi_uri: uri,
                     amount_rs: amountRs,
@@ -81,7 +81,7 @@ export function UpiPaymentModal({
 
     if (!isOpen) return null;
 
-    const upiUri = upiData?.upi_uri || `upi://pay?pa=9880358634@upi&pn=Surya%20Family%20Restaurant&am=${amountRs}&tn=Order%20${orderNumber}&cu=INR`;
+    const upiUri = upiData?.upi_uri || `upi://pay?pa=9880358634@upi&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=${encodeURIComponent(orderNumber)}&tr=${encodeURIComponent(orderNumber)}`;
     const vpa = upiData?.upi_vpa || "9880358634@upi";
 
     // Copy UPI VPA to clipboard
@@ -94,24 +94,25 @@ export function UpiPaymentModal({
         }
     };
 
-    // Confirm Payment
+    // Confirm Payment via Direct Merchant UPI
     const handleConfirmPayment = async () => {
         setIsSubmitting(true);
         try {
-            // Verify or record payment with optional UTR
-            const res = await api.verifyRazorpayPayment({
+            const cleanUtr = utrNumber.trim();
+            const res = await api.submitUpiRef({
                 order_id: orderId,
-                razorpay_order_id: `upi_order_${orderId}`,
-                razorpay_payment_id: utrNumber.trim() || `UPI_${Date.now()}`,
-                razorpay_signature: `mock_sig_upi_${Date.now()}`,
+                utr_number: cleanUtr || undefined,
+                amount_paise: totalPaise,
+                notes: `UPI customer submission${cleanUtr ? ` (UTR: ${cleanUtr})` : ""}`,
             });
 
             soundManager.playOrderPlacedSuccess();
-            toast.success(`Payment of ${formatRupees(totalPaise)} Confirmed!`);
+            toast.success(`UPI Payment of ${formatRupees(totalPaise)} Confirmed!`);
             onPaymentSuccess(res);
             onClose();
         } catch (err: any) {
-            // Fallback: If sandbox verify fails, acknowledge and transition
+            console.error("Direct UPI submit error:", err);
+            // Fallback: If network issue, acknowledge and transition gracefully
             soundManager.playOrderPlacedSuccess();
             toast.success("UPI Payment details received! Kitchen will begin preparation.");
             onPaymentSuccess();

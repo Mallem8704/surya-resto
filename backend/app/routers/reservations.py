@@ -184,7 +184,7 @@ async def create_table_reservation(
                 },
             )
         except Exception as ws_err:
-            print("[WS Broadcast Error]", ws_err)
+            import logging; logging.getLogger("surya.reservations").warning(f"WS broadcast error: {ws_err}")
 
         return TableReservationOut(
             id=reservation.id,
@@ -207,9 +207,9 @@ async def create_table_reservation(
         )
     except Exception as e:
         db.rollback()
-        import traceback
+        import traceback, logging
         trace = traceback.format_exc()
-        print("[Reservation Error Traceback]", trace)
+        logging.getLogger("surya.reservations").error(f"Reservation error: {trace}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Unable to complete table reservation: {str(e)}"

@@ -130,6 +130,29 @@ def upload_menu_image(
     with open(file_path, "wb") as buffer:
         buffer.write(contents)
 
+    # Cloud Dual-Storage: Replicate to Supabase 'menu-media' bucket if configured
+    supabase_url = os.getenv("SUPABASE_URL", "").strip()
+    supabase_key = os.getenv("SUPABASE_SECRET_KEY", "").strip()
+    if supabase_url and supabase_key:
+        try:
+            import urllib.request
+            upload_endpoint = f"{supabase_url}/storage/v1/object/menu-media/{unique_filename}"
+            req = urllib.request.Request(
+                upload_endpoint,
+                data=contents,
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}",
+                    "Content-Type": file.content_type,
+                    "x-upsert": "true",
+                },
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                pass
+        except Exception:
+            pass  # Local on-premise copy remains safely on disk
+
     image_url = f"/uploads/{unique_filename}"
     return {
         "url": image_url,

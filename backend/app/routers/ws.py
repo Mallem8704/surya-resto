@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Set, Optional, Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
-logger = logging.getLogger("teatime_ws")
+logger = logging.getLogger("surya_ws")
 router = APIRouter(tags=["WebSockets"])
 
 
@@ -93,6 +93,10 @@ class ConnectionManager:
     async def broadcast_service_call(self, outlet_id: int, data: Any):
         """Broadcast service calls (waiter, bill, water) to admin dashboard."""
         await self.broadcast_to_admin(outlet_id=outlet_id, event_type="service_call", data=data)
+
+    async def broadcast_outlet_event(self, outlet_id: int, event_type: str, data: Any):
+        """Broadcast live event to all connected admin/staff devices (Cashier POS, Captain POS, KDS) for the given outlet."""
+        await self.broadcast_to_admin(outlet_id=outlet_id, event_type=event_type, data=data)
 
 
 # Global singleton connection manager

@@ -26,23 +26,29 @@ interface CustomerContextType {
   isCustomerLoggedIn: boolean;
   isLoading: boolean;
   pastOrders: any[];
+  authModalOpen: boolean;
+  setAuthModalOpen: (open: boolean) => void;
   loginCustomer: (token: string, customerData: CustomerProfile) => void;
   logoutCustomer: () => void;
   refreshCustomer: () => Promise<void>;
+  requireCustomerAuth: (onSuccessCallback?: () => void) => boolean;
+  executePendingAuthCallback: () => void;
   addCustomerAddress: (address: { label: string; address_line: string; landmark?: string; is_default?: boolean }) => Promise<void>;
   fetchPastOrders: () => Promise<void>;
 }
 
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
-const TOKEN_KEY = "surya_customer_token";
+export const CUSTOMER_TOKEN_KEY = "surya_customer_token";
 
 export function CustomerProvider({ children }: { children: React.ReactNode }) {
   const [customer, setCustomer] = useState<CustomerProfile | null>(null);
   const [pastOrders, setPastOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingAuthCallback, setPendingAuthCallback] = useState<(() => void) | null>(null);
 
   const refreshCustomer = useCallback(async () => {
-    const token = safeStorage.getItem(TOKEN_KEY);
+    const token = safeStorage.getItem(CUSTOMER_TOKEN_KEY);
     if (!token) {
       setCustomer(null);
       setIsLoading(false);
@@ -54,7 +60,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
       setCustomer(profile);
     } catch (err) {
       console.warn("Failed to refresh customer profile, session may have expired:", err);
-      safeStorage.removeItem(TOKEN_KEY);
+      safeStorage.removeItem(CUSTOMER_TOKEN_KEY);
       setCustomer(null);
     } finally {
       setIsLoading(false);
@@ -62,7 +68,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const fetchPastOrders = useCallback(async () => {
-    const token = safeStorage.getItem(TOKEN_KEY);
+    const token = safeStorage.getItem(CUSTOMER_TOKEN_KEY);
     if (!token) return;
 
     try {
@@ -86,15 +92,39 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
   }, [customer, fetchPastOrders]);
 
   const loginCustomer = useCallback((token: string, customerData: CustomerProfile) => {
-    safeStorage.setItem(TOKEN_KEY, token);
+    safeStorage.setItem(CUSTOMER_TOKEN_KEY, token);
     setCustomer(customerData);
   }, []);
 
   const logoutCustomer = useCallback(() => {
-    safeStorage.removeItem(TOKEN_KEY);
+    safeStorage.removeItem(CUSTOMER_TOKEN_KEY);
     setCustomer(null);
     setPastOrders([]);
   }, []);
+
+  const requireCustomerAuth = useCallback((onSuccessCallback?: () => void): boolean => {
+    if (customer) {
+      if (onSuccessCallback) onSuccessCallback();
+      return true;
+    }
+    if (onSuccessCallback) {
+      setPendingAuthCallback(() => onSuccessCallback);
+    }
+    setAuthModalOpen(true);
+    return false;
+  }, [customer]);
+
+  const executePendingAuthCallback = useCallback(() => {
+    if (pendingAuthCallback) {
+      try {
+        pendingAuthCallback();
+      } catch (err) {
+        console.error("Error executing post-auth callback:", err);
+      } finally {
+        setPendingAuthCallback(null);
+      }
+    }
+  }, [pendingAuthCallback]);
 
   const addCustomerAddress = useCallback(async (addressData: { label: string; address_line: string; landmark?: string; is_default?: boolean }) => {
     const newAddr = await api.addCustomerAddress(addressData);
@@ -118,9 +148,13 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         isCustomerLoggedIn: !!customer,
         isLoading,
         pastOrders,
+        authModalOpen,
+        setAuthModalOpen,
         loginCustomer,
         logoutCustomer,
         refreshCustomer,
+        requireCustomerAuth,
+        executePendingAuthCallback,
         addCustomerAddress,
         fetchPastOrders,
       }}

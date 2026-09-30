@@ -6,6 +6,11 @@ if sys.platform == "win32":
     sys.stderr.reconfigure(encoding="utf-8")
 
 TEST_FILES = [
+    "test_customer_auth_flow.py",
+    "test_admin_customers_crm.py",
+    "test_security_hardening.py",
+    "test_merchant_upi.py",
+    "test_hybrid_sync.py",
     "test_surya_full_operations.py",
     "test_ws.py",
 ]

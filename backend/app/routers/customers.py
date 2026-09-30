@@ -4,13 +4,16 @@ import os
 import re
 import json
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 
 from app.database import get_db
-from app.models import Customer, CustomerAddress, CustomerOTP, Order, OrderItem, MenuItemVariant, MenuItemAddon
+from app.models import Customer, CustomerAddress, CustomerOTP, Order, OrderItem, MenuItemVariant, MenuItemAddon, User
 from app.schemas import (
+    CustomerRegisterReq,
+    CustomerLoginReq,
+    CustomerCheckPhoneReq,
     CustomerQuickLoginReq,
     CustomerSendOTPReq,
     CustomerVerifyOTPReq,
@@ -18,16 +21,113 @@ from app.schemas import (
     CustomerAddressOut,
     CustomerOut,
     CustomerAuthResponse,
+    AdminCustomerListItem,
+    AdminCustomersSummary,
+    AdminCustomersResponse,
 )
-from app.auth_utils import SECRET_KEY, ALGORITHM
+from app.auth_utils import SECRET_KEY, ALGORITHM, verify_password, get_password_hash
+from app.routers.auth import require_staff_or_owner
+from app.rate_limiter import customer_login_limiter, customer_register_limiter
+
 
 router = APIRouter()
 
 
-@router.post("/quick-login", response_model=CustomerAuthResponse)
+@router.post("/register", response_model=CustomerAuthResponse)
+def register_customer(req: CustomerRegisterReq, request: Request, db: Session = Depends(get_db)):
+    """Customer registration with 10-digit mobile number and password (Zero OTP)."""
+    customer_register_limiter.check(request)
+    phone = normalize_phone(req.phone)
+    now = datetime.datetime.utcnow()
+
+    customer = db.query(Customer).filter(Customer.phone == phone).first()
+    if customer and customer.hashed_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An account with this mobile number already exists. Please sign in."
+        )
+
+    if not customer:
+        customer = Customer(
+            phone=phone,
+            name=req.name.strip() if req.name else None,
+            email=req.email.strip() if req.email else None,
+            hashed_password=get_password_hash(req.password),
+            created_at=now,
+        )
+        db.add(customer)
+        db.commit()
+        db.refresh(customer)
+    else:
+        # Existing walk-in customer setting their password for the first time
+        if req.name and req.name.strip():
+            customer.name = req.name.strip()
+        if req.email and req.email.strip():
+            customer.email = req.email.strip()
+        customer.hashed_password = get_password_hash(req.password)
+        db.commit()
+        db.refresh(customer)
+
+    token = create_customer_token(customer.id, customer.phone)
+
+    return CustomerAuthResponse(
+        access_token=token,
+        token_type="bearer",
+        customer=CustomerOut.model_validate(customer),
+    )
+
+
 @router.post("/login", response_model=CustomerAuthResponse)
+def login_customer(req: CustomerLoginReq, request: Request, db: Session = Depends(get_db)):
+    """Customer login with 10-digit mobile number and password (Zero OTP)."""
+    customer_login_limiter.check_pre_attempt(request)
+    phone = normalize_phone(req.phone)
+    customer = db.query(Customer).filter(Customer.phone == phone).first()
+
+    if not customer:
+        customer_login_limiter.record_failure(request)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this mobile number. Please register first."
+        )
+
+    if not customer.hashed_password:
+        # Set password for legacy/walk-in account on first login
+        customer.hashed_password = get_password_hash(req.password)
+        db.commit()
+        db.refresh(customer)
+    elif not verify_password(req.password, customer.hashed_password):
+        customer_login_limiter.record_failure(request)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect password. Please verify and try again."
+        )
+
+    customer_login_limiter.record_success(request)
+    token = create_customer_token(customer.id, customer.phone)
+
+    return CustomerAuthResponse(
+        access_token=token,
+        token_type="bearer",
+        customer=CustomerOut.model_validate(customer),
+    )
+
+
+@router.post("/check-phone")
+def check_phone(req: CustomerCheckPhoneReq, db: Session = Depends(get_db)):
+    """Check if a phone number is registered and has a password set."""
+    phone = normalize_phone(req.phone)
+    customer = db.query(Customer).filter(Customer.phone == phone).first()
+    return {
+        "exists": customer is not None and customer.hashed_password is not None,
+        "has_record": customer is not None,
+        "name": customer.name if customer else None,
+    }
+
+
+@router.post("/quick-login", response_model=CustomerAuthResponse)
 def quick_login(req: CustomerQuickLoginReq, db: Session = Depends(get_db)):
-    """Instant Zero-Cost 1-Tap Customer Mobile Login / Auto-Registration (Zero SMS / Zero OTP)."""
+    """Backward-compatible Quick Login fallback (Zero OTP)."""
     phone = normalize_phone(req.phone)
     now = datetime.datetime.utcnow()
 
@@ -71,6 +171,7 @@ def normalize_phone(phone: str) -> str:
 
 
 def create_customer_token(customer_id: int, phone: str) -> str:
+    # 90-Day Long-Lived Token to keep customer login session active across visits
     expire = datetime.datetime.utcnow() + datetime.timedelta(days=90)
     to_encode = {
         "sub": str(customer_id),
@@ -81,16 +182,25 @@ def create_customer_token(customer_id: int, phone: str) -> str:
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
+def extract_customer_token(authorization: Optional[str], x_customer_token: Optional[str]) -> Optional[str]:
+    if x_customer_token and x_customer_token.strip():
+        return x_customer_token.strip()
+    if authorization and authorization.startswith("Bearer "):
+        return authorization.split(" ")[1].strip()
+    return None
+
+
 def get_current_customer(
     authorization: Optional[str] = Header(None),
+    x_customer_token: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ) -> Customer:
-    if not authorization or not authorization.startswith("Bearer "):
+    token = extract_customer_token(authorization, x_customer_token)
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Customer authentication required. Please login with mobile OTP."
+            detail="Customer authentication required. Please sign in with your mobile number and password."
         )
-    token = authorization.split(" ")[1]
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         customer_id: str = payload.get("sub")
@@ -98,7 +208,7 @@ def get_current_customer(
         if customer_id is None or role != "customer":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid customer credentials")
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired, please re-login")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Customer session expired, please re-login")
 
     customer = db.query(Customer).filter(Customer.id == int(customer_id)).first()
     if customer is None:
@@ -108,11 +218,12 @@ def get_current_customer(
 
 def get_current_customer_optional(
     authorization: Optional[str] = Header(None),
+    x_customer_token: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ) -> Optional[Customer]:
-    if not authorization or not authorization.startswith("Bearer "):
+    token = extract_customer_token(authorization, x_customer_token)
+    if not token:
         return None
-    token = authorization.split(" ")[1]
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         customer_id: str = payload.get("sub")
@@ -153,7 +264,8 @@ def send_otp(req: CustomerSendOTPReq, db: Session = Depends(get_db)):
     db.add(otp_record)
     db.commit()
 
-    print(f"[CUSTOMER-OTP] Generated OTP {otp_code} for mobile +91-{phone}")
+    import logging
+    logging.getLogger("surya.customer").info(f"OTP generated for +91-{phone[:3]}****{phone[-3:]}")
 
     return {
         "status": "success",
@@ -245,9 +357,13 @@ def get_customer_orders(
     current_customer: Customer = Depends(get_current_customer),
     db: Session = Depends(get_db)
 ):
+    from sqlalchemy import or_
     orders = db.query(Order).filter(
-        Order.customer_phone == current_customer.phone
-    ).order_by(Order.id.desc()).limit(15).all()
+        or_(
+            Order.customer_id == current_customer.id,
+            Order.customer_phone == current_customer.phone,
+        )
+    ).order_by(Order.id.desc()).limit(25).all()
 
     result = []
     for o in orders:
@@ -311,3 +427,167 @@ def get_reorder_payload(
         "delivery_address": order.delivery_address,
         "items": reorder_items,
     }
+
+
+# ==========================================
+# ADMIN CUSTOMER CRM ENDPOINTS
+# ==========================================
+
+@router.get("/admin/list", response_model=AdminCustomersResponse)
+def get_admin_customers(
+    search: Optional[str] = None,
+    tier: Optional[str] = None,
+    current_user: User = Depends(require_staff_or_owner),
+    db: Session = Depends(get_db),
+):
+    """
+    Dedicated CRM endpoint for Admin & Staff.
+    Provides customer aggregate stats, loyalty tier breakdown, spend metrics, and phone search.
+    """
+    all_customers = db.query(Customer).order_by(Customer.created_at.desc()).all()
+
+    items = []
+    total_revenue_paise = 0
+    vip_count = 0
+    returning_count = 0
+    new_count = 0
+
+    for c in all_customers:
+        valid_orders = [o for o in c.orders if o.status != "cancelled"]
+        total_orders = len(valid_orders)
+        total_spent = sum(o.total_paise for o in valid_orders)
+        total_revenue_paise += total_spent
+
+        if total_orders >= 5:
+            c_tier = "vip"
+            vip_count += 1
+        elif total_orders >= 2:
+            c_tier = "returning"
+            returning_count += 1
+        else:
+            c_tier = "new"
+            new_count += 1
+
+        latest_order = c.orders[0] if c.orders else None
+        last_order_dt = latest_order.created_at if latest_order else c.last_order_at
+
+        item = AdminCustomerListItem(
+            id=c.id,
+            phone=c.phone,
+            name=c.name or "Guest Diner",
+            email=c.email,
+            default_address=c.default_address,
+            created_at=c.created_at,
+            last_order_at=last_order_dt,
+            total_orders=total_orders,
+            total_spent_paise=total_spent,
+            tier=c_tier,
+            addresses_count=len(c.addresses),
+            latest_order_number=latest_order.order_number if latest_order else None,
+        )
+        items.append(item)
+
+    filtered_items = items
+    if search and search.strip():
+        term = search.strip().lower()
+        filtered_items = [
+            it for it in filtered_items
+            if (term in it.phone.lower()) or (it.name and term in it.name.lower()) or (it.email and term in it.email.lower())
+        ]
+
+    if tier and tier.strip() and tier.lower() != "all":
+        t = tier.strip().lower()
+        filtered_items = [it for it in filtered_items if it.tier == t]
+
+    summary = AdminCustomersSummary(
+        total_customers=len(all_customers),
+        vip_count=vip_count,
+        returning_count=returning_count,
+        new_count=new_count,
+        total_revenue_paise=total_revenue_paise,
+    )
+
+    return AdminCustomersResponse(
+        summary=summary,
+        customers=filtered_items,
+    )
+
+
+@router.get("/admin/{customer_id}")
+def get_admin_customer_detail(
+    customer_id: int,
+    current_user: User = Depends(require_staff_or_owner),
+    db: Session = Depends(get_db),
+):
+    """
+    Get in-depth CRM view for a specific customer, including address book and full order chronology.
+    """
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+
+    valid_orders = [o for o in customer.orders if o.status != "cancelled"]
+    total_orders = len(valid_orders)
+    total_spent = sum(o.total_paise for o in valid_orders)
+
+    tier = "new"
+    if total_orders >= 5:
+        tier = "vip"
+    elif total_orders >= 2:
+        tier = "returning"
+
+    order_history = []
+    for o in customer.orders:
+        items_detail = []
+        for it in o.items:
+            items_detail.append({
+                "id": it.id,
+                "item_name": it.item_name,
+                "variant_name": it.variant_name,
+                "qty": it.qty,
+                "total_price_paise": it.total_price_paise,
+            })
+        order_history.append({
+            "id": o.id,
+            "order_number": o.order_number,
+            "outlet_id": o.outlet_id,
+            "table_id": o.table_id,
+            "order_type": o.order_type,
+            "status": o.status,
+            "total_paise": o.total_paise,
+            "payment_status": o.payment_status,
+            "payment_method": o.payment_method,
+            "delivery_address": o.delivery_address,
+            "created_at": o.created_at.isoformat() if o.created_at else None,
+            "items": items_detail,
+        })
+
+    addresses = [
+        {
+            "id": a.id,
+            "label": a.label,
+            "address_line": a.address_line,
+            "landmark": a.landmark,
+            "is_default": a.is_default,
+            "created_at": a.created_at.isoformat() if a.created_at else None,
+        }
+        for a in customer.addresses
+    ]
+
+    return {
+        "customer": {
+            "id": customer.id,
+            "phone": customer.phone,
+            "name": customer.name or "Guest Diner",
+            "email": customer.email,
+            "default_address": customer.default_address,
+            "created_at": customer.created_at.isoformat() if customer.created_at else None,
+            "last_order_at": customer.last_order_at.isoformat() if customer.last_order_at else None,
+            "tier": tier,
+            "total_orders": total_orders,
+            "total_spent_paise": total_spent,
+        },
+        "addresses": addresses,
+        "orders": order_history,
+    }
+

@@ -93,9 +93,91 @@ class AuthRateLimiter:
         self.lockouts.pop(key, None)
 
 
+class SlidingWindowRateLimiter:
+    """In-memory sliding-window rate limiter based on client IP.
+
+    Supports:
+    1. Pre-request checking & recording (e.g., max 10 registration attempts per minute per IP).
+    2. Failed attempt tracking & lockout (e.g., max 10 failed login attempts per minute per IP).
+    """
+    def __init__(self, max_attempts: int = 10, window_seconds: int = 60, name: str = "rate_limit"):
+        self.max_attempts = max_attempts
+        self.window_seconds = window_seconds
+        self.name = name
+        self.records = defaultdict(list)
+
+    @staticmethod
+    def get_client_ip(request: Request) -> str:
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        client = getattr(request, "client", None)
+        if client and hasattr(client, "host"):
+            return client.host
+        return "127.0.0.1"
+
+    def _get_active_timestamps(self, ip: str, now: float) -> list:
+        cutoff = now - self.window_seconds
+        active = [t for t in self.records[ip] if t > cutoff]
+        self.records[ip] = active
+        return active
+
+    def check(self, request: Request):
+        """Check and record an attempt. Used for sensitive request-rate limited endpoints like registration."""
+        ip = self.get_client_ip(request)
+        now = time.time()
+        active = self._get_active_timestamps(ip, now)
+        if len(active) >= self.max_attempts:
+            oldest = active[0]
+            retry_after = max(1, int(self.window_seconds - (now - oldest)))
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Too many requests for {self.name}. Rate limit exceeded. Please wait {retry_after} seconds before trying again.",
+                headers={"Retry-After": str(retry_after)},
+            )
+        self.records[ip].append(now)
+
+    def check_pre_attempt(self, request: Request):
+        """Check if IP is currently blocked due to exceeding max failed attempts in sliding window."""
+        ip = self.get_client_ip(request)
+        now = time.time()
+        active = self._get_active_timestamps(ip, now)
+        if len(active) >= self.max_attempts:
+            oldest = active[0]
+            retry_after = max(1, int(self.window_seconds - (now - oldest)))
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Too many failed attempts for {self.name}. Rate limit exceeded. Please wait {retry_after} seconds before trying again.",
+                headers={"Retry-After": str(retry_after)},
+            )
+
+    def record_failure(self, request: Request):
+        """Record a failed attempt for client IP and raise 429 if threshold is reached."""
+        ip = self.get_client_ip(request)
+        now = time.time()
+        active = self._get_active_timestamps(ip, now)
+        self.records[ip].append(now)
+        if len(self.records[ip]) >= self.max_attempts:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Too many failed attempts for {self.name}. Rate limit reached ({self.max_attempts} attempts/minute). Please wait {self.window_seconds} seconds before trying again.",
+                headers={"Retry-After": str(self.window_seconds)},
+            )
+
+    def record_success(self, request: Request):
+        """Reset failed attempt records on successful authentication."""
+        ip = self.get_client_ip(request)
+        self.records.pop(ip, None)
+
+
 # Standard limiters for endpoints
 order_creation_limiter = RateLimiter(requests_per_minute=60, name="order_creation")
 service_call_limiter = RateLimiter(requests_per_minute=30, name="service_calls")
 general_api_limiter = RateLimiter(requests_per_minute=300, name="api")
 auth_limiter = AuthRateLimiter(max_failures=5, lockout_seconds=900)
+
+# Sensitive endpoint sliding window rate limiters (max 10 attempts/min per IP)
+auth_login_limiter = SlidingWindowRateLimiter(max_attempts=10, window_seconds=60, name="auth_login")
+customer_login_limiter = SlidingWindowRateLimiter(max_attempts=10, window_seconds=60, name="customer_login")
+customer_register_limiter = SlidingWindowRateLimiter(max_attempts=10, window_seconds=60, name="customer_register")
 

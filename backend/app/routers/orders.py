@@ -7,9 +7,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
-from app.models import Order, OrderItem, MenuItem, MenuItemVariant, MenuItemAddon, CafeTable, Outlet, StockLog, User, Coupon
+from app.models import Order, OrderItem, MenuItem, MenuItemVariant, MenuItemAddon, CafeTable, Outlet, StockLog, User, Coupon, Customer
 from app.schemas import OrderCreate, OrderStatusUpdate, OrderAppendItems, OrderTransferTable, OrderOut, OrderItemOut
 from app.routers.auth import require_staff_or_owner, get_current_user_optional
+from app.routers.customers import get_current_customer_optional, normalize_phone
 from app.routers.ws import manager
 from app.audit_utils import log_audit
 from app.routers.outlets import get_effective_outlet_id
@@ -28,8 +29,8 @@ def generate_order_number():
     return f"SRY-{date_part}-{unique_part}"
 
 
-def format_order_response(order: Order) -> OrderOut:
-    """Helper to format Order model to OrderOut schema with table_label, variants, and delivery details."""
+def format_order_response(order: Order, db: Optional[Session] = None) -> OrderOut:
+    """Helper to format Order model to OrderOut schema with table_label, variants, customer intelligence, and delivery details."""
     table_label = None
     if order.table:
         table_label = order.table.label
@@ -38,6 +39,15 @@ def format_order_response(order: Order) -> OrderOut:
     elif order.order_type == "delivery":
         table_label = "🛵 Delivery"
 
+    customer_order_count = None
+    if db is not None:
+        if order.customer_id:
+            customer_order_count = db.query(Order).filter(Order.customer_id == order.customer_id).count()
+        elif order.customer_phone:
+            customer_order_count = db.query(Order).filter(Order.customer_phone == order.customer_phone).count()
+    elif hasattr(order, "customer") and order.customer and hasattr(order.customer, "orders"):
+        customer_order_count = len(order.customer.orders)
+
     return OrderOut(
         id=order.id,
         outlet_id=order.outlet_id,
@@ -45,8 +55,10 @@ def format_order_response(order: Order) -> OrderOut:
         table_label=table_label,
         idempotency_key=order.idempotency_key,
         order_type=order.order_type or "dine_in",
+        customer_id=order.customer_id,
         customer_name=order.customer_name,
         customer_phone=order.customer_phone,
+        customer_order_count=customer_order_count,
         delivery_address=order.delivery_address,
         delivery_status=order.delivery_status or "pending",
         delivery_fee_paise=order.delivery_fee_paise or 0,
@@ -90,11 +102,13 @@ async def create_order(
     data: OrderCreate,
     request: Request,
     db: Session = Depends(get_db),
+    current_customer: Optional[Customer] = Depends(get_current_customer_optional),
+    current_user: Optional[User] = Depends(get_current_user_optional),
 ):
     """Place a new customer order (Dine-in Table or Swiggy/Zomato-style Free Delivery).
 
-    Features Idempotency Key validation, Rate Limiting, Portion Variants & Addons pricing,
-    auto-inventory deduction, and real-time WebSocket broadcasting.
+    Features Idempotency Key validation, Mandatory Customer Auth Gate, Rate Limiting,
+    Portion Variants & Addons pricing, auto-inventory deduction, and real-time WebSocket broadcasting.
     """
     # 1. Rate Limiting Check
     order_creation_limiter.check(request)
@@ -109,13 +123,58 @@ async def create_order(
             .first()
         )
         if existing_order:
-            return format_order_response(existing_order)
+            return format_order_response(existing_order, db=db)
 
     if not data.items:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Order must contain at least one item",
         )
+
+    # 3. Mandatory Customer Authentication Gate
+    customer = current_customer
+    is_staff = current_user is not None
+
+    resolved_customer_id = None
+    resolved_customer_phone = None
+    resolved_customer_name = None
+
+    if not is_staff:
+        # Mandatory customer login for table diners and home delivery
+        if not customer:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Customer login is required before placing an order. Please sign in or register with your mobile number."
+            )
+        resolved_customer_id = customer.id
+        resolved_customer_phone = customer.phone
+        resolved_customer_name = customer.name or data.customer_name or "Valued Diner"
+        customer.last_order_at = datetime.datetime.utcnow()
+        if data.customer_name and (not customer.name or customer.name == "Customer"):
+            customer.name = data.customer_name.strip()
+    else:
+        # Staff POS cashier walk-in orders
+        if data.customer_phone and data.customer_phone.strip():
+            try:
+                clean_phone = normalize_phone(data.customer_phone)
+                c_record = db.query(Customer).filter(Customer.phone == clean_phone).first()
+                if not c_record:
+                    c_record = Customer(
+                        phone=clean_phone,
+                        name=data.customer_name.strip() if data.customer_name else None,
+                        created_at=datetime.datetime.utcnow(),
+                    )
+                    db.add(c_record)
+                    db.flush()
+                resolved_customer_id = c_record.id
+                resolved_customer_phone = c_record.phone
+                resolved_customer_name = c_record.name or data.customer_name
+                c_record.last_order_at = datetime.datetime.utcnow()
+            except Exception:
+                resolved_customer_phone = data.customer_phone.strip()
+                resolved_customer_name = data.customer_name.strip() if data.customer_name else None
+        else:
+            resolved_customer_name = data.customer_name.strip() if data.customer_name else "Walk-in Diner"
 
     order_type = (data.order_type or "dine_in").lower()
     table = None
@@ -279,8 +338,9 @@ async def create_order(
         table_id=table.id if table else None,
         idempotency_key=data.idempotency_key.strip() if data.idempotency_key else None,
         order_type=order_type,
-        customer_name=data.customer_name.strip() if data.customer_name else None,
-        customer_phone=data.customer_phone.strip() if data.customer_phone else None,
+        customer_id=resolved_customer_id,
+        customer_name=resolved_customer_name,
+        customer_phone=resolved_customer_phone,
         delivery_address=data.delivery_address.strip() if data.delivery_address else None,
         delivery_status="pending" if order_type == "delivery" else None,
         delivery_fee_paise=0,
@@ -343,7 +403,7 @@ async def create_order(
     db.commit()
     db.refresh(new_order)
 
-    formatted_response = format_order_response(new_order)
+    formatted_response = format_order_response(new_order, db=db)
 
     # Broadcast real-time event to Admin Dashboards
     await manager.broadcast_to_admin(
@@ -503,7 +563,7 @@ def list_orders(
             )
 
     orders = query.order_by(Order.created_at.desc()).limit(limit).all()
-    return [format_order_response(o) for o in orders]
+    return [format_order_response(o, db=db) for o in orders]
 
 
 @router.get("/{order_id}", response_model=OrderOut)
@@ -524,7 +584,7 @@ def get_order(
             detail=f"Order with ID {order_id} not found",
         )
 
-    return format_order_response(order)
+    return format_order_response(order, db=db)
 
 
 @router.post("/{order_id}/append-items", response_model=OrderOut)

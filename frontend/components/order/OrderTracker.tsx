@@ -98,7 +98,7 @@ export function OrderTracker({ initialOrder, onOrderMore }: OrderTrackerProps) {
 
     // Subscribe to real-time WebSocket events for this order
     const { isConnected: wsConnected } = useOrderSocket(order.id, (updatedData) => {
-        console.log("[OrderTracker] Received live order update:", updatedData);
+        if (process.env.NODE_ENV === "development") console.log("[OrderTracker] Received live order update:", updatedData);
         setOrder(updatedData);
         if (updatedData.payment_status === "paid") {
             setIsBillRequested(false);
