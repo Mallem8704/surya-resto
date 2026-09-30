@@ -72,6 +72,20 @@ import { MenuGridSkeleton } from "@/components/order/MenuGridSkeleton";
 import { UpiPaymentModal } from "@/components/order/UpiPaymentModal";
 import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 
+export const CATEGORY_EMOJIS: Record<number | string, string> = {
+    all: "🍽️",
+    1: "🍛", // Biryani & Pulao Specials
+    2: "🥘", // Punjabi & North Indian Curries
+    3: "🍢", // Tandoori & Kebabs
+    4: "🍗", // Non-Veg Starters & Andhra Specials
+    5: "🥗", // Veg Starters & Crispies
+    6: "🫓", // Indian Breads & Naans
+    7: "👑", // Arabic Mandi Specials
+    8: "🍜", // Chinese Rice & Noodles
+    9: "🍧", // Desserts & Sweets
+    10: "🥤", // Beverages & Lassi
+};
+
 interface MenuItemData extends CustomizerItemData {
     category_id: number;
     is_available: boolean;
@@ -544,7 +558,7 @@ function DeliveryOrderContent() {
             toast.success("Rider is on the way with your food!");
         } else if (updatedData.status === "delivered") {
             soundManager.playReadyChime();
-            toast.success("Food Delivered! Enjoy your Arabian feast!");
+            toast.success("Food Delivered! Enjoy your Surya feast!");
         }
     });
 
@@ -1029,9 +1043,9 @@ function DeliveryOrderContent() {
                             </div>
                             <div>
                                 <h4 className="text-base font-serif font-black text-espresso-950 flex items-center gap-2">
-                                    <span>Loved your Arabian Feast?</span>
+                                    <span>Loved your Surya Feast?</span>
                                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-950 font-bold border border-amber-300">
-                                        Get Free Chai
+                                        Special Treat
                                     </span>
                                 </h4>
                                 <p className="text-xs text-espresso-700 mt-0.5">
@@ -1258,31 +1272,51 @@ function DeliveryOrderContent() {
             </div>
 
             {/* Category Pills (Horizontal Scroll) */}
-            <div className="sticky top-[56px] z-20 bg-[#FDFBF7]/95 backdrop-blur-md py-2 border-b border-terracotta-100/60 shadow-2xs">
-                <div className="max-w-5xl mx-auto px-4 flex items-center gap-2 overflow-x-auto no-scrollbar">
+            <div className="sticky top-[52px] sm:top-[56px] z-20 bg-[#FDFBF7]/95 backdrop-blur-md py-2.5 border-b border-cream-200/80 shadow-2xs">
+                <div className="max-w-5xl mx-auto px-3 sm:px-4 flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth">
                     <button
                         onClick={() => setSelectedCategory("all")}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 shrink-0 cursor-pointer ${
                             selectedCategory === "all"
-                                ? "bg-terracotta-600 text-white shadow-xs"
-                                : "bg-white text-espresso-700 border border-terracotta-100 hover:bg-cream-100"
+                                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/25 scale-[1.02]"
+                                : "bg-white text-espresso-800 border border-cream-300 hover:bg-cream-100 shadow-2xs"
                         }`}
                     >
-                        {language === "te" ? "అన్నీ (ఆల్ కేటగిరీలు)" : "All Dishes"}
+                        <span>🍽️</span>
+                        <span>{language === "te" ? "అన్నీ (ఆల్ కేటగిరీలు)" : "All Dishes"}</span>
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                            selectedCategory === "all" ? "bg-white/20 text-white" : "bg-cream-100 text-espresso-600"
+                        }`}>
+                            {menuItems.length}
+                        </span>
                     </button>
-                    {categories.map((cat) => (
-                        <button
-                            key={cat.id}
-                            onClick={() => setSelectedCategory(cat.id)}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
-                                selectedCategory === cat.id
-                                    ? "bg-terracotta-600 text-white shadow-xs"
-                                    : "bg-white text-espresso-700 border border-terracotta-100 hover:bg-cream-100"
-                            }`}
-                        >
-                            {language === "te" && cat.name_te ? cat.name_te : cat.name}
-                        </button>
-                    ))}
+                    {categories.map((cat) => {
+                        const count = menuItems.filter((i) => i.category_id === cat.id).length;
+                        const isSelected = selectedCategory === cat.id;
+                        const emoji = CATEGORY_EMOJIS[cat.id] || "🍽️";
+
+                        return (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSelectedCategory(cat.id)}
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                                    isSelected
+                                        ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/25 scale-[1.02]"
+                                        : "bg-white text-espresso-800 border border-cream-300 hover:bg-cream-100 shadow-2xs"
+                                }`}
+                            >
+                                <span>{emoji}</span>
+                                <span>{language === "te" && cat.name_te ? cat.name_te : cat.name}</span>
+                                {count > 0 && (
+                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                                        isSelected ? "bg-white/20 text-white" : "bg-cream-100 text-espresso-600"
+                                    }`}>
+                                        {count}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

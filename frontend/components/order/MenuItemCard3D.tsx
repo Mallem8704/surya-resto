@@ -7,6 +7,7 @@ import { formatRupees } from "@/lib/formatters";
 import { useLanguage } from "@/context/LanguageContext";
 import { api } from "@/lib/api";
 import { getDishImage } from "@/lib/dishImages";
+import { soundManager } from "@/lib/sound";
 import type { MenuItemData } from "@/components/order/MenuItemCard";
 
 interface MenuItemCard3DProps {
@@ -93,10 +94,15 @@ export function MenuItemCard3D({
 
     // Resolve distinct dish image
     const finalImageSrc = imageError ? "/dishes/3d_biryani.jpg" : getDishImage(item);
+    const hasOptions = Boolean(
+        ((item as any).variants && (item as any).variants.length > 0) ||
+        ((item as any).addons && (item as any).addons.length > 0)
+    );
 
     const handleAddClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (isOutOfStock) return;
+        soundManager.playAddToCartPop();
         onAdd();
     };
 
@@ -107,7 +113,7 @@ export function MenuItemCard3D({
 
     return (
         <>
-            {/* Main Menu Item Card — 100% Lightweight & iOS Safari Compatible */}
+            {/* Main Menu Item Card — Mobile-Optimized & Touch-Friendly */}
             <div
                 className={`bg-white rounded-3xl border-2 overflow-hidden flex flex-col justify-between shadow-xs hover:shadow-xl transition-all duration-200 h-full ${
                     isOutOfStock
@@ -116,14 +122,17 @@ export function MenuItemCard3D({
                 }`}
             >
                 {/* Dish Image Header */}
-                <div className="relative h-44 sm:h-48 bg-gradient-to-br from-cream-100 to-cream-200 overflow-hidden flex items-center justify-center">
+                <div className="relative h-44 sm:h-48 bg-gradient-to-br from-cream-100 to-cream-200 overflow-hidden flex items-center justify-center group">
                     <img
                         src={finalImageSrc}
                         alt={displayName}
                         onError={() => setImageError(true)}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
                     />
+
+                    {/* Gradient overlay for contrast */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
 
                     {/* Veg / Non-Veg & Special Badges */}
                     <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
@@ -159,31 +168,49 @@ export function MenuItemCard3D({
                 </div>
 
                 {/* Content & Actions */}
-                <div className="p-4 flex-1 flex flex-col justify-between">
+                <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
                     <div>
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                            <h4 className="text-[15px] font-extrabold text-espresso-950 leading-snug line-clamp-1">
-                                {displayName}
-                            </h4>
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                            <div className="min-w-0 flex-1">
+                                <h4 className="text-[15px] sm:text-[16px] font-extrabold text-espresso-950 leading-snug truncate">
+                                    {displayName}
+                                </h4>
+                                {language === "en" && item.name_te ? (
+                                    <p className="text-[11px] text-amber-800/90 font-medium truncate mt-0.5 font-telugu">
+                                        {item.name_te}
+                                    </p>
+                                ) : language === "te" && item.name ? (
+                                    <p className="text-[11px] text-amber-800/90 font-medium truncate mt-0.5">
+                                        {item.name}
+                                    </p>
+                                ) : null}
+                            </div>
                             <span
-                                className={`text-[16px] font-black shrink-0 bg-gradient-to-br ${accentGradient[c]} bg-clip-text text-transparent font-mono`}
+                                className={`text-[16px] sm:text-[17px] font-black shrink-0 bg-gradient-to-br ${accentGradient[c]} bg-clip-text text-transparent font-mono`}
                             >
                                 {formatRupees(item.price_paise)}
                             </span>
                         </div>
 
                         {displayDesc && (
-                            <p className="text-[12px] text-espresso-500 line-clamp-2 leading-relaxed font-normal">
+                            <p className="text-[11px] sm:text-[12px] text-espresso-500 line-clamp-2 leading-relaxed font-normal mt-1">
                                 {displayDesc}
                             </p>
                         )}
                     </div>
 
                     {/* Bottom Action Bar */}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-cream-100">
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-espresso-500">
-                            <span className={`w-2 h-2 rounded-full ${item.is_veg ? "bg-emerald-500" : "bg-red-500"}`} />
-                            <span>{item.is_veg ? "Veg" : "Non-Veg"}</span>
+                    <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-cream-100">
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-espresso-600">
+                                <span className={`w-2 h-2 rounded-full ${item.is_veg ? "bg-emerald-500 ring-2 ring-emerald-500/20" : "bg-red-500 ring-2 ring-red-500/20"}`} />
+                                <span>{item.is_veg ? "Veg" : "Non-Veg"}</span>
+                            </div>
+                            {hasOptions && (
+                                <span className="text-[9px] text-terracotta-600 font-extrabold tracking-wide uppercase mt-0.5">
+                                    Customisable
+                                </span>
+                            )}
                         </div>
 
                         {isOutOfStock ? (
@@ -195,32 +222,32 @@ export function MenuItemCard3D({
                             </button>
                         ) : cartQty > 0 ? (
                             <div
-                                className={`inline-flex items-center gap-1.5 p-1 rounded-xl border shadow-xs ${stepperBg[c]}`}
+                                className={`inline-flex items-center gap-1 p-1 rounded-2xl border shadow-xs ${stepperBg[c]}`}
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <button
                                     type="button"
                                     onClick={handleRemoveClick}
-                                    className="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-white hover:bg-cream-100 text-espresso-800 flex items-center justify-center font-bold shadow-xs transition active:scale-90 cursor-pointer"
+                                    className="w-8 h-8 rounded-xl bg-white hover:bg-cream-100 text-espresso-800 flex items-center justify-center font-bold shadow-xs transition active:scale-90 cursor-pointer"
                                 >
-                                    <Minus className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                                    <Minus className="w-4 h-4" />
                                 </button>
-                                <span className="w-6 sm:w-5 text-center text-sm font-black text-espresso-950 font-mono">
+                                <span className="w-7 text-center text-sm font-black text-espresso-950 font-mono">
                                     {cartQty}
                                 </span>
                                 <button
                                     type="button"
                                     onClick={handleAddClick}
-                                    className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg text-white flex items-center justify-center font-bold shadow-xs transition active:scale-90 cursor-pointer ${stepperBtnAdd[c]}`}
+                                    className={`w-8 h-8 rounded-xl text-white flex items-center justify-center font-bold shadow-xs transition active:scale-90 cursor-pointer ${stepperBtnAdd[c]}`}
                                 >
-                                    <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                                    <Plus className="w-4 h-4" />
                                 </button>
                             </div>
                         ) : (
                             <button
                                 type="button"
                                 onClick={handleAddClick}
-                                className={`inline-flex items-center gap-1.5 px-4 py-2 sm:px-3.5 sm:py-1.5 rounded-xl text-white text-xs font-extrabold shadow-sm active:scale-95 transition cursor-pointer min-h-[36px] ${addBtnColors[c]}`}
+                                className={`inline-flex items-center gap-1.5 px-4 py-2 sm:px-4 sm:py-2 rounded-2xl text-white text-xs font-extrabold shadow-sm active:scale-95 transition cursor-pointer min-h-[38px] ${addBtnColors[c]}`}
                             >
                                 <Plus className="w-3.5 h-3.5" />
                                 <span>{t("add_to_cart")}</span>

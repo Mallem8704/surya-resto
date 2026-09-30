@@ -44,6 +44,20 @@ import {
 import { MenuGridSkeleton } from "@/components/order/MenuGridSkeleton";
 import { SURYA_CATEGORIES, SURYA_MENU_ITEMS } from "@/lib/suryaMenuData";
 
+export const CATEGORY_EMOJIS: Record<number | string, string> = {
+    all: "🍽️",
+    1: "🍛", // Biryani & Pulao Specials
+    2: "🥘", // Punjabi & North Indian Curries
+    3: "🍢", // Tandoori & Kebabs
+    4: "🍗", // Non-Veg Starters & Andhra Specials
+    5: "🥗", // Veg Starters & Crispies
+    6: "🫓", // Indian Breads & Naans
+    7: "👑", // Arabic Mandi Specials
+    8: "🍜", // Chinese Rice & Noodles
+    9: "🍧", // Desserts & Sweets
+    10: "🥤", // Beverages & Lassi
+};
+
 function CustomerOrderContent() {
     const searchParams = useSearchParams();
     const { language, t } = useLanguage();
@@ -104,6 +118,7 @@ function CustomerOrderContent() {
     const [menuItems, setMenuItems] = useState<MenuItemData[]>(() => SURYA_MENU_ITEMS as any);
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all");
     const [vegFilter, setVegFilter] = useState<"all" | "veg" | "non_veg">("all");
+    const [onlyBestsellers, setOnlyBestsellers] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isLoadingMenu, setIsLoadingMenu] = useState<boolean>(false);
 
@@ -216,6 +231,10 @@ function CustomerOrderContent() {
     // Filter Menu Items
     const filteredItems = useMemo(() => {
         return menuItems.filter((item) => {
+            // Bestsellers filter
+            if (onlyBestsellers && !item.is_special && !(item as any).is_best_seller) {
+                return false;
+            }
             // Category filter
             if (selectedCategory !== "all" && item.category_id !== selectedCategory) {
                 return false;
@@ -233,7 +252,20 @@ function CustomerOrderContent() {
             }
             return true;
         });
-    }, [menuItems, selectedCategory, vegFilter, searchQuery]);
+    }, [menuItems, selectedCategory, vegFilter, searchQuery, onlyBestsellers]);
+
+    const handleSelectCategory = (catId: number | "all") => {
+        setOnlyBestsellers(false);
+        setSelectedCategory(catId);
+        if (catId !== "all") {
+            setTimeout(() => {
+                const el = document.getElementById(`category-${catId}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                }
+            }, 50);
+        }
+    };
 
     // Group filtered items by category for the 3D section view
     const groupedByCategory = useMemo(() => {
@@ -520,51 +552,58 @@ function CustomerOrderContent() {
 
     return (
         <main className="min-h-screen bg-cream-50 text-espresso-950 flex flex-col justify-between pb-32">
-            {/* Header */}
-            <header className="border-b border-cream-200 bg-white/90 backdrop-blur-md sticky top-0 z-40">
-                <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
-                    <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition min-w-0 shrink">
-                        <SuryaSunLogo size={34} className="shrink-0" />
+            {/* Header — Smartphone & Tablet Optimized */}
+            <header className="border-b border-cream-200/90 bg-white/95 backdrop-blur-md sticky top-0 z-40 shadow-xs">
+                <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2">
+                    <Link href="/" className="flex items-center gap-2 hover:opacity-95 transition min-w-0 shrink">
+                        <div className="relative shrink-0">
+                            <div className="absolute inset-0 rounded-full bg-amber-400/25 blur-xs scale-110" />
+                            <SuryaSunLogo size={34} className="relative shrink-0" />
+                        </div>
                         <div className="min-w-0">
-                            <span className="text-xs font-black uppercase tracking-wider text-amber-800 block truncate">
+                            <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-900 block truncate">
                                 {branchOutlet?.name || "Surya Restaurant"}
                             </span>
-                            <span className="text-[10px] text-espresso-500 font-medium hidden xs:block truncate">
+                            <span className="text-[10px] text-espresso-500 font-semibold hidden xs:block truncate">
                                 Opp. RTC Bus Stand, Kadiri
                             </span>
                         </div>
                     </Link>
 
                     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                        {/* Table Selector Pill */}
+                        {/* Table Indicator Pill with live pulsating green dot */}
                         <button
                             onClick={() => setShowTablePicker(true)}
-                            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full border border-terracotta-300 bg-terracotta-50 text-terracotta-800 text-[11px] sm:text-xs font-bold shadow-2xs hover:bg-terracotta-100 transition cursor-pointer"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 text-[11px] sm:text-xs font-black shadow-2xs transition active:scale-95 cursor-pointer"
+                            title="Tap to change table"
                         >
-                            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-terracotta-600 shrink-0" />
-                            <span>{t("table")} {tableLabel}</span>
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                            <span>Table {tableLabel}</span>
+                            <span className="text-[9.5px] text-emerald-700 font-medium underline decoration-dotted hidden xs:inline">Change</span>
                         </button>
 
                         {/* Call Waiter Pill */}
                         <button
                             onClick={() => setShowServiceModal(true)}
-                            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full border border-amber-400/80 bg-amber-50 hover:bg-amber-100 text-amber-950 text-[11px] sm:text-xs font-extrabold shadow-2xs transition cursor-pointer"
+                            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full border border-amber-400/90 bg-gradient-to-r from-amber-100 to-amber-50 hover:from-amber-200 hover:to-amber-100 text-amber-950 text-[11px] sm:text-xs font-black shadow-2xs transition active:scale-95 cursor-pointer"
+                            title="Call waiter or request service"
                         >
-                            <Bell className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600 animate-bounce shrink-0" />
-                            <span className="hidden sm:inline">Call Waiter</span>
-                            <span className="sm:hidden">Bell</span>
+                            <Bell className="w-3.5 h-3.5 text-amber-700 animate-bounce shrink-0" />
+                            <span className="hidden xs:inline">Waiter</span>
                         </button>
 
                         {/* Customer Session Status Pill */}
                         {isCustomerLoggedIn ? (
-                            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-amber-400/80 bg-amber-500/10 text-espresso-950 text-[11px] sm:text-xs font-bold shadow-2xs">
+                            <div className="flex items-center gap-1 px-2 py-1.5 rounded-full border border-amber-300 bg-amber-500/15 text-espresso-950 text-[11px] sm:text-xs font-bold shadow-2xs">
                                 <span className="text-xs">👤</span>
-                                <span className="max-w-[70px] sm:max-w-[110px] truncate">{customer?.name ? customer.name.split(' ')[0] : customer?.phone}</span>
+                                <span className="max-w-[65px] sm:max-w-[110px] truncate text-[11px] font-black">
+                                    {customer?.name ? customer.name.split(' ')[0] : customer?.phone}
+                                </span>
                                 <button
                                     type="button"
                                     onClick={logoutCustomer}
                                     title="Sign Out"
-                                    className="ml-0.5 text-[10px] text-terracotta-700 hover:text-terracotta-900 cursor-pointer font-bold"
+                                    className="text-[10px] text-terracotta-700 hover:text-terracotta-900 ml-0.5 font-bold cursor-pointer"
                                 >
                                     ✕
                                 </button>
@@ -573,7 +612,7 @@ function CustomerOrderContent() {
                             <button
                                 type="button"
                                 onClick={() => requireCustomerAuth()}
-                                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full border border-espresso-900 bg-espresso-900 hover:bg-espresso-800 text-amber-300 text-[11px] sm:text-xs font-bold shadow-2xs transition cursor-pointer"
+                                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full border border-espresso-900 bg-espresso-900 hover:bg-espresso-800 text-amber-300 text-[11px] sm:text-xs font-black shadow-2xs transition active:scale-95 cursor-pointer"
                             >
                                 <span>Sign In</span>
                             </button>
@@ -585,16 +624,36 @@ function CustomerOrderContent() {
             </header>
 
             {/* Menu Content */}
-            <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 w-full space-y-4">
+            <section className="max-w-5xl mx-auto px-3 sm:px-6 pt-3 sm:pt-5 w-full space-y-3.5">
+                {/* Mobile Restaurant Identity & Kadiri Reputation Strip */}
+                <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-300/60 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-extrabold text-amber-950 flex items-center gap-1 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-lg shadow-2xs">
+                            ⭐ 4.8★
+                        </span>
+                        <span className="text-espresso-800 font-bold text-[11px]">
+                            1,200+ Reviews
+                        </span>
+                        <span className="text-espresso-400 hidden xs:inline">•</span>
+                        <span className="text-espresso-600 text-[11px] hidden xs:inline">
+                            Kadiri • Pure Ghee & Halal
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] text-emerald-800 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>Kitchen Live • Fresh & Hot</span>
+                    </div>
+                </div>
+
                 {/* Free Delivery Callout Banner */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
                     <div className="flex items-center gap-2.5">
-                        <span className="w-8 h-8 rounded-xl bg-amber-500 text-black flex items-center justify-center shrink-0 shadow-xs">
+                        <span className="w-8 h-8 rounded-xl bg-amber-500 text-espresso-950 flex items-center justify-center shrink-0 shadow-xs">
                             <Truck className="w-4 h-4" />
                         </span>
                         <div>
                             <span className="font-extrabold text-espresso-950 block">
-                                Want food delivered to your home or office in Kadiri?
+                                Want food delivered to home or office in Kadiri?
                             </span>
                             <span className="text-[11px] text-espresso-600">
                                 100% Free Doorstep Delivery • 30–40 mins
@@ -603,7 +662,7 @@ function CustomerOrderContent() {
                     </div>
                     <Link
                         href={`/delivery?branch=${outletId || 1}`}
-                        className="px-3.5 py-1.5 rounded-xl bg-espresso-900 hover:bg-espresso-800 text-white font-extrabold text-[11px] shrink-0 transition flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-espresso-900 hover:bg-espresso-800 text-white font-black text-[11px] shrink-0 transition flex items-center justify-center gap-1 cursor-pointer self-start sm:self-center"
                     >
                         <span>Order Delivery</span>
                         <ArrowRight className="w-3 h-3" />
@@ -611,17 +670,25 @@ function CustomerOrderContent() {
                 </div>
 
                 {/* Search Bar & Dietary Filter */}
-                <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="flex flex-col sm:flex-row gap-2.5">
                     {/* Search Input */}
                     <div className="relative flex-1">
                         <Search className="w-4 h-4 text-espresso-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
                             type="text"
-                            placeholder={language === "en" ? "Search Biryani, Punjabi Curries, Tandoori, Starters, Naan..." : "బిర్యానీ, పంజాబీ కర్రీలు, తందూరీ, స్టార్టర్స్ వెతకండి..."}
+                            placeholder={language === "en" ? "Search Biryani, Punjabi Curries, Tandoori, Naan..." : "బిర్యానీ, పంజాబీ కర్రీలు, తందూరీ, నాన్ వెతకండి..."}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-cream-300 bg-white placeholder:text-espresso-400 text-xs sm:text-sm focus:outline-none focus:border-terracotta-500 shadow-2xs"
+                            className="w-full pl-10 pr-9 py-2.5 rounded-2xl border border-cream-300 bg-white placeholder:text-espresso-400 text-xs sm:text-sm focus:outline-none focus:border-amber-500 shadow-2xs"
                         />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-400 hover:text-espresso-700"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        )}
                     </div>
 
                     {/* Veg / Non-Veg Toggle */}
@@ -655,32 +722,69 @@ function CustomerOrderContent() {
                     </div>
                 </div>
 
-                {/* Categories Tabs */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
-                    <button
-                        onClick={() => setSelectedCategory("all")}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
-                            selectedCategory === "all"
-                                ? "bg-terracotta-500 text-white shadow-sm shadow-terracotta-500/20"
-                                : "bg-white border border-cream-300 text-espresso-800 hover:bg-cream-100"
-                        }`}
-                    >
-                        {t("all_categories")}
-                    </button>
-
-                    {categories.map((cat) => (
+                {/* ═══ STICKY CATEGORY HORIZONTAL CAROUSEL ═══ */}
+                <div className="sticky top-[49px] sm:top-[55px] z-30 bg-cream-50/95 backdrop-blur-md -mx-3 sm:-mx-6 px-3 sm:px-6 py-2.5 border-b border-cream-200/80 shadow-2xs">
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth">
                         <button
-                            key={cat.id}
-                            onClick={() => setSelectedCategory(cat.id)}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
-                                selectedCategory === cat.id
-                                    ? "bg-terracotta-500 text-white shadow-sm shadow-terracotta-500/20"
-                                    : "bg-white border border-cream-300 text-espresso-800 hover:bg-cream-100"
+                            onClick={() => handleSelectCategory("all")}
+                            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                                selectedCategory === "all" && !onlyBestsellers
+                                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/25 scale-[1.02]"
+                                    : "bg-white border border-cream-300/90 text-espresso-800 hover:bg-cream-100 shadow-2xs"
                             }`}
                         >
-                            {language === "te" && cat.name_te ? cat.name_te : cat.name}
+                            <span>🍽️</span>
+                            <span>{t("all_categories")}</span>
+                            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                                selectedCategory === "all" && !onlyBestsellers ? "bg-white/20 text-white" : "bg-cream-100 text-espresso-600"
+                            }`}>
+                                {menuItems.length}
+                            </span>
                         </button>
-                    ))}
+
+                        <button
+                            onClick={() => {
+                                setOnlyBestsellers(!onlyBestsellers);
+                                if (!onlyBestsellers) setSelectedCategory("all");
+                            }}
+                            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                                onlyBestsellers
+                                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md shadow-red-500/25 scale-[1.02]"
+                                    : "bg-white border border-amber-300 text-amber-900 hover:bg-amber-50 shadow-2xs"
+                            }`}
+                        >
+                            <span>🔥</span>
+                            <span>Bestsellers</span>
+                        </button>
+
+                        {categories.map((cat) => {
+                            const count = menuItems.filter((i) => i.category_id === cat.id).length;
+                            const isSelected = selectedCategory === cat.id && !onlyBestsellers;
+                            const emoji = CATEGORY_EMOJIS[cat.id] || "🍽️";
+
+                            return (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => handleSelectCategory(cat.id)}
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                                        isSelected
+                                            ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/25 scale-[1.02]"
+                                            : "bg-white border border-cream-300/90 text-espresso-800 hover:bg-cream-100 shadow-2xs"
+                                    }`}
+                                >
+                                    <span>{emoji}</span>
+                                    <span>{language === "te" && cat.name_te ? cat.name_te : cat.name}</span>
+                                    {count > 0 && (
+                                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                                            isSelected ? "bg-white/20 text-white" : "bg-cream-100 text-espresso-600"
+                                        }`}>
+                                            {count}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 {/* Menu Items */}
@@ -793,35 +897,47 @@ function CustomerOrderContent() {
                 onAddToCart={handleCustomizedAddToCart}
             />
 
-            {/* Table Selector Modal */}
+            {/* Table Selector Modal — Mobile Bottom Sheet */}
             {showTablePicker && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-espresso-950/60 backdrop-blur-xs animate-in fade-in">
-                    <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-cream-200">
-                        <div className="flex items-center justify-between mb-4">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-espresso-950/60 backdrop-blur-xs animate-in fade-in">
+                    <div
+                        className="fixed inset-0"
+                        onClick={() => setShowTablePicker(false)}
+                    />
+                    <div className="relative bg-white rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 max-w-sm sm:max-w-md w-full shadow-2xl border border-cream-200 z-10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+                        {/* Mobile Drag Indicator */}
+                        <div className="w-12 h-1.5 bg-cream-300 rounded-full mx-auto mb-3 sm:hidden" />
+
+                        <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
-                                <QrCode className="w-5 h-5 text-terracotta-500" />
-                                <h3 className="text-base font-bold text-espresso-950">Select Your Table</h3>
+                                <span className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                                    <QrCode className="w-5 h-5" />
+                                </span>
+                                <div>
+                                    <h3 className="text-base font-black text-espresso-950">Select Your Table</h3>
+                                    <p className="text-[11px] text-espresso-500 font-medium">Pick your dining table at Kadiri</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setShowTablePicker(false)}
-                                className="p-1 rounded-lg text-espresso-400 hover:text-espresso-800 hover:bg-cream-100 transition cursor-pointer"
+                                className="p-1.5 rounded-full text-espresso-400 hover:text-espresso-800 hover:bg-cream-100 transition cursor-pointer"
                             >
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
 
                         <p className="text-xs text-espresso-600 mb-4">
-                            Each physical table in the cafe has a unique QR code. Pick your table number below:
+                            Your kitchen tickets and waiter service requests will be linked to this table:
                         </p>
 
-                        <div className="grid grid-cols-4 gap-2.5 mb-6">
+                        <div className="grid grid-cols-4 gap-2.5 mb-6 max-h-60 overflow-y-auto pr-1">
                             {availableTables.map((t) => (
                                 <button
                                     key={t.id}
                                     onClick={() => handleSelectTable(t)}
-                                    className={`py-3 rounded-2xl border text-sm font-extrabold transition cursor-pointer ${
+                                    className={`py-3.5 rounded-2xl border text-sm font-black transition cursor-pointer active:scale-95 ${
                                         tableLabel === t.label
-                                            ? "border-terracotta-500 bg-terracotta-500 text-white shadow-md shadow-terracotta-500/30"
+                                            ? "border-amber-500 bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/30 scale-102"
                                             : "border-cream-300 bg-cream-50 hover:bg-cream-100 text-espresso-900"
                                     }`}
                                 >
@@ -833,7 +949,7 @@ function CustomerOrderContent() {
                         <Button
                             variant="outline"
                             size="sm"
-                            className="w-full"
+                            className="w-full rounded-xl py-2.5 text-xs font-bold"
                             onClick={() => setShowTablePicker(false)}
                         >
                             Cancel
@@ -842,74 +958,81 @@ function CustomerOrderContent() {
                 </div>
             )}
 
-            {/* Call Waiter / Service Bell Modal */}
+            {/* Call Waiter / Service Bell Modal — Mobile Bottom Sheet */}
             {showServiceModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-espresso-950/60 backdrop-blur-xs animate-in fade-in">
-                    <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-cream-200">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-espresso-950/60 backdrop-blur-xs animate-in fade-in">
+                    <div
+                        className="fixed inset-0"
+                        onClick={() => setShowServiceModal(false)}
+                    />
+                    <div className="relative bg-white rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 max-w-sm sm:max-w-md w-full shadow-2xl border border-cream-200 z-10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+                        {/* Mobile Drag Indicator */}
+                        <div className="w-12 h-1.5 bg-cream-300 rounded-full mx-auto mb-3 sm:hidden" />
+
                         <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <span className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
-                                    <Bell className="w-4 h-4" />
+                            <div className="flex items-center gap-2.5">
+                                <span className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-600 flex items-center justify-center shadow-xs">
+                                    <Bell className="w-5 h-5 text-amber-600 animate-bounce" />
                                 </span>
                                 <div>
                                     <h3 className="text-base font-black text-espresso-950">Table {tableLabel} Assistance</h3>
-                                    <p className="text-[11px] text-espresso-500 font-medium">How can our staff assist you?</p>
+                                    <p className="text-[11px] text-espresso-500 font-medium">Instant notification to floor captain</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setShowServiceModal(false)}
-                                className="p-1 rounded-lg text-espresso-400 hover:text-espresso-800 hover:bg-cream-100 transition cursor-pointer"
+                                className="p-1.5 rounded-full text-espresso-400 hover:text-espresso-800 hover:bg-cream-100 transition cursor-pointer"
                             >
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2.5 mb-5">
+                        <div className="grid grid-cols-2 gap-3 mb-5">
                             <button
                                 disabled={isCallingWaiter}
                                 onClick={() => handleCallService("waiter")}
-                                className="p-3.5 rounded-2xl border border-cream-300 bg-cream-50 hover:border-terracotta-400 hover:bg-cream-100 transition flex flex-col items-center text-center gap-1.5 cursor-pointer"
+                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-amber-400 hover:bg-amber-50/50 active:scale-98 transition flex flex-col items-center text-center gap-1.5 cursor-pointer shadow-2xs group"
                             >
-                                <span className="text-2xl">🛎️</span>
+                                <span className="text-3xl group-hover:scale-110 transition-transform">🛎️</span>
                                 <span className="text-xs font-black text-espresso-900">Call Waiter</span>
-                                <span className="text-[10px] text-espresso-500 font-medium">Order assistance</span>
+                                <span className="text-[10px] text-espresso-500 font-medium">Order help & questions</span>
                             </button>
 
                             <button
                                 disabled={isCallingWaiter}
                                 onClick={() => handleCallService("water")}
-                                className="p-3.5 rounded-2xl border border-cream-300 bg-cream-50 hover:border-cyan-400 hover:bg-cyan-50/50 transition flex flex-col items-center text-center gap-1.5 cursor-pointer"
+                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-cyan-400 hover:bg-cyan-50/50 active:scale-98 transition flex flex-col items-center text-center gap-1.5 cursor-pointer shadow-2xs group"
                             >
-                                <span className="text-2xl">💧</span>
+                                <span className="text-3xl group-hover:scale-110 transition-transform">💧</span>
                                 <span className="text-xs font-black text-espresso-900">Drinking Water</span>
-                                <span className="text-[10px] text-espresso-500 font-medium">Refill water</span>
+                                <span className="text-[10px] text-espresso-500 font-medium">Fresh water refill</span>
                             </button>
 
                             <button
                                 disabled={isCallingWaiter}
                                 onClick={() => handleCallService("bill")}
-                                className="p-3.5 rounded-2xl border border-cream-300 bg-cream-50 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center text-center gap-1.5 cursor-pointer"
+                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-emerald-400 hover:bg-emerald-50/50 active:scale-98 transition flex flex-col items-center text-center gap-1.5 cursor-pointer shadow-2xs group"
                             >
-                                <span className="text-2xl">🧾</span>
+                                <span className="text-3xl group-hover:scale-110 transition-transform">🧾</span>
                                 <span className="text-xs font-black text-espresso-900">Request Bill</span>
-                                <span className="text-[10px] text-espresso-500 font-medium">Pay at table</span>
+                                <span className="text-[10px] text-espresso-500 font-medium">Pay at table / UPI</span>
                             </button>
 
                             <button
                                 disabled={isCallingWaiter}
                                 onClick={() => handleCallService("clean")}
-                                className="p-3.5 rounded-2xl border border-cream-300 bg-cream-50 hover:border-amber-400 hover:bg-amber-50/50 transition flex flex-col items-center text-center gap-1.5 cursor-pointer"
+                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-amber-400 hover:bg-amber-50/50 active:scale-98 transition flex flex-col items-center text-center gap-1.5 cursor-pointer shadow-2xs group"
                             >
-                                <span className="text-2xl">🧹</span>
+                                <span className="text-3xl group-hover:scale-110 transition-transform">🧹</span>
                                 <span className="text-xs font-black text-espresso-900">Clean Table</span>
-                                <span className="text-[10px] text-espresso-500 font-medium">Clear table</span>
+                                <span className="text-[10px] text-espresso-500 font-medium">Clear used plates</span>
                             </button>
                         </div>
 
                         <Button
                             variant="outline"
                             size="sm"
-                            className="w-full"
+                            className="w-full rounded-xl py-2.5 text-xs font-bold"
                             onClick={() => setShowServiceModal(false)}
                         >
                             Cancel

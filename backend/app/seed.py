@@ -64,25 +64,39 @@ def seed_database(clear_existing: bool = True):
         db.flush()
         print(f"[OK] Outlet created: {outlet.name} (ID: {outlet.id})")
 
-        # USERS
+        # USERS — Official Production Credentials + Test Suite Credentials
         db.add_all([
             User(
                 outlet_id=outlet.id,
-                name="Surya Restaurant Manager",
+                name="Surya Managing Director",
+                email="owner@suryafamilyrestaurant.in",
+                password_hash=get_password_hash("surya_admin_2026"),
+                role="owner"
+            ),
+            User(
+                outlet_id=outlet.id,
+                name="Surya Cashier & Floor Staff",
+                email="staff@suryafamilyrestaurant.in",
+                password_hash=get_password_hash("surya_staff_2026"),
+                role="staff"
+            ),
+            User(
+                outlet_id=outlet.id,
+                name="Surya Restaurant Manager (Dev)",
                 email="owner@suryarestaurant.com",
                 password_hash=get_password_hash("admin123"),
                 role="owner"
             ),
             User(
                 outlet_id=outlet.id,
-                name="Surya Floor Staff",
+                name="Surya Floor Staff (Dev)",
                 email="staff@suryarestaurant.com",
                 password_hash=get_password_hash("staff123"),
                 role="staff"
             ),
         ])
         db.flush()
-        print("[OK] Users created: owner@suryarestaurant.com & staff@suryarestaurant.com")
+        print("[OK] Users created: owner@suryafamilyrestaurant.in, staff@suryafamilyrestaurant.in & dev accounts")
 
         # TABLES: T1 to T12
         for i in range(1, 13):

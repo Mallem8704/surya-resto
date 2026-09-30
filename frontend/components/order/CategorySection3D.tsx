@@ -28,107 +28,99 @@ interface CategoryTheme {
 }
 
 const CATEGORY_THEMES: Record<string, CategoryTheme> = {
-    // Tiffin & Breakfast
+    // 1: Biryani & Pulao Specials
     "1": {
-        color: "amber",
-        gradient: "from-amber-400 via-amber-500 to-amber-600",
-        glowColor: "bg-amber-400/20",
-        icon: <Coffee className="w-6 h-6" />,
-        bgPattern: "from-amber-50 to-saffron-50",
+        color: "saffron",
+        gradient: "from-amber-500 via-orange-500 to-amber-600",
+        glowColor: "bg-amber-400/25",
+        icon: <Flame className="w-6 h-6" />,
+        bgPattern: "from-amber-50 to-orange-50",
     },
-    // Dosa & Uttapam
+    // 2: Punjabi & North Indian Curries
     "2": {
         color: "terracotta",
-        gradient: "from-terracotta-400 via-terracotta-500 to-terracotta-600",
-        glowColor: "bg-terracotta-400/20",
-        icon: <Utensils className="w-6 h-6" />,
-        bgPattern: "from-terracotta-50 to-cream-50",
-    },
-    // Snacks & Sweets
-    "3": {
-        color: "saffron",
-        gradient: "from-saffron-400 via-saffron-500 to-saffron-600",
-        glowColor: "bg-saffron-400/20",
-        icon: <Sparkles className="w-6 h-6" />,
-        bgPattern: "from-saffron-50 to-amber-50",
-    },
-    // Soups & Salads
-    "4": {
-        color: "cyan",
-        gradient: "from-cyan-400 via-cyan-500 to-cyan-600",
-        glowColor: "bg-cyan-400/20",
-        icon: <Soup className="w-6 h-6" />,
-        bgPattern: "from-cyan-50 to-blue-50",
-    },
-    // Veg Starters
-    "5": {
-        color: "emerald",
-        gradient: "from-emerald-400 via-emerald-500 to-emerald-600",
-        glowColor: "bg-emerald-400/20",
-        icon: <Salad className="w-6 h-6" />,
-        bgPattern: "from-emerald-50 to-green-50",
-    },
-    // Non-Veg Starters
-    "6": {
-        color: "red",
-        gradient: "from-red-400 via-red-500 to-red-600",
-        glowColor: "bg-red-400/20",
-        icon: <Flame className="w-6 h-6" />,
-        bgPattern: "from-red-50 to-orange-50",
-    },
-    // Indian Breads
-    "7": {
-        color: "terracotta",
-        gradient: "from-terracotta-400 via-chai-500 to-chai-600",
-        glowColor: "bg-terracotta-400/20",
-        icon: <CircleDot className="w-6 h-6" />,
-        bgPattern: "from-cream-100 to-cream-50",
-    },
-    // Biryani & Pulavs
-    "8": {
-        color: "saffron",
-        gradient: "from-saffron-400 via-saffron-500 to-amber-600",
-        glowColor: "bg-saffron-400/20",
-        icon: <Flame className="w-6 h-6" />,
-        bgPattern: "from-saffron-50 to-amber-50",
-    },
-    // Curries & Main Course
-    "9": {
-        color: "terracotta",
-        gradient: "from-terracotta-400 via-terracotta-500 to-terracotta-700",
-        glowColor: "bg-terracotta-400/20",
+        gradient: "from-amber-600 via-terracotta-500 to-orange-700",
+        glowColor: "bg-terracotta-400/25",
         icon: <UtensilsCrossed className="w-6 h-6" />,
         bgPattern: "from-terracotta-50 to-cream-50",
     },
-    // Arabian Mandi & Al-Faham
-    "10": {
+    // 3: Tandoori & Kebabs
+    "3": {
+        color: "red",
+        gradient: "from-orange-500 via-red-500 to-red-600",
+        glowColor: "bg-red-400/25",
+        icon: <Flame className="w-6 h-6" />,
+        bgPattern: "from-red-50 to-orange-50",
+    },
+    // 4: Non-Veg Starters & Andhra Specials
+    "4": {
+        color: "red",
+        gradient: "from-red-500 via-rose-600 to-amber-700",
+        glowColor: "bg-red-400/25",
+        icon: <Flame className="w-6 h-6" />,
+        bgPattern: "from-rose-50 to-red-50",
+    },
+    // 5: Veg Starters & Crispies
+    "5": {
+        color: "emerald",
+        gradient: "from-emerald-400 via-emerald-500 to-green-600",
+        glowColor: "bg-emerald-400/25",
+        icon: <Salad className="w-6 h-6" />,
+        bgPattern: "from-emerald-50 to-green-50",
+    },
+    // 6: Indian Breads & Naans
+    "6": {
         color: "amber",
-        gradient: "from-amber-500 via-saffron-500 to-amber-700",
-        glowColor: "bg-amber-400/20",
+        gradient: "from-amber-400 via-yellow-500 to-amber-600",
+        glowColor: "bg-amber-400/25",
+        icon: <CircleDot className="w-6 h-6" />,
+        bgPattern: "from-cream-100 to-amber-50",
+    },
+    // 7: Arabic Mandi Specials
+    "7": {
+        color: "amber",
+        gradient: "from-amber-500 via-yellow-500 to-amber-700",
+        glowColor: "bg-amber-400/30",
         icon: <Crown className="w-6 h-6" />,
         bgPattern: "from-amber-50 to-saffron-50",
     },
-    // Beverages & Desserts
-    "11": {
+    // 8: Chinese Rice & Noodles
+    "8": {
+        color: "orange",
+        gradient: "from-orange-400 via-amber-500 to-red-500",
+        glowColor: "bg-orange-400/25",
+        icon: <Soup className="w-6 h-6" />,
+        bgPattern: "from-orange-50 to-amber-50",
+    },
+    // 9: Desserts & Sweets
+    "9": {
         color: "purple",
-        gradient: "from-purple-400 via-purple-500 to-purple-600",
-        glowColor: "bg-purple-400/20",
-        icon: <Wine className="w-6 h-6" />,
-        bgPattern: "from-purple-50 to-pink-50",
+        gradient: "from-pink-400 via-rose-500 to-purple-600",
+        glowColor: "bg-pink-400/25",
+        icon: <Sparkles className="w-6 h-6" />,
+        bgPattern: "from-pink-50 to-purple-50",
+    },
+    // 10: Beverages & Lassi
+    "10": {
+        color: "cyan",
+        gradient: "from-cyan-400 via-teal-500 to-blue-600",
+        glowColor: "bg-cyan-400/25",
+        icon: <Coffee className="w-6 h-6" />,
+        bgPattern: "from-cyan-50 to-teal-50",
     },
 };
 
 const DEFAULT_THEME: CategoryTheme = {
     color: "terracotta",
-    gradient: "from-terracotta-400 via-terracotta-500 to-terracotta-600",
-    glowColor: "bg-terracotta-400/20",
+    gradient: "from-amber-500 via-orange-500 to-amber-600",
+    glowColor: "bg-amber-400/20",
     icon: <Utensils className="w-6 h-6" />,
     bgPattern: "from-cream-100 to-cream-50",
 };
 
 /* ─────────── Focus Categories for 3D ─────────── */
 
-export const FOCUS_CATEGORY_IDS = [1, 5, 6, 8, 9, 10, 11];
+export const FOCUS_CATEGORY_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 /* ─────────── Component ─────────── */
 
@@ -161,7 +153,7 @@ export function CategorySection3D({
     if (items.length === 0) return null;
 
     return (
-        <section className="mb-12">
+        <section id={`category-${categoryId}`} className="mb-10 sm:mb-12 scroll-mt-28">
             {/* Category Header */}
             <div className="mb-6">
                 <div className="flex items-center gap-3">

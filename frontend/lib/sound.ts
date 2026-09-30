@@ -225,6 +225,13 @@ class SoundManager {
     }
 
     /**
+     * Alias for playAddToCartPop
+     */
+    playAddToCart() {
+        this.playAddToCartPop();
+    }
+
+    /**
      * Play an energetic celebratory chime when an order is placed.
      */
     playOrderPlacedSuccess() {

@@ -254,7 +254,7 @@ export function DishCustomizerModal({
                             <div className="flex items-center justify-between mb-3">
                                 <label className="text-xs font-black uppercase tracking-wider text-espresso-900 flex items-center gap-1.5">
                                     <ChefHat className="w-3.5 h-3.5 text-terracotta-600" />
-                                    {language === "te" ? "అదనపు సైడ్స్ & యాడ్-ఆన్స్" : "2. Popular Arabian Add-ons"}
+                                    {language === "te" ? "అదనపు సైడ్స్ & యాడ్-ఆన్స్" : "2. Delicious Add-ons & Extra Sides"}
                                 </label>
                                 <span className="text-[11px] text-espresso-500 font-medium">
                                     {language === "te" ? "ఐచ్ఛికం" : "Optional"}
