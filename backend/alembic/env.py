@@ -30,9 +30,11 @@ target_metadata = Base.metadata
 # Read DATABASE_URL from environment
 database_url = os.getenv("DATABASE_URL")
 if database_url:
-    # Fix common Heroku/Render/Railway 'postgres://' URI prefix to 'postgresql://'
+    # Fix common Heroku/Render/Railway 'postgres://' or 'postgresql://' URI prefix to explicit psycopg2 driver
     if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
+        database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif database_url.startswith("postgresql://") and not database_url.startswith("postgresql+"):
+        database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
     config.set_main_option("sqlalchemy.url", database_url)
 elif not config.get_main_option("sqlalchemy.url"):
     config.set_main_option("sqlalchemy.url", "sqlite:///./surya_restaurant.db")
