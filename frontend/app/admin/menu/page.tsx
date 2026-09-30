@@ -18,6 +18,7 @@ import {
     AlertCircle,
     Star,
     Layers,
+    Package,
 } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -55,6 +56,14 @@ export default function AdminMenuManagementPage() {
     const [showVariantsModal, setShowVariantsModal] = useState<boolean>(false);
     const [selectedVariantItem, setSelectedVariantItem] = useState<any | null>(null);
     const [newPriceRupees, setNewPriceRupees] = useState<string>("");
+
+    // Quick Stock Modal
+    const [showStockModal, setShowStockModal] = useState(false);
+    const [selectedStockItem, setSelectedStockItem] = useState<any | null>(null);
+    const [stockChangeQty, setStockChangeQty] = useState<string>("50");
+    const [stockReason, setStockReason] = useState<string>("restock");
+    const [stockNotes, setStockNotes] = useState<string>("");
+    const [isSavingStock, setIsSavingStock] = useState(false);
 
     // Form States
     const [formData, setFormData] = useState<any>({
@@ -208,6 +217,42 @@ export default function AdminMenuManagementPage() {
             toast.success(`Deleted ${item.name}`);
         } catch (err: any) {
             toast.error(err.message || "Failed to delete item");
+        }
+    };
+
+    // Quick Stock Adjustment Modal Handlers
+    const handleOpenStockModal = (item: any, defaultReason = "restock") => {
+        setSelectedStockItem(item);
+        setStockReason(defaultReason);
+        setStockChangeQty(defaultReason === "restock" ? "50" : "5");
+        setStockNotes("");
+        setShowStockModal(true);
+    };
+
+    const handleSaveStock = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedStockItem || !stockChangeQty) return;
+        const qtyNum = parseInt(stockChangeQty, 10);
+        if (isNaN(qtyNum) || qtyNum === 0) {
+            toast.error("Please enter a valid non-zero quantity");
+            return;
+        }
+        const delta = stockReason === "wastage" ? -Math.abs(qtyNum) : Math.abs(qtyNum);
+        setIsSavingStock(true);
+        try {
+            await api.adjustStockManual({
+                item_id: selectedStockItem.id,
+                change_qty: delta,
+                reason: stockReason,
+                notes: stockNotes.trim() || undefined,
+            });
+            toast.success(`Stock updated for ${selectedStockItem.name}: ${delta > 0 ? `+${delta}` : delta} units`);
+            setShowStockModal(false);
+            fetchData();
+        } catch (err: any) {
+            toast.error(err.message || "Failed to adjust stock");
+        } finally {
+            setIsSavingStock(false);
         }
     };
 
@@ -447,16 +492,23 @@ export default function AdminMenuManagementPage() {
                                             {/* Stock */}
                                             <td className="py-3.5 px-4">
                                                 {item.track_stock ? (
-                                                    <StockBadge
-                                                        status={
-                                                            item.stock_qty <= 0
-                                                                ? "out_of_stock"
-                                                                : item.stock_qty <= item.low_stock_threshold
-                                                                ? "low_stock"
-                                                                : "in_stock"
-                                                        }
-                                                        qty={item.stock_qty}
-                                                    />
+                                                    <button
+                                                        onClick={() => handleOpenStockModal(item)}
+                                                        className="cursor-pointer group flex items-center gap-1.5 transition text-left"
+                                                        title="Click to adjust stock"
+                                                    >
+                                                        <StockBadge
+                                                            status={
+                                                                item.stock_qty <= 0
+                                                                    ? "out_of_stock"
+                                                                    : item.stock_qty <= item.low_stock_threshold
+                                                                    ? "low_stock"
+                                                                    : "in_stock"
+                                                            }
+                                                            qty={item.stock_qty}
+                                                        />
+                                                        <Package className="w-3.5 h-3.5 text-espresso-400 group-hover:text-terracotta-600 transition" />
+                                                    </button>
                                                 ) : (
                                                     <span className="text-[11px] text-espresso-400 font-semibold">Untracked</span>
                                                 )}
@@ -768,9 +820,96 @@ export default function AdminMenuManagementPage() {
                             setShowVariantsModal(false);
                             setSelectedVariantItem(null);
                         }}
-                        item={selectedVariantItem}
+                        item={items.find((i) => i.id === selectedVariantItem?.id) || selectedVariantItem}
                         onItemUpdated={fetchData}
                     />
+                )}
+
+                {/* QUICK STOCK ADJUSTMENT MODAL */}
+                {showStockModal && selectedStockItem && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-espresso-950/60 backdrop-blur-xs animate-in fade-in">
+                        <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-cream-300 space-y-4">
+                            <div className="flex items-center justify-between pb-2 border-b border-cream-200">
+                                <h3 className="text-base font-bold text-espresso-950">Quick Stock Adjustment</h3>
+                                <button
+                                    onClick={() => setShowStockModal(false)}
+                                    className="p-1 rounded-lg text-espresso-400 hover:text-espresso-800 hover:bg-cream-100 transition cursor-pointer"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <div className="p-3 bg-cream-50 rounded-2xl border border-cream-200 text-xs">
+                                <div className="text-espresso-500 font-semibold">Target Item:</div>
+                                <div className="text-sm font-black text-espresso-950">{selectedStockItem.name}</div>
+                                <div className="text-[11px] text-espresso-600 mt-1">
+                                    Current Stock: <strong>{selectedStockItem.stock_qty} units</strong>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleSaveStock} className="space-y-3.5 text-xs">
+                                <div>
+                                    <label className="block font-bold text-espresso-700 mb-1">Reason / Action</label>
+                                    <select
+                                        value={stockReason}
+                                        onChange={(e) => setStockReason(e.target.value)}
+                                        className="w-full p-2.5 rounded-xl border border-cream-300 bg-white font-bold"
+                                    >
+                                        <option value="restock">Restock (Add to Stock)</option>
+                                        <option value="wastage">Wastage / Spoilage (Deduct)</option>
+                                        <option value="adjustment">Inventory Count Adjustment</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block font-bold text-espresso-700 mb-1">
+                                        Quantity to {stockReason === "wastage" ? "Deduct" : "Add"}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        required
+                                        value={stockChangeQty}
+                                        onChange={(e) => setStockChangeQty(e.target.value)}
+                                        placeholder="e.g. 50"
+                                        className="w-full p-2.5 rounded-xl border border-cream-300 text-sm font-extrabold text-espresso-950"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block font-bold text-espresso-700 mb-1">Notes (Optional)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Fresh batch delivery"
+                                        value={stockNotes}
+                                        onChange={(e) => setStockNotes(e.target.value)}
+                                        className="w-full p-2.5 rounded-xl border border-cream-300 bg-white"
+                                    />
+                                </div>
+
+                                <div className="flex items-center gap-2 pt-2 border-t border-cream-200">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex-1"
+                                        onClick={() => setShowStockModal(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        size="sm"
+                                        className="flex-1"
+                                        isLoading={isSavingStock}
+                                    >
+                                        Confirm Stock
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

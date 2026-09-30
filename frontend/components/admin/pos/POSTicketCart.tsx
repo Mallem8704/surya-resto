@@ -16,6 +16,8 @@ import {
     CheckCircle2,
     ChefHat,
     Sparkles,
+    Flame,
+    X,
 } from "lucide-react";
 import { formatRupees } from "@/lib/formatters";
 
@@ -349,17 +351,17 @@ export function POSTicketCart({
                         disabled={isSubmitting || cartItems.length === 0}
                         className="w-full py-2.5 rounded-xl bg-[#2A1E14] hover:bg-[#38281B] border border-[#D4AF37]/50 text-[#D4AF37] font-serif font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer shadow"
                     >
-                        <ChefHat className="w-4 h-4" />
-                        <span>🔥 Send Kitchen KOT [F9]</span>
+                        <Flame className="w-4 h-4 text-amber-400" />
+                        <span>Send Kitchen KOT [F9]</span>
                     </button>
 
                     {/* Settlement Buttons */}
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-4 gap-1.5">
                         <button
                             type="button"
                             onClick={onSettleCash}
                             disabled={isSubmitting || grandTotalPaise === 0}
-                            className="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
+                            className="py-2.5 px-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
                         >
                             <div className="flex items-center gap-1">
                                 <Banknote className="w-3.5 h-3.5" />
@@ -372,24 +374,37 @@ export function POSTicketCart({
                             type="button"
                             onClick={onSettleUPI}
                             disabled={isSubmitting || grandTotalPaise === 0}
-                            className="py-2.5 px-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
+                            className="py-2.5 px-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
                         >
                             <div className="flex items-center gap-1">
                                 <QrCode className="w-3.5 h-3.5" />
-                                <span>UPI QR</span>
+                                <span>UPI</span>
                             </div>
                             <span className="text-[9px] opacity-75 font-mono">[F11]</span>
                         </button>
 
                         <button
                             type="button"
+                            onClick={onSettleCard}
+                            disabled={isSubmitting || grandTotalPaise === 0}
+                            className="py-2.5 px-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
+                        >
+                            <div className="flex items-center gap-1">
+                                <CreditCard className="w-3.5 h-3.5" />
+                                <span>Card</span>
+                            </div>
+                            <span className="text-[9px] opacity-75 font-mono">[Card]</span>
+                        </button>
+
+                        <button
+                            type="button"
                             onClick={onPrintBillEstimate}
                             disabled={isSubmitting || totalSubtotalPaise === 0}
-                            className="py-2.5 px-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
+                            className="py-2.5 px-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
                         >
                             <div className="flex items-center gap-1">
                                 <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
-                                <span>Bill Print</span>
+                                <span>Print</span>
                             </div>
                             <span className="text-[9px] opacity-75 font-mono">[F12]</span>
                         </button>
@@ -403,7 +418,9 @@ export function POSTicketCart({
                     <div className="w-full max-w-xs bg-[#171310] border border-[#D4AF37]/40 rounded-3xl p-5 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150">
                         <div className="flex items-center justify-between border-b border-white/10 pb-2">
                             <h3 className="font-serif font-black text-sm text-white">Custom Discount</h3>
-                            <button onClick={() => setDiscountModalOpen(false)} className="text-white/60 hover:text-white text-xs">✕</button>
+                            <button onClick={() => setDiscountModalOpen(false)} className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition cursor-pointer">
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
 
                         <div className="flex rounded-xl bg-black/50 p-1 border border-white/10">

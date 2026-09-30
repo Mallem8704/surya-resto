@@ -29,7 +29,7 @@ from app.routers.outlets import get_effective_outlet_id
 router = APIRouter(prefix="", tags=["Tables & QR"])
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-VALID_TABLE_STATUSES = {"free", "occupied", "reserved"}
+VALID_TABLE_STATUSES = {"free", "available", "occupied", "reserved", "cleaning"}
 
 
 # ==========================================

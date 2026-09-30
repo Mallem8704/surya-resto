@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { soundManager } from "@/lib/sound";
-import { Volume2, VolumeX, CheckCircle2, BellRing, Sparkles } from "lucide-react";
+import { Volume2, CheckCircle2, BellRing, X } from "lucide-react";
 
 interface AudioUnlockBannerProps {
     variant?: "banner" | "pill" | "compact";
@@ -13,7 +13,7 @@ interface AudioUnlockBannerProps {
 /**
  * Audio Autoplay Unlock Indicator / Banner for Kitchen Wall-Mounted Tablets and Cashier Terminals.
  * Browsers block Web Audio API by default until the first touch or click.
- * Displays '🔔 Tap to enable Kitchen Order Chime' until unlocked, and marks it active once tapped.
+ * Displays 'Tap to enable Kitchen Order Chime' until unlocked, and marks it active once tapped.
  */
 export function AudioUnlockBanner({
     variant = "banner",
@@ -70,13 +70,13 @@ export function AudioUnlockBanner({
             >
                 {isUnlocked ? (
                     <>
-                        <Volume2 className="w-4 h-4 text-emerald-400" />
-                        <span>🔔 Kitchen Order Chime Active</span>
+                        <Volume2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span>Kitchen Order Chime Active</span>
                     </>
                 ) : (
                     <>
-                        <BellRing className="w-4 h-4 text-amber-400 animate-bounce" />
-                        <span>🔔 Tap to enable Kitchen Order Chime</span>
+                        <BellRing className="w-4 h-4 text-amber-400 animate-bounce shrink-0" />
+                        <span>Tap to enable Kitchen Order Chime</span>
                     </>
                 )}
             </button>
@@ -96,12 +96,12 @@ export function AudioUnlockBanner({
                         className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-saffron-500 to-amber-600 text-espresso-950 font-black text-xs sm:text-sm shadow-2xl border-2 border-amber-300/80 animate-pulse hover:scale-105 active:scale-95 transition-all cursor-pointer"
                     >
                         <BellRing className="w-4 h-4 animate-bounce shrink-0" />
-                        <span>🔔 Tap to enable Kitchen Order Chime</span>
+                        <span>Tap to enable Kitchen Order Chime</span>
                     </button>
                 ) : (
                     <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-lg backdrop-blur-md">
                         <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>🔔 Kitchen Order Chime Active</span>
+                        <span>Kitchen Order Chime Active</span>
                         <button
                             type="button"
                             onClick={() => soundManager.playNewOrderChime()}
@@ -140,7 +140,7 @@ export function AudioUnlockBanner({
                         </div>
                         <div>
                             <span className="font-black text-espresso-950 text-xs sm:text-sm tracking-tight">
-                                🔔 Tap to enable Kitchen Order Chime
+                                Tap to enable Kitchen Order Chime
                             </span>
                             <span className="hidden md:inline ml-2 text-xs font-medium text-espresso-900/90">
                                 (Tablets block audio alerts by default until the first touch)
@@ -152,7 +152,7 @@ export function AudioUnlockBanner({
                         <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                         <div>
                             <span className="font-bold text-white text-xs sm:text-sm">
-                                🔔 Kitchen Order Chime Active
+                                Kitchen Order Chime Active
                             </span>
                             <span className="hidden sm:inline ml-2 text-xs text-emerald-300/80">
                                 • Wall tablet audio engine running. Live chime verified.
@@ -184,10 +184,10 @@ export function AudioUnlockBanner({
                         <button
                             type="button"
                             onClick={() => setIsDismissed(true)}
-                            className="text-xs text-emerald-400/70 hover:text-emerald-200 px-2 py-1 transition cursor-pointer"
+                            className="text-xs text-emerald-400/70 hover:text-emerald-200 p-1 rounded hover:bg-emerald-900/50 transition cursor-pointer flex items-center justify-center"
                             title="Dismiss notification"
                         >
-                            ✕
+                            <X className="w-3.5 h-3.5" />
                         </button>
                     </>
                 )}

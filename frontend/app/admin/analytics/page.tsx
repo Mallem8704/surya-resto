@@ -30,6 +30,8 @@ import {
     AlertTriangle,
     Shield,
     Store,
+    Building2,
+    Sparkles,
     ChevronRight,
 } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -179,7 +181,7 @@ export default function AdminAnalyticsDashboardPage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success("📥 CSV Report downloaded successfully");
+        toast.success("CSV Report downloaded successfully");
     };
 
     // WhatsApp Business Summary Dispatch
@@ -187,7 +189,7 @@ export default function AdminAnalyticsDashboardPage() {
         try {
             const report = await api.getEODReport(undefined, selectedBranchId || outlet?.id);
             dispatchEODWhatsApp(report, outlet?.phone || "9959159515");
-            toast.success("📱 WhatsApp Business Report opened!");
+            toast.success("WhatsApp Business Report opened!");
         } catch {
             toast.error("Failed to generate WhatsApp report");
         }
@@ -233,35 +235,38 @@ export default function AdminAnalyticsDashboardPage() {
                                     <button
                                         type="button"
                                         onClick={() => setSelectedBranchId(0)}
-                                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 ${
                                             selectedBranchId === 0
                                                 ? "bg-[#D4AF37] text-black shadow-md"
                                                 : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
                                         }`}
                                     >
-                                        🏢 All Branches Unified
+                                        <Building2 className="w-3.5 h-3.5" />
+                                        <span>All Branches Unified</span>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setSelectedBranchId(1)}
-                                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 ${
                                             selectedBranchId === 1
                                                 ? "bg-amber-500 text-black shadow-md"
                                                 : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
                                         }`}
                                     >
-                                        🏛️ Surya Family Restaurant (Kadiri)
+                                        <Store className="w-3.5 h-3.5" />
+                                        <span>Surya Family Restaurant (Kadiri)</span>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setSelectedBranchId(2)}
-                                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 ${
                                             selectedBranchId === 2
                                                 ? "bg-amber-500 text-black shadow-md"
                                                 : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
                                         }`}
                                     >
-                                        🌟 Branch 2
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                        <span>Branch 2</span>
                                     </button>
                                 </div>
                             ) : (
@@ -642,8 +647,9 @@ export default function AdminAnalyticsDashboardPage() {
                                                 </span>
                                             </div>
                                             {isPeak && (
-                                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase shrink-0">
-                                                    🔥 Peak Rush
+                                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase shrink-0 inline-flex items-center gap-1">
+                                                    <Flame className="w-3 h-3 text-red-400" />
+                                                    <span>Peak Rush</span>
                                                 </span>
                                             )}
                                         </div>

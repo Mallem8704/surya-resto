@@ -8,6 +8,7 @@ import {
     Search,
     ShoppingBag,
     UtensilsCrossed,
+    Utensils,
     Sparkles,
     CheckCircle2,
     AlertCircle,
@@ -18,6 +19,15 @@ import {
     X,
     RefreshCw,
     Truck,
+    Flame,
+    Salad,
+    CircleDot,
+    Crown,
+    Soup,
+    Droplets,
+    Receipt,
+    User,
+    Star,
 } from "lucide-react";
 import { MenuItemCard3D } from "@/components/order/MenuItemCard3D";
 import { CategorySection3D, FOCUS_CATEGORY_IDS } from "@/components/order/CategorySection3D";
@@ -44,19 +54,38 @@ import {
 import { MenuGridSkeleton } from "@/components/order/MenuGridSkeleton";
 import { SURYA_CATEGORIES, SURYA_MENU_ITEMS } from "@/lib/suryaMenuData";
 
-export const CATEGORY_EMOJIS: Record<number | string, string> = {
-    all: "🍽️",
-    1: "🍛", // Biryani & Pulao Specials
-    2: "🥘", // Punjabi & North Indian Curries
-    3: "🍢", // Tandoori & Kebabs
-    4: "🍗", // Non-Veg Starters & Andhra Specials
-    5: "🥗", // Veg Starters & Crispies
-    6: "🫓", // Indian Breads & Naans
-    7: "👑", // Arabic Mandi Specials
-    8: "🍜", // Chinese Rice & Noodles
-    9: "🍧", // Desserts & Sweets
-    10: "🥤", // Beverages & Lassi
-};
+export function getCategoryIcon(catId: number | string, className: string = "w-3.5 h-3.5") {
+    switch (Number(catId)) {
+        case 1:
+            return <Flame className={`${className} text-orange-500`} />;
+        case 2:
+            return <UtensilsCrossed className={`${className} text-amber-600`} />;
+        case 3:
+            return <Flame className={`${className} text-red-500`} />;
+        case 4:
+            return <Flame className={`${className} text-rose-600`} />;
+        case 5:
+            return <Salad className={`${className} text-emerald-600`} />;
+        case 6:
+            return <CircleDot className={`${className} text-amber-600`} />;
+        case 7:
+            return <Crown className={`${className} text-amber-500`} />;
+        case 8:
+            return <Soup className={`${className} text-orange-500`} />;
+        case 9:
+            return <Sparkles className={`${className} text-pink-500`} />;
+        case 10:
+            return <Coffee className={`${className} text-cyan-600`} />;
+        default:
+            return <Utensils className={`${className} text-espresso-700`} />;
+    }
+}
+
+const DEFAULT_TABLES = Array.from({ length: 12 }, (_, i) => ({
+    id: i + 1,
+    label: `T${i + 1}`,
+    status: "free",
+}));
 
 function CustomerOrderContent() {
     const searchParams = useSearchParams();
@@ -89,8 +118,14 @@ function CustomerOrderContent() {
     const [tableLabel, setTableLabel] = useState<string>(() => {
         return (tableParam || "T1").toUpperCase();
     });
-    const [tableId, setTableId] = useState<number>(1);
-    const [availableTables, setAvailableTables] = useState<any[]>([]);
+    const [tableId, setTableId] = useState<number>(() => {
+        if (tableParam) {
+            const num = parseInt(tableParam.replace(/\D/g, ""), 10);
+            if (!isNaN(num) && num > 0) return num;
+        }
+        return 1;
+    });
+    const [availableTables, setAvailableTables] = useState<any[]>(() => DEFAULT_TABLES);
     const [showTablePicker, setShowTablePicker] = useState<boolean>(false);
     const [showServiceModal, setShowServiceModal] = useState<boolean>(false);
     const [isCallingWaiter, setIsCallingWaiter] = useState<boolean>(false);
@@ -103,7 +138,7 @@ function CustomerOrderContent() {
             toast.success(
                 language === "te"
                     ? `టేబుల్ ${tableLabel} కోసం సిబ్బందికి సమాచారం పంపబడింది!`
-                    : `🔔 Staff notified for Table ${tableLabel}! Coming right over.`
+                    : `Staff notified for Table ${tableLabel}! Floor captain is coming over.`
             );
             setShowServiceModal(false);
         } catch (err: any) {
@@ -384,14 +419,25 @@ function CustomerOrderContent() {
 
     const handleRemoveFromCart = (itemId: number, cartKey?: string) => {
         setCart((prev) => {
-            const matchKey = cartKey || `item_${itemId}`;
-            const existing = prev.find((i) => (i.cartKey || `item_${i.id}`) === matchKey);
-            if (existing && existing.qty > 1) {
+            if (cartKey) {
+                const existing = prev.find((i) => (i.cartKey || `item_${i.id}`) === cartKey);
+                if (existing && existing.qty > 1) {
+                    return prev.map((i) =>
+                        (i.cartKey || `item_${i.id}`) === cartKey ? { ...i, qty: i.qty - 1 } : i
+                    );
+                }
+                return prev.filter((i) => (i.cartKey || `item_${i.id}`) !== cartKey);
+            }
+            // If no cartKey specified, decrement the most recent entry with this item id
+            const match = [...prev].reverse().find((i) => i.id === itemId);
+            if (!match) return prev;
+            const targetKey = match.cartKey || `item_${match.id}`;
+            if (match.qty > 1) {
                 return prev.map((i) =>
-                    (i.cartKey || `item_${i.id}`) === matchKey ? { ...i, qty: i.qty - 1 } : i
+                    (i.cartKey || `item_${i.id}`) === targetKey ? { ...i, qty: i.qty - 1 } : i
                 );
             }
-            return prev.filter((i) => (i.cartKey || `item_${i.id}`) !== matchKey);
+            return prev.filter((i) => (i.cartKey || `item_${i.id}`) !== targetKey);
         });
     };
 
@@ -421,11 +467,15 @@ function CustomerOrderContent() {
     };
 
     // Checkout Flow with Idempotency Key
-    const handleCheckout = async (paymentMethod: "counter" | "upi", customerNotes: string) => {
+    const handleCheckout = async (
+        paymentMethod: "counter" | "upi",
+        customerNotes: string,
+        promo?: { code: string; discount_paise: number }
+    ) => {
         // Enforce mandatory customer login gate before placing order
         if (!isCustomerLoggedIn) {
             requireCustomerAuth(() => {
-                handleCheckout(paymentMethod, customerNotes);
+                handleCheckout(paymentMethod, customerNotes, promo);
             });
             return;
         }
@@ -441,10 +491,13 @@ function CustomerOrderContent() {
                 table_id: tableId,
                 outlet_id: outletId,
                 idempotency_key: idempotencyKey,
+                order_type: "dine_in" as const,
                 customer_name: customer?.name || undefined,
                 customer_phone: customer?.phone || undefined,
                 customer_notes: customerNotes,
                 payment_method: paymentMethod,
+                coupon_code: promo?.code,
+                discount_paise: promo?.discount_paise,
                 items: cart.map((i) => ({
                     item_id: i.id,
                     variant_id: i.variant_id,
@@ -594,8 +647,8 @@ function CustomerOrderContent() {
 
                         {/* Customer Session Status Pill */}
                         {isCustomerLoggedIn ? (
-                            <div className="flex items-center gap-1 px-2 py-1.5 rounded-full border border-amber-300 bg-amber-500/15 text-espresso-950 text-[11px] sm:text-xs font-bold shadow-2xs">
-                                <span className="text-xs">👤</span>
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-amber-300 bg-amber-500/15 text-espresso-950 text-[11px] sm:text-xs font-bold shadow-2xs">
+                                <User className="w-3.5 h-3.5 text-amber-800 shrink-0" />
                                 <span className="max-w-[65px] sm:max-w-[110px] truncate text-[11px] font-black">
                                     {customer?.name ? customer.name.split(' ')[0] : customer?.phone}
                                 </span>
@@ -605,7 +658,7 @@ function CustomerOrderContent() {
                                     title="Sign Out"
                                     className="text-[10px] text-terracotta-700 hover:text-terracotta-900 ml-0.5 font-bold cursor-pointer"
                                 >
-                                    ✕
+                                    <X className="w-3 h-3" />
                                 </button>
                             </div>
                         ) : (
@@ -629,7 +682,8 @@ function CustomerOrderContent() {
                 <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-300/60 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-extrabold text-amber-950 flex items-center gap-1 bg-amber-100/90 border border-amber-300 px-2 py-0.5 rounded-lg shadow-2xs">
-                            ⭐ 4.8★
+                            <Star className="w-3 h-3 fill-amber-500 text-amber-500 shrink-0" />
+                            <span>4.8</span>
                         </span>
                         <span className="text-espresso-800 font-bold text-[11px]">
                             1,200+ Reviews
@@ -733,7 +787,7 @@ function CustomerOrderContent() {
                                     : "bg-white border border-cream-300/90 text-espresso-800 hover:bg-cream-100 shadow-2xs"
                             }`}
                         >
-                            <span>🍽️</span>
+                            <Utensils className="w-3.5 h-3.5 shrink-0" />
                             <span>{t("all_categories")}</span>
                             <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                                 selectedCategory === "all" && !onlyBestsellers ? "bg-white/20 text-white" : "bg-cream-100 text-espresso-600"
@@ -753,14 +807,13 @@ function CustomerOrderContent() {
                                     : "bg-white border border-amber-300 text-amber-900 hover:bg-amber-50 shadow-2xs"
                             }`}
                         >
-                            <span>🔥</span>
+                            <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                             <span>Bestsellers</span>
                         </button>
 
                         {categories.map((cat) => {
                             const count = menuItems.filter((i) => i.category_id === cat.id).length;
                             const isSelected = selectedCategory === cat.id && !onlyBestsellers;
-                            const emoji = CATEGORY_EMOJIS[cat.id] || "🍽️";
 
                             return (
                                 <button
@@ -772,7 +825,7 @@ function CustomerOrderContent() {
                                             : "bg-white border border-cream-300/90 text-espresso-800 hover:bg-cream-100 shadow-2xs"
                                     }`}
                                 >
-                                    <span>{emoji}</span>
+                                    {getCategoryIcon(cat.id)}
                                     <span>{language === "te" && cat.name_te ? cat.name_te : cat.name}</span>
                                     {count > 0 && (
                                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
@@ -991,41 +1044,57 @@ function CustomerOrderContent() {
                             <button
                                 disabled={isCallingWaiter}
                                 onClick={() => handleCallService("waiter")}
-                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-amber-400 hover:bg-amber-50/50 active:scale-98 transition flex flex-col items-center text-center gap-1.5 cursor-pointer shadow-2xs group"
+                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-amber-400 hover:bg-amber-50/50 active:scale-98 transition flex flex-col items-center text-center gap-2 cursor-pointer shadow-2xs group"
                             >
-                                <span className="text-3xl group-hover:scale-110 transition-transform">🛎️</span>
-                                <span className="text-xs font-black text-espresso-900">Call Waiter</span>
-                                <span className="text-[10px] text-espresso-500 font-medium">Order help & questions</span>
+                                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Bell className="w-6 h-6 text-amber-600" />
+                                </div>
+                                <div>
+                                    <span className="text-xs font-black text-espresso-900 block">Call Waiter</span>
+                                    <span className="text-[10px] text-espresso-500 font-medium block mt-0.5">Order help & questions</span>
+                                </div>
                             </button>
 
                             <button
                                 disabled={isCallingWaiter}
                                 onClick={() => handleCallService("water")}
-                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-cyan-400 hover:bg-cyan-50/50 active:scale-98 transition flex flex-col items-center text-center gap-1.5 cursor-pointer shadow-2xs group"
+                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-cyan-400 hover:bg-cyan-50/50 active:scale-98 transition flex flex-col items-center text-center gap-2 cursor-pointer shadow-2xs group"
                             >
-                                <span className="text-3xl group-hover:scale-110 transition-transform">💧</span>
-                                <span className="text-xs font-black text-espresso-900">Drinking Water</span>
-                                <span className="text-[10px] text-espresso-500 font-medium">Fresh water refill</span>
+                                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Droplets className="w-6 h-6 text-cyan-600" />
+                                </div>
+                                <div>
+                                    <span className="text-xs font-black text-espresso-900 block">Drinking Water</span>
+                                    <span className="text-[10px] text-espresso-500 font-medium block mt-0.5">Fresh water refill</span>
+                                </div>
                             </button>
 
                             <button
                                 disabled={isCallingWaiter}
                                 onClick={() => handleCallService("bill")}
-                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-emerald-400 hover:bg-emerald-50/50 active:scale-98 transition flex flex-col items-center text-center gap-1.5 cursor-pointer shadow-2xs group"
+                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-emerald-400 hover:bg-emerald-50/50 active:scale-98 transition flex flex-col items-center text-center gap-2 cursor-pointer shadow-2xs group"
                             >
-                                <span className="text-3xl group-hover:scale-110 transition-transform">🧾</span>
-                                <span className="text-xs font-black text-espresso-900">Request Bill</span>
-                                <span className="text-[10px] text-espresso-500 font-medium">Pay at table / UPI</span>
+                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Receipt className="w-6 h-6 text-emerald-600" />
+                                </div>
+                                <div>
+                                    <span className="text-xs font-black text-espresso-900 block">Request Bill</span>
+                                    <span className="text-[10px] text-espresso-500 font-medium block mt-0.5">Pay at table / UPI</span>
+                                </div>
                             </button>
 
                             <button
                                 disabled={isCallingWaiter}
                                 onClick={() => handleCallService("clean")}
-                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-amber-400 hover:bg-amber-50/50 active:scale-98 transition flex flex-col items-center text-center gap-1.5 cursor-pointer shadow-2xs group"
+                                className="p-4 rounded-2xl border-2 border-cream-200 bg-white hover:border-amber-400 hover:bg-amber-50/50 active:scale-98 transition flex flex-col items-center text-center gap-2 cursor-pointer shadow-2xs group"
                             >
-                                <span className="text-3xl group-hover:scale-110 transition-transform">🧹</span>
-                                <span className="text-xs font-black text-espresso-900">Clean Table</span>
-                                <span className="text-[10px] text-espresso-500 font-medium">Clear used plates</span>
+                                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Sparkles className="w-6 h-6 text-amber-600" />
+                                </div>
+                                <div>
+                                    <span className="text-xs font-black text-espresso-900 block">Clean Table</span>
+                                    <span className="text-[10px] text-espresso-500 font-medium block mt-0.5">Clear used plates</span>
+                                </div>
                             </button>
                         </div>
 

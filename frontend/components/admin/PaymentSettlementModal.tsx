@@ -11,6 +11,10 @@ import {
     MessageCircle,
     RefreshCw,
     ExternalLink,
+    AlertTriangle,
+    Bike,
+    Utensils,
+    CreditCard,
 } from "lucide-react";
 import { formatRupees } from "@/lib/formatters";
 import { soundManager } from "@/lib/sound";
@@ -38,7 +42,7 @@ export function PaymentSettlementModal({
     const { language } = useLanguage();
     const { outlet } = useOutlet();
 
-    const [activeTab, setActiveTab] = useState<"cash" | "upi" | "split">("cash");
+    const [activeTab, setActiveTab] = useState<"cash" | "upi" | "card" | "split">("cash");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Cash State
@@ -47,6 +51,11 @@ export function PaymentSettlementModal({
     // Dynamic UPI State
     const [dynamicUpi, setDynamicUpi] = useState<any>(null);
     const [isLoadingUpi, setIsLoadingUpi] = useState(false);
+
+    // Card State
+    const [cardNetwork, setCardNetwork] = useState<string>("RuPay");
+    const [cardLast4, setCardLast4] = useState<string>("");
+    const [cardTxnRef, setCardTxnRef] = useState<string>("");
 
     // Split State
     const [splitType, setSplitType] = useState<"equal" | "custom">("equal");
@@ -83,11 +92,43 @@ export function PaymentSettlementModal({
         }
     }, [isOpen, order, totalRs]);
 
-    if (!isOpen || !order) return null;
-
     const tenderedNum = Number(tenderedAmount) || 0;
     const changeReturnRs = tenderedNum >= totalRs ? (tenderedNum - totalRs) : 0;
     const shortAmountRs = tenderedNum < totalRs ? (totalRs - tenderedNum) : 0;
+
+    // Keyboard Shortcuts Listener (Esc to close, Enter to settle, Alt+1/2/3/4 for tabs)
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                onClose();
+            } else if (e.key === "Enter" && !isSubmitting) {
+                if ((e.target as HTMLElement)?.tagName === "TEXTAREA") return;
+                e.preventDefault();
+                if (activeTab === "cash") {
+                    handleSettleCash();
+                } else if (activeTab === "upi") {
+                    handleSettleUpi();
+                } else if (activeTab === "card") {
+                    handleSettleCard();
+                } else if (activeTab === "split") {
+                    handleSettleSplit();
+                }
+            } else if (e.altKey) {
+                if (e.key === "1") { e.preventDefault(); setActiveTab("cash"); }
+                else if (e.key === "2") { e.preventDefault(); setActiveTab("upi"); }
+                else if (e.key === "3") { e.preventDefault(); setActiveTab("card"); }
+                else if (e.key === "4") { e.preventDefault(); setActiveTab("split"); }
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, activeTab, isSubmitting, tenderedAmount, totalRs, splitType, splitPeople, customCashRs, customUpiRs, customCardRs, cardNetwork, cardLast4, cardTxnRef, tenderedNum]);
+
+    if (!isOpen || !order) return null;
 
     // Fast Cash Buttons
     const fastNotes = [
@@ -116,7 +157,7 @@ export function PaymentSettlementModal({
                 notes: `Cash collected at counter. Tendered: ₹${tenderedNum}, Change: ₹${changeReturnRs}`,
             });
 
-            toast.success(`🎉 Order #${order.order_number} PAID in Cash! Return change: ₹${changeReturnRs.toFixed(2)}`);
+            toast.success(`Order #${order.order_number} PAID in Cash! Return change: ₹${changeReturnRs.toFixed(2)}`);
             soundManager.playPaymentSoundbox(totalRs, "Cash", order.table_label, language as any);
 
             // Auto-print POS thermal receipt
@@ -142,7 +183,7 @@ export function PaymentSettlementModal({
                 notes: `Direct UPI payment verified by cashier`,
             });
 
-            toast.success(`🎉 Order #${order.order_number} PAID via Direct UPI!`);
+            toast.success(`Order #${order.order_number} PAID via Direct UPI!`);
             soundManager.playPaymentSoundbox(totalRs, "UPI", order.table_label, language as any);
 
             printPOSReceipt({ ...order, payment_status: "paid", payment_method: "upi" }, outlet);
@@ -156,7 +197,33 @@ export function PaymentSettlementModal({
         }
     };
 
-    // 3. Submit Split Payment
+    // 3. Submit Card Payment (EDC / POS Machine)
+    const handleSettleCard = async () => {
+        setIsSubmitting(true);
+        try {
+            const txnId = cardTxnRef.trim() || `CARD-${cardNetwork.toUpperCase()}-${cardLast4.trim() ? cardLast4.trim() : Date.now().toString().slice(-4)}`;
+            await api.recordPayment(order.id, {
+                method: "card",
+                amount_paise: totalPaise,
+                txn_id: txnId,
+                notes: `Card POS settlement (${cardNetwork.toUpperCase()}${cardLast4.trim() ? ` *${cardLast4.trim()}` : ""})`,
+            });
+
+            toast.success(`Order #${order.order_number} PAID via Card!`);
+            soundManager.playPaymentSoundbox(totalRs, "Card", order.table_label, language as any);
+
+            printPOSReceipt({ ...order, payment_status: "paid", payment_method: "card" }, outlet);
+
+            onSuccess();
+            onClose();
+        } catch (err: any) {
+            toast.error(err.message || "Failed to record card payment");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // 4. Submit Split Payment
     const handleSettleSplit = async () => {
         setIsSubmitting(true);
         try {
@@ -189,7 +256,7 @@ export function PaymentSettlementModal({
                 await api.splitPayment(order.id, { payments, notes: "Multi-tender hybrid payment" });
             }
 
-            toast.success(`🎉 Order #${order.order_number} Split Payment Settled!`);
+            toast.success(`Order #${order.order_number} Split Payment Settled!`);
             soundManager.playPaymentSoundbox(totalRs, "Split", order.table_label, language as any);
 
             printPOSReceipt({ ...order, payment_status: "paid", payment_method: "split" }, outlet);
@@ -210,8 +277,18 @@ export function PaymentSettlementModal({
                 <div className="p-5 bg-gradient-to-r from-amber-950/80 via-black to-amber-950/80 border-b border-white/10 flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2">
-                            <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-black text-[10px] font-black uppercase tracking-wider">
-                                {order.order_type === "delivery" ? "🛵 Delivery Settle" : `🍽️ Table ${order.table_label || "Counter"}`}
+                            <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-black text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
+                                {order.order_type === "delivery" ? (
+                                    <>
+                                        <Bike className="w-3 h-3" />
+                                        <span>Delivery Settle</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Utensils className="w-3 h-3" />
+                                        <span>Table {order.table_label || "Counter"}</span>
+                                    </>
+                                )}
                             </span>
                             <span className="font-mono text-xs text-white/60">#{order.order_number}</span>
                         </div>
@@ -238,7 +315,7 @@ export function PaymentSettlementModal({
                         }`}
                     >
                         <Banknote className="w-4 h-4" />
-                        <span>💵 Cash Tender</span>
+                        <span>Cash Tender</span>
                     </button>
 
                     <button
@@ -250,7 +327,19 @@ export function PaymentSettlementModal({
                         }`}
                     >
                         <QrCode className="w-4 h-4" />
-                        <span>📱 Dynamic UPI</span>
+                        <span>Dynamic UPI</span>
+                    </button>
+
+                    <button
+                        onClick={() => setActiveTab("card")}
+                        className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                            activeTab === "card"
+                                ? "bg-purple-500 text-black shadow-md shadow-purple-500/20 font-black"
+                                : "text-white/60 hover:text-white hover:bg-white/5"
+                        }`}
+                    >
+                        <CreditCard className="w-4 h-4" />
+                        <span>Card Swipe</span>
                     </button>
 
                     <button
@@ -262,7 +351,7 @@ export function PaymentSettlementModal({
                         }`}
                     >
                         <Users className="w-4 h-4" />
-                        <span>👥 Split Bill</span>
+                        <span>Split Bill</span>
                     </button>
                 </div>
 
@@ -320,7 +409,13 @@ export function PaymentSettlementModal({
                                             : `₹${shortAmountRs.toFixed(2)} short`}
                                     </p>
                                 </div>
-                                <span className="text-3xl">{tenderedNum >= totalRs ? "💵" : "⚠️"}</span>
+                                <div>
+                                    {tenderedNum >= totalRs ? (
+                                        <Banknote className="w-8 h-8 text-emerald-400" />
+                                    ) : (
+                                        <AlertTriangle className="w-8 h-8 text-rose-400" />
+                                    )}
+                                </div>
                             </div>
 
                             <button
@@ -389,7 +484,83 @@ export function PaymentSettlementModal({
                         </div>
                     )}
 
-                    {/* TAB 3: SPLIT BILL */}
+                    {/* TAB 3: CARD PAYMENT */}
+                    {activeTab === "card" && (
+                        <div className="space-y-4 animate-in fade-in">
+                            <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+                                <div className="flex items-center gap-2 text-purple-400">
+                                    <CreditCard className="w-5 h-5" />
+                                    <h4 className="font-bold text-sm text-white">Card Payment / POS Machine</h4>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-white/70 mb-1">
+                                        Card Network
+                                    </label>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {["RuPay", "Visa", "Mastercard", "Amex"].map((net) => (
+                                            <button
+                                                key={net}
+                                                type="button"
+                                                onClick={() => setCardNetwork(net)}
+                                                className={`py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                                                    cardNetwork === net
+                                                        ? "bg-purple-500 text-black font-black shadow"
+                                                        : "bg-white/10 text-white/70 hover:bg-white/15"
+                                                }`}
+                                            >
+                                                {net}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label className="block text-xs font-bold text-white/70 mb-1">
+                                            Last 4 Digits (Optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            maxLength={4}
+                                            placeholder="e.g. 4242"
+                                            value={cardLast4}
+                                            onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                                            className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-sm font-mono text-white focus:outline-none focus:border-purple-400"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-white/70 mb-1">
+                                            Approval / Ref No (Optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="RRN / Txn ID"
+                                            value={cardTxnRef}
+                                            onChange={(e) => setCardTxnRef(e.target.value)}
+                                            className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-sm font-mono text-white focus:outline-none focus:border-purple-400"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 flex justify-between items-center text-xs">
+                                    <span className="text-purple-300">Amount to Charge on EDC POS:</span>
+                                    <span className="text-lg font-mono font-black text-white">₹{totalRs.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleSettleCard}
+                                disabled={isSubmitting}
+                                className="w-full py-4 rounded-2xl bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-black font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-purple-500/20 transition cursor-pointer"
+                            >
+                                <CheckCircle2 className="w-5 h-5" />
+                                <span>Charge Card & Mark Paid (Print Bill)</span>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* TAB 4: SPLIT BILL */}
                     {activeTab === "split" && (
                         <div className="space-y-4 animate-in fade-in">
                             {/* Split Sub-Tabs */}
@@ -414,7 +585,7 @@ export function PaymentSettlementModal({
                                             : "bg-white/10 text-white/70"
                                     }`}
                                 >
-                                    Hybrid (Cash + UPI)
+                                    Hybrid (Cash + UPI + Card)
                                 </button>
                             </div>
 
@@ -449,7 +620,7 @@ export function PaymentSettlementModal({
                                                 ₹{(totalRs / splitPeople).toFixed(2)}
                                             </p>
                                         </div>
-                                        <span className="text-3xl">👥</span>
+                                        <Users className="w-8 h-8 text-cyan-400" />
                                     </div>
                                 </div>
                             ) : (
@@ -476,17 +647,29 @@ export function PaymentSettlementModal({
                                             className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/20 text-sm font-mono text-amber-400 focus:outline-none"
                                         />
                                     </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-white/70 mb-1">
+                                            Card Portion (₹)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={customCardRs}
+                                            onChange={(e) => setCustomCardRs(e.target.value)}
+                                            placeholder="0"
+                                            className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/20 text-sm font-mono text-purple-400 focus:outline-none"
+                                        />
+                                    </div>
 
                                     <div className="flex justify-between text-xs font-bold pt-1">
                                         <span className="text-white/60">Total Bill: ₹{totalRs}</span>
                                         <span
                                             className={
-                                                (Number(customCashRs) || 0) + (Number(customUpiRs) || 0) === totalRs
+                                                (Number(customCashRs) || 0) + (Number(customUpiRs) || 0) + (Number(customCardRs) || 0) === totalRs
                                                     ? "text-emerald-400"
                                                     : "text-rose-400"
                                             }
                                         >
-                                            Allocated: ₹{((Number(customCashRs) || 0) + (Number(customUpiRs) || 0)).toFixed(2)}
+                                            Allocated: ₹{((Number(customCashRs) || 0) + (Number(customUpiRs) || 0) + (Number(customCardRs) || 0)).toFixed(2)}
                                         </span>
                                     </div>
                                 </div>

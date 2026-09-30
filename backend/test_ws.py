@@ -105,8 +105,13 @@ async def run_ws_test():
 
     # 8. Verify Admin also received "order_updated"
     print("\n[STEP 7] Verifying Admin WebSocket received 'order_updated' event...")
-    admin_status_msg = json.loads(await asyncio.wait_for(admin_ws.recv(), timeout=5.0))
-    assert admin_status_msg["event"] in ["order_updated", "order_status_updated"]
+    admin_status_msg = None
+    while True:
+        msg = json.loads(await asyncio.wait_for(admin_ws.recv(), timeout=5.0))
+        if msg["event"] in ["order_updated", "order_status_updated"]:
+            admin_status_msg = msg
+            break
+    assert admin_status_msg is not None
     assert admin_status_msg["data"]["status"] == "preparing"
     print(f"✓ Admin Received Sync Event: '{admin_status_msg['event']}' for Kanban board")
 
@@ -118,8 +123,13 @@ async def run_ws_test():
     )
     assert call_res.status_code == 201
 
-    admin_call_msg = json.loads(await asyncio.wait_for(admin_ws.recv(), timeout=5.0))
-    assert admin_call_msg["event"] == "service_call"
+    admin_call_msg = None
+    while True:
+        msg = json.loads(await asyncio.wait_for(admin_ws.recv(), timeout=5.0))
+        if msg["event"] == "service_call":
+            admin_call_msg = msg
+            break
+    assert admin_call_msg is not None
     assert admin_call_msg["data"]["call_type"] == "water"
     assert admin_call_msg["data"]["table_label"] == "T3"
     print(f"✓ Admin Received Service Call: Table {admin_call_msg['data']['table_label']} requested '{admin_call_msg['data']['call_type'].upper()}'")

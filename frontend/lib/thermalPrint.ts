@@ -149,6 +149,7 @@ export interface PrintOrderData {
     coupon_code?: string | null;
     tax_paise?: number;
     delivery_fee_paise?: number;
+    parcel_charge_paise?: number;
     total_paise?: number;
     customer_notes?: string | null;
     created_at?: string;
@@ -199,7 +200,7 @@ export function printKOT(
 
     const isDelivery = order.order_type === "delivery";
     const isTakeaway = order.order_type === "takeaway";
-    const titleTag = isDelivery ? "🛵 DELIVERY" : isTakeaway ? "🛍️ TAKEAWAY" : `🍽️ TABLE: ${order.table_label || "1"}`;
+    const titleTag = isDelivery ? "[DELIVERY]" : isTakeaway ? "[TAKEAWAY]" : `[TABLE: ${order.table_label || "1"}]`;
     
     const formattedTime = order.created_at
         ? new Date(order.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
@@ -225,9 +226,9 @@ export function printKOT(
                         x${qty}
                     </span>
                 </div>
-                ${item.variant_name ? `<div style="font-size: ${is58 ? "9px" : "10px"}; font-weight: 700; color: #222; margin-left: ${is58 ? "6px" : "10px"}; margin-top: 1px;">▶ ${item.variant_name}</div>` : ""}
+                ${item.variant_name ? `<div style="font-size: ${is58 ? "9px" : "10px"}; font-weight: 700; color: #222; margin-left: ${is58 ? "6px" : "10px"}; margin-top: 1px;">> ${item.variant_name}</div>` : ""}
                 ${addons.length > 0 ? `<div style="font-size: ${is58 ? "8.5px" : "9.5px"}; color: #444; margin-left: ${is58 ? "6px" : "10px"};">+ ${addons.join(", ")}</div>` : ""}
-                ${item.notes ? `<div style="font-size: ${is58 ? "9px" : "10.5px"}; font-weight: 800; color: #000; background: #eee; padding: 1px 3px; margin-top: 1.5px; border-left: 2px solid #000;">⚠️ ${item.notes.toUpperCase()}</div>` : ""}
+                ${item.notes ? `<div style="font-size: ${is58 ? "9px" : "10.5px"}; font-weight: 800; color: #000; background: #eee; padding: 1px 3px; margin-top: 1.5px; border-left: 2px solid #000;">NOTE: ${item.notes.toUpperCase()}</div>` : ""}
             </div>
         `;
     });
@@ -342,8 +343,8 @@ export function printRunningKOT(
                         +${qty}
                     </span>
                 </div>
-                ${item.variant_name ? `<div style="font-size: ${is58 ? "9px" : "10px"}; font-weight: 700; margin-left: ${is58 ? "6px" : "10px"}; margin-top: 1px;">▶ ${item.variant_name}</div>` : ""}
-                ${item.notes ? `<div style="font-size: ${is58 ? "9px" : "10.5px"}; font-weight: 800; background: #eee; padding: 1px 3px; margin-top: 1.5px; border-left: 2px solid #000;">⚠️ ${item.notes.toUpperCase()}</div>` : ""}
+                ${item.variant_name ? `<div style="font-size: ${is58 ? "9px" : "10px"}; font-weight: 700; margin-left: ${is58 ? "6px" : "10px"}; margin-top: 1px;">> ${item.variant_name}</div>` : ""}
+                ${item.notes ? `<div style="font-size: ${is58 ? "9px" : "10.5px"}; font-weight: 800; background: #eee; padding: 1px 3px; margin-top: 1.5px; border-left: 2px solid #000;">NOTE: ${item.notes.toUpperCase()}</div>` : ""}
             </div>
         `;
     });
@@ -388,7 +389,7 @@ export function printRunningKOT(
             </style>
         </head>
         <body>
-            <div class="text-center bold" style="font-size: ${titleFontSize}; letter-spacing: 0.5px;">⚡ RUNNING KOT (ADD-ON ROUND)</div>
+            <div class="text-center bold" style="font-size: ${titleFontSize}; letter-spacing: 0.5px;">RUNNING KOT (ADD-ON ROUND)</div>
             <div class="text-center" style="font-size: ${is58 ? "9px" : "10px"}; font-weight: 600; color: #444;">${outlet?.name || "SURYA FAMILY RESTAURANT"}</div>
             
             <div class="badge">TABLE ${order.table_label || "1"}</div>
@@ -491,11 +492,13 @@ export function printPOSReceipt(
     const taxRate = Number(outlet?.tax_rate_percent ?? 5) || 5;
     const taxPaise = Number(order.tax_paise ?? Math.round(netAfterDiscountPaise * (taxRate / 100))) || 0;
     const deliveryFeePaise = Number(order.delivery_fee_paise ?? 0) || 0;
-    const totalPaise = Number(order.total_paise ?? (order as any).total_price_paise ?? (netAfterDiscountPaise + taxPaise + deliveryFeePaise)) || (netAfterDiscountPaise + taxPaise + deliveryFeePaise);
+    const parcelChargePaise = Number(order.parcel_charge_paise ?? (order as any).packaging_charge_paise ?? 0) || 0;
+    const totalPaise = Number(order.total_paise ?? (order as any).total_price_paise ?? (netAfterDiscountPaise + taxPaise + deliveryFeePaise + parcelChargePaise)) || (netAfterDiscountPaise + taxPaise + deliveryFeePaise + parcelChargePaise);
 
     const subtotalRs = (subtotalPaise / 100).toFixed(2);
     const discountRs = (discountPaise / 100).toFixed(2);
     const taxRs = (taxPaise / 100).toFixed(2);
+    const parcelChargeRs = (parcelChargePaise / 100).toFixed(2);
     const totalRs = (totalPaise / 100).toFixed(2);
 
     const isDelivery = order.order_type === "delivery";
@@ -599,6 +602,12 @@ export function printPOSReceipt(
                 <tr>
                     <td style="padding: 1px 0;">Discount (${order.coupon_code || "Special"}):</td>
                     <td class="text-right" style="font-variant-numeric: tabular-nums; padding: 1px 0;">-₹${discountRs}</td>
+                </tr>
+                ` : ""}
+                ${parcelChargePaise > 0 ? `
+                <tr>
+                    <td style="padding: 1px 0;">Packaging / Parcel:</td>
+                    <td class="text-right" style="font-variant-numeric: tabular-nums; padding: 1px 0;">₹${parcelChargeRs}</td>
                 </tr>
                 ` : ""}
                 <tr>

@@ -7,6 +7,7 @@ from app.models import MenuItem, StockLog, User
 from app.schemas import StockAdjustmentCreate, StockLogOut, StockItemOverview, MenuItemOut
 from app.routers.auth import require_staff_or_owner
 from app.audit_utils import log_audit
+from app.routers.ws import manager
 
 router = APIRouter(prefix="", tags=["Inventory & Stock"])
 
@@ -139,15 +140,20 @@ def get_stock_logs(
     ]
 
 
+@router.post("/update", response_model=MenuItemOut)
 @router.post("/adjust", response_model=MenuItemOut)
 @router.post("/restock", response_model=MenuItemOut)
-def adjust_stock_manual(
+async def adjust_stock_manual(
     data: StockAdjustmentCreate,
     current_user: User = Depends(require_staff_or_owner),
     db: Session = Depends(get_db),
 ):
-    """Record manual restock, wastage, or adjustment for an item."""
-    item = db.query(MenuItem).filter(MenuItem.id == data.item_id, MenuItem.outlet_id == current_user.outlet_id).first()
+    """Record manual restock, wastage, update, or adjustment for an item."""
+    query = db.query(MenuItem).filter(MenuItem.id == data.item_id)
+    if current_user.role != "owner":
+        query = query.filter(MenuItem.outlet_id == current_user.outlet_id)
+    item = query.first()
+
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -155,15 +161,26 @@ def adjust_stock_manual(
         )
 
     old_stock = item.stock_qty
-    new_stock = max(0, old_stock + data.change_qty)
+    if data.stock_qty is not None:
+        new_stock = max(0, data.stock_qty)
+        effective_change = new_stock - old_stock
+    elif data.change_qty is not None:
+        effective_change = data.change_qty
+        new_stock = max(0, old_stock + effective_change)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either change_qty or stock_qty must be specified",
+        )
+
     item.stock_qty = new_stock
     item.track_stock = True
 
     # Record StockLog
     stock_log = StockLog(
-        outlet_id=current_user.outlet_id,
+        outlet_id=item.outlet_id,
         item_id=item.id,
-        change_qty=data.change_qty,
+        change_qty=effective_change,
         reason=data.reason.strip().lower(),
         staff_id=current_user.id,
         notes=data.notes,
@@ -172,14 +189,14 @@ def adjust_stock_manual(
 
     log_audit(
         db=db,
-        outlet_id=current_user.outlet_id,
+        outlet_id=item.outlet_id,
         user_id=current_user.id,
         action="manual_stock_adjustment",
         entity_type="menu_item",
         entity_id=item.id,
         details={
             "item_name": item.name,
-            "change_qty": data.change_qty,
+            "change_qty": effective_change,
             "old_stock": old_stock,
             "new_stock": new_stock,
             "reason": data.reason,
@@ -190,4 +207,38 @@ def adjust_stock_manual(
 
     db.commit()
     db.refresh(item)
+
+    # Broadcast real-time stock update and low-stock alert
+    try:
+        stock_status = "out_of_stock" if item.stock_qty <= 0 else ("low_stock" if item.track_stock and item.stock_qty <= item.low_stock_threshold else "in_stock")
+        await manager.broadcast_stock_update(
+            outlet_id=item.outlet_id,
+            data={
+                "item_id": item.id,
+                "item_name": item.name,
+                "stock_qty": item.stock_qty,
+                "track_stock": item.track_stock,
+                "low_stock_threshold": item.low_stock_threshold,
+                "is_available": item.is_available,
+                "status": stock_status,
+                "change_qty": effective_change,
+                "reason": data.reason,
+                "notes": data.notes,
+            },
+        )
+        if item.track_stock and item.stock_qty <= item.low_stock_threshold:
+            await manager.broadcast_to_admin(
+                outlet_id=item.outlet_id,
+                event_type="stock:low",
+                data={
+                    "item_id": item.id,
+                    "item_name": item.name,
+                    "stock_qty": item.stock_qty,
+                    "low_stock_threshold": item.low_stock_threshold,
+                    "status": stock_status,
+                },
+            )
+    except Exception:
+        pass
+
     return item

@@ -225,8 +225,8 @@ export const api = {
         apiFetch(`/api/orders/${orderId}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
     appendOrderItems: (orderId: number, items: Array<{ item_id: number; variant_id?: number; addon_ids?: number[]; qty: number; notes?: string }>, notes?: string) =>
         apiFetch(`/api/orders/${orderId}/append-items`, { method: "POST", body: JSON.stringify({ items, notes }) }),
-    transferOrderTable: (orderId: number, target_table_id: number) =>
-        apiFetch(`/api/orders/${orderId}/transfer-table`, { method: "POST", body: JSON.stringify({ target_table_id }) }),
+    transferOrderTable: (orderId: number, target_table_id: number, merge_if_occupied?: boolean) =>
+        apiFetch(`/api/orders/${orderId}/transfer-table`, { method: "POST", body: JSON.stringify({ target_table_id, merge_if_occupied }) }),
     changeOrderPaymentMethod: (orderId: number, payment_method: string, notes?: string) =>
         apiFetch(`/api/orders/${orderId}/change-payment-method`, { method: "PATCH", body: JSON.stringify({ payment_method, notes }) }),
     voidOrder: (orderId: number, reason: string, staff_notes?: string) =>
@@ -239,6 +239,8 @@ export const api = {
         apiFetch("/api/shifts/open", { method: "POST", params: outletId ? { outlet_id: outletId } : undefined, body: JSON.stringify(data) }),
     closeShift: (shiftId: number, data: { actual_cash_paise: number; denominations_json?: string; closing_notes?: string }) =>
         apiFetch(`/api/shifts/${shiftId}/close`, { method: "POST", body: JSON.stringify(data) }),
+    recordPettyCash: (data: { type: "cash_in" | "cash_out"; amount_paise: number; category: string; notes?: string }, outletId?: number) =>
+        apiFetch("/api/shifts/petty-cash", { method: "POST", params: outletId ? { outlet_id: outletId } : undefined, body: JSON.stringify(data) }),
     getPastShifts: (outletId?: number, limit = 20) =>
         apiFetch("/api/shifts", { params: { outlet_id: outletId, limit } }),
 
@@ -389,8 +391,12 @@ export const api = {
         apiFetch("/api/customer/verify-otp", { method: "POST", body: JSON.stringify(data) }),
     getCustomerProfile: () =>
         apiFetch("/api/customer/profile"),
+    getCustomerAddresses: () =>
+        apiFetch("/api/customer/addresses"),
     addCustomerAddress: (data: { label: string; address_line: string; landmark?: string; is_default?: boolean }) =>
-        apiFetch("/api/customer/address", { method: "POST", body: JSON.stringify(data) }),
+        apiFetch("/api/customer/addresses", { method: "POST", body: JSON.stringify(data) }),
+    deleteCustomerAddress: (addressId: number) =>
+        apiFetch(`/api/customer/addresses/${addressId}`, { method: "DELETE" }),
     getCustomerOrders: () =>
         apiFetch("/api/customer/orders"),
     getReorderPayload: (orderId: number) =>

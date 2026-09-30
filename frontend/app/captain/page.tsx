@@ -22,6 +22,7 @@ import {
     X,
     QrCode,
     Utensils,
+    UtensilsCrossed,
     Flame,
     Coffee,
     Sparkles,
@@ -33,6 +34,13 @@ import {
     Layers,
     Banknote,
     CreditCard,
+    Droplets,
+    UserCheck,
+    Receipt,
+    Check,
+    MessageSquare,
+    AlertTriangle,
+    Brush,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatRupees, formatRelativeTime } from "@/lib/formatters";
@@ -48,7 +56,7 @@ import { PaymentSettlementModal } from "@/components/admin/PaymentSettlementModa
 interface CafeTableData {
     id: number;
     label: string;
-    status: "available" | "occupied" | "reserved" | "billing";
+    status: "available" | "free" | "occupied" | "reserved" | "billing" | "cleaning";
     outlet_id: number;
 }
 
@@ -69,11 +77,13 @@ const QUICK_NOTES = [
     "Extra Spicy",
     "Medium Spicy",
     "Less Spicy",
+    "No Onion / Garlic",
     "Separate Salan Gravy",
     "Extra Garlic Mayo",
     "Extra Lemon & Onion",
     "Crispy Meat",
     "Serve Hot",
+    "Pack Separate",
 ];
 
 export default function CaptainWaiterPage() {
@@ -94,8 +104,8 @@ export default function CaptainWaiterPage() {
     // Selected Branch
     const [selectedOutletId, setSelectedOutletId] = useState<number>(outlet?.id || 1);
 
-    // Table Filter
-    const [tableFilter, setTableFilter] = useState<"all" | "occupied" | "available" | "calls">("all");
+    // Table Filter: all | occupied | available | bill | cleaning | calls
+    const [tableFilter, setTableFilter] = useState<"all" | "occupied" | "available" | "bill" | "cleaning" | "calls">("all");
     const [tableSearch, setTableSearch] = useState("");
 
     // Active Table Modal state
@@ -106,6 +116,10 @@ export default function CaptainWaiterPage() {
     const [isMenuSheetOpen, setIsMenuSheetOpen] = useState(false);
     const [menuSearch, setMenuSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all");
+    const [dietFilter, setDietFilter] = useState<"all" | "veg" | "non_veg">("all");
+    const [activeNoteItemIdx, setActiveNoteItemIdx] = useState<number | null>(null);
+    const [customNoteInput, setCustomNoteInput] = useState("");
+
     const [cartItems, setCartItems] = useState<
         Array<{
             item_id: number;
@@ -120,7 +134,7 @@ export default function CaptainWaiterPage() {
     >([]);
     const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
-    // Table Transfer Modal state
+    // Table Transfer / Merge Modal state
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [transferTargetTableId, setTransferTargetTableId] = useState<number | null>(null);
     const [isTransferring, setIsTransferring] = useState(false);
@@ -159,7 +173,7 @@ export default function CaptainWaiterPage() {
         }
     };
 
-    // Load initial data
+    // Load initial floor data
     const loadFloorData = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -172,14 +186,14 @@ export default function CaptainWaiterPage() {
                 }),
                 api.getCategories(true, selectedOutletId),
                 api.getMenu(selectedOutletId),
-                api.getServiceCalls("pending"),
+                api.getServiceCalls("pending", selectedOutletId),
             ]);
 
-            // Tables: Use API result or fallback to 10 standard tables
+            // Tables
             if (tablesRes.status === "fulfilled" && Array.isArray(tablesRes.value) && tablesRes.value.length > 0) {
                 setTables(tablesRes.value);
             } else {
-                const fallbackTables: CafeTableData[] = Array.from({ length: 10 }, (_, i) => ({
+                const fallbackTables: CafeTableData[] = Array.from({ length: 12 }, (_, i) => ({
                     id: i + 1,
                     label: `T${i + 1}`,
                     status: "available",
@@ -213,9 +227,8 @@ export default function CaptainWaiterPage() {
             }
         } catch (err: any) {
             console.error("Failed to load Captain floor data:", err);
-            // Ensure tables are always populated and visible
             setTables(
-                Array.from({ length: 10 }, (_, i) => ({
+                Array.from({ length: 12 }, (_, i) => ({
                     id: i + 1,
                     label: `T${i + 1}`,
                     status: "available",
@@ -234,13 +247,22 @@ export default function CaptainWaiterPage() {
     // WebSocket real-time updates
     const handleWsEvent = useCallback(
         (event: SocketEvent) => {
-            if (event.event === "new_order" || event.event === "order_status_updated" || event.event === "running_kot_added") {
+            if (
+                event.event === "new_order" ||
+                event.event === "order_status_updated" ||
+                event.event === "running_kot_added" ||
+                event.event === "table_transferred" ||
+                event.event === "table_updated"
+            ) {
                 loadFloorData();
                 soundManager.playNewOrderChime();
             } else if (event.event === "service_call") {
                 loadFloorData();
                 soundManager.playServiceCallAlert();
-                toast.info(`🔔 Service Call from Table #${event.data?.table_id || "N/A"}`);
+                const callType = event.data?.call_type ? event.data.call_type.toUpperCase() : "SERVICE";
+                toast.info(`Service Call: ${callType} requested from Table #${event.data?.table_id || "N/A"}`);
+            } else if (event.event === "service_call_attended") {
+                loadFloorData();
             }
         },
         [loadFloorData, toast]
@@ -266,9 +288,40 @@ export default function CaptainWaiterPage() {
         try {
             await api.attendServiceCall(callId);
             setServiceCalls((prev) => prev.filter((c) => c.id !== callId));
-            toast.success("Service call cleared");
+            toast.success("Service call marked attended");
         } catch (err: any) {
             toast.error("Failed to clear service call");
+        }
+    };
+
+    // Attend All Service Calls
+    const handleAttendAllServiceCalls = async () => {
+        try {
+            await Promise.all(serviceCalls.map((c) => api.attendServiceCall(c.id)));
+            setServiceCalls([]);
+            toast.success("All pending service calls cleared");
+        } catch (err: any) {
+            toast.error("Failed to clear all service calls");
+        }
+    };
+
+    // Update Table Cleaning Status
+    const handleToggleCleaningStatus = async (table: CafeTableData, setClean: boolean) => {
+        try {
+            const newStatus = setClean ? "free" : "cleaning";
+            await api.updateTableStatus(table.id, newStatus);
+            // Also attend any pending clean service calls for this table
+            const cleanCalls = serviceCalls.filter((c) => c.table_id === table.id && (c.call_type === "clean" || c.call_type === "cleaning"));
+            for (const cc of cleanCalls) {
+                await api.attendServiceCall(cc.id);
+            }
+            toast.success(setClean ? `Table ${table.label} marked cleaned & ready` : `Table ${table.label} flagged for cleaning`);
+            loadFloorData();
+            if (selectedTable?.id === table.id) {
+                setSelectedTable((prev) => (prev ? { ...prev, status: newStatus } : null));
+            }
+        } catch (err: any) {
+            toast.error(err.message || "Failed to update cleaning status");
         }
     };
 
@@ -315,16 +368,55 @@ export default function CaptainWaiterPage() {
         });
     };
 
-    // Add quick note to cart item
+    // Remove Item from Cart
+    const handleRemoveCartItem = (idx: number) => {
+        setCartItems((prev) => prev.filter((_, i) => i !== idx));
+        if (activeNoteItemIdx === idx) {
+            setActiveNoteItemIdx(null);
+            setCustomNoteInput("");
+        }
+    };
+
+    // Add Quick Note to Cart Item
     const handleAddNoteToCartItem = (idx: number, note: string) => {
         setCartItems((prev) => {
             const updated = [...prev];
             const current = updated[idx].notes || "";
             if (!current) {
                 updated[idx].notes = note;
-            } else if (!current.includes(note)) {
+            } else if (current.includes(note)) {
+                // Toggle off if already present
+                const parts = current.split(",").map((s) => s.trim()).filter((s) => s !== note);
+                updated[idx].notes = parts.join(", ");
+            } else {
                 updated[idx].notes = `${current}, ${note}`;
             }
+            return updated;
+        });
+    };
+
+    // Set Custom Freeform Note on Cart Item
+    const handleSaveCustomNote = (idx: number) => {
+        if (!customNoteInput.trim()) return;
+        setCartItems((prev) => {
+            const updated = [...prev];
+            const current = updated[idx].notes || "";
+            if (!current) {
+                updated[idx].notes = customNoteInput.trim();
+            } else {
+                updated[idx].notes = `${current}, ${customNoteInput.trim()}`;
+            }
+            return updated;
+        });
+        setCustomNoteInput("");
+        setActiveNoteItemIdx(null);
+    };
+
+    // Clear All Notes on Cart Item
+    const handleClearItemNotes = (idx: number) => {
+        setCartItems((prev) => {
+            const updated = [...prev];
+            updated[idx].notes = "";
             return updated;
         });
     };
@@ -345,7 +437,7 @@ export default function CaptainWaiterPage() {
                         notes: ci.notes,
                     }))
                 );
-                toast.success(`🔥 Running KOT dispatched to Kitchen for Table ${selectedTable.label}!`);
+                toast.success(`Running KOT dispatched to Kitchen for Table ${selectedTable.label}!`);
                 soundManager.playNewOrderChime();
 
                 // Print Running KOT
@@ -376,7 +468,7 @@ export default function CaptainWaiterPage() {
                         notes: ci.notes,
                     })),
                 });
-                toast.success(`🔥 New KOT sent to Kitchen for Table ${selectedTable.label}!`);
+                toast.success(`New KOT sent to Kitchen for Table ${selectedTable.label}!`);
                 soundManager.playNewOrderChime();
 
                 // Print Kitchen KOT
@@ -386,6 +478,7 @@ export default function CaptainWaiterPage() {
 
             setCartItems([]);
             setIsMenuSheetOpen(false);
+            setActiveNoteItemIdx(null);
             loadFloorData();
         } catch (err: any) {
             toast.error(err.message || "Failed to dispatch KOT");
@@ -394,19 +487,26 @@ export default function CaptainWaiterPage() {
         }
     };
 
-    // Transfer Table
-    const handleTransferTable = async () => {
+    // Transfer or Merge Table
+    const handleTransferOrMergeTable = async () => {
         if (!tableOrder || !transferTargetTableId) return;
+        const targetOrder = getOrderForTable(transferTargetTableId);
+        const isMerging = !!targetOrder;
+
         setIsTransferring(true);
         try {
-            const res = await api.transferOrderTable(tableOrder.id, transferTargetTableId);
-            toast.success(`Order transferred to Table #${transferTargetTableId}`);
+            const res = await api.transferOrderTable(tableOrder.id, transferTargetTableId, isMerging);
+            if (isMerging) {
+                toast.success(`Tables merged! Orders consolidated under Table #${transferTargetTableId}`);
+            } else {
+                toast.success(`Order transferred to Table #${transferTargetTableId}`);
+            }
             setIsTransferModalOpen(false);
             setSelectedTable(null);
             setTableOrder(null);
             loadFloorData();
         } catch (err: any) {
-            toast.error(err.message || "Failed to transfer table");
+            toast.error(err.message || "Failed to transfer or merge table");
         } finally {
             setIsTransferring(false);
         }
@@ -415,12 +515,19 @@ export default function CaptainWaiterPage() {
     // Filtered Tables
     const filteredTables = useMemo(() => {
         return tables.filter((t) => {
+            const billCall = serviceCalls.some((c) => c.table_id === t.id && c.call_type === "bill");
+            const cleanCall = serviceCalls.some((c) => c.table_id === t.id && (c.call_type === "clean" || c.call_type === "cleaning"));
             const hasCall = serviceCalls.some((c) => c.table_id === t.id);
             const activeOrd = getOrderForTable(t.id);
             const isOccupied = !!activeOrd || t.status === "occupied";
+            const isCleaning = cleanCall || t.status === "cleaning";
+            const isBillRequested = billCall || t.status === "billing";
+            const isAvailable = !isOccupied && !isCleaning && !isBillRequested;
 
             if (tableFilter === "occupied" && !isOccupied) return false;
-            if (tableFilter === "available" && isOccupied) return false;
+            if (tableFilter === "available" && !isAvailable) return false;
+            if (tableFilter === "bill" && !isBillRequested) return false;
+            if (tableFilter === "cleaning" && !isCleaning) return false;
             if (tableFilter === "calls" && !hasCall) return false;
 
             if (tableSearch.trim()) {
@@ -431,10 +538,43 @@ export default function CaptainWaiterPage() {
         });
     }, [tables, activeOrders, serviceCalls, tableFilter, tableSearch]);
 
+    // Counts for Filter Badges
+    const counts = useMemo(() => {
+        let occupied = 0;
+        let available = 0;
+        let bill = 0;
+        let cleaning = 0;
+
+        tables.forEach((t) => {
+            const billCall = serviceCalls.some((c) => c.table_id === t.id && c.call_type === "bill");
+            const cleanCall = serviceCalls.some((c) => c.table_id === t.id && (c.call_type === "clean" || c.call_type === "cleaning"));
+            const activeOrd = getOrderForTable(t.id);
+            const isOccupied = !!activeOrd || t.status === "occupied";
+            const isCleaning = cleanCall || t.status === "cleaning";
+            const isBillRequested = billCall || t.status === "billing";
+
+            if (isBillRequested) bill += 1;
+            if (isCleaning) cleaning += 1;
+            if (isOccupied) occupied += 1;
+            if (!isOccupied && !isCleaning && !isBillRequested) available += 1;
+        });
+
+        return {
+            total: tables.length,
+            occupied,
+            available,
+            bill,
+            cleaning,
+            calls: serviceCalls.length,
+        };
+    }, [tables, activeOrders, serviceCalls]);
+
     // Filtered Menu Items
     const filteredMenuItems = useMemo(() => {
         return menuItems.filter((it) => {
             if (selectedCategory !== "all" && it.category_id !== selectedCategory) return false;
+            if (dietFilter === "veg" && !it.is_veg) return false;
+            if (dietFilter === "non_veg" && it.is_veg) return false;
             if (menuSearch.trim()) {
                 const q = menuSearch.toLowerCase();
                 return (
@@ -444,9 +584,44 @@ export default function CaptainWaiterPage() {
             }
             return true;
         });
-    }, [menuItems, selectedCategory, menuSearch]);
+    }, [menuItems, selectedCategory, dietFilter, menuSearch]);
 
     const cartTotalPaise = cartItems.reduce((acc, ci) => acc + ci.price_paise * ci.qty, 0);
+
+    // Helper for Service Call Type Badges
+    const renderCallTypeBadge = (call: any) => {
+        const type = (call.call_type || "waiter").toLowerCase();
+        if (type === "water") {
+            return (
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-400/30 text-[11px] font-bold">
+                    <Droplets className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Table #{call.table_id} (Water)</span>
+                </div>
+            );
+        }
+        if (type === "bill") {
+            return (
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-400/30 text-[11px] font-bold">
+                    <Receipt className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Table #{call.table_id} (Bill)</span>
+                </div>
+            );
+        }
+        if (type === "clean" || type === "cleaning") {
+            return (
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/30 text-[11px] font-bold">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Table #{call.table_id} (Clean)</span>
+                </div>
+            );
+        }
+        return (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[11px] font-bold">
+                <UserCheck className="w-3.5 h-3.5 text-blue-400" />
+                <span>Table #{call.table_id} (Waiter)</span>
+            </div>
+        );
+    };
 
     return (
         <div className="min-h-screen bg-[#0f0d0a] text-white flex flex-col font-sans pb-20">
@@ -459,18 +634,18 @@ export default function CaptainWaiterPage() {
                     <div>
                         <div className="flex items-center gap-2">
                             <h1 className="text-base font-black text-white leading-tight">Captain Waiter POS</h1>
-                            <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-400/30 uppercase">
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-400/30 uppercase tracking-wider">
                                 Floor Handheld
                             </span>
                         </div>
                         <p className="text-[11px] text-white/50">
-                            {outlet?.name || "Surya Family Restaurant"} • Floor Captain
+                            {outlet?.name || "Surya Family Restaurant"} • Floor Operations
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {/* Branch Switcher Pill (Owners/SuperAdmin only; Staff locked to assigned branch) */}
+                    {/* Branch Switcher (Owner/Admin only) */}
                     {isOwner ? (
                         <div className="flex rounded-xl bg-black/40 border border-white/10 p-1">
                             <button
@@ -478,7 +653,7 @@ export default function CaptainWaiterPage() {
                                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer ${
                                     selectedOutletId === 1 ? "bg-amber-500 text-black" : "text-white/60"
                                 }`}
-                                title="Switch to Surya Family Restaurant (Kadiri)"
+                                title="Switch to Surya Family Restaurant"
                             >
                                 Surya
                             </button>
@@ -495,16 +670,16 @@ export default function CaptainWaiterPage() {
                     ) : (
                         <div className="px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-[11px] font-black text-amber-400 flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                            <span>B{user?.outlet_id || 1} • Surya Family Restaurant</span>
+                            <span>B{user?.outlet_id || 1} • Surya</span>
                         </div>
                     )}
 
-                    {/* 1-Tap App Install Button */}
+                    {/* App Install Button */}
                     {!isStandalone && (
                         <button
                             onClick={handleInstallClick}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-xs shadow-md transition active:scale-95 cursor-pointer shrink-0"
-                            title="Install Captain App on Phone"
+                            title="Install Captain App on Tablet / Phone"
                         >
                             <Download className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">Install App</span>
@@ -524,22 +699,45 @@ export default function CaptainWaiterPage() {
 
             {/* PENDING SERVICE CALLS ALERT BANNER */}
             {serviceCalls.length > 0 && (
-                <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-900 border-b border-blue-400/30 px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-lg animate-pulse">
-                    <div className="flex items-center gap-2">
-                        <Bell className="w-4 h-4 text-blue-300 fill-blue-300 shrink-0" />
-                        <span className="text-xs font-black text-white">
-                            {serviceCalls.length} Pending Table Service Calls:
-                        </span>
-                        <div className="flex gap-1.5 overflow-x-auto">
+                <div className="bg-gradient-to-r from-[#19152b] via-[#1f1a3a] to-[#19152b] border-b border-indigo-400/30 px-4 py-3 shadow-xl">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2">
+                            <span className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                                <Bell className="w-4 h-4" />
+                            </span>
+                            <div>
+                                <span className="text-xs font-black text-white">
+                                    {serviceCalls.length} Incoming Table Service {serviceCalls.length === 1 ? "Request" : "Requests"}:
+                                </span>
+                                <p className="text-[10px] text-white/50">Tap checkmark to attend and dismiss</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
                             {serviceCalls.map((c) => (
-                                <button
+                                <div
                                     key={c.id}
-                                    onClick={() => handleAttendServiceCall(c.id)}
-                                    className="px-2 py-0.5 rounded bg-blue-500 hover:bg-blue-400 text-black text-[10px] font-extrabold cursor-pointer"
+                                    className="flex items-center gap-1.5 bg-black/50 border border-white/10 rounded-xl p-1 shrink-0"
                                 >
-                                    Table #{c.table_id} ({c.call_type || "Call"}) ✓ Clear
-                                </button>
+                                    {renderCallTypeBadge(c)}
+                                    <button
+                                        onClick={() => handleAttendServiceCall(c.id)}
+                                        className="p-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black transition cursor-pointer"
+                                        title="Mark Call Attended"
+                                    >
+                                        <Check className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
                             ))}
+
+                            {serviceCalls.length > 1 && (
+                                <button
+                                    onClick={handleAttendAllServiceCalls}
+                                    className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 text-[11px] font-bold transition shrink-0 cursor-pointer border border-white/10"
+                                >
+                                    Attend All
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -560,38 +758,79 @@ export default function CaptainWaiterPage() {
                     </div>
                 </div>
 
-                {/* Filter Pills */}
-                <div className="flex gap-1.5 overflow-x-auto pb-1">
-                    {[
-                        { id: "all", label: `All Tables (${tables.length})` },
-                        {
-                            id: "occupied",
-                            label: `🟡 Dining (${activeOrders.length})`,
-                            activeClass: "bg-amber-500 text-black",
-                        },
-                        {
-                            id: "available",
-                            label: `🟢 Available (${Math.max(0, tables.length - activeOrders.length)})`,
-                            activeClass: "bg-emerald-500 text-black",
-                        },
-                        {
-                            id: "calls",
-                            label: `🔔 Calls (${serviceCalls.length})`,
-                            activeClass: "bg-blue-500 text-white",
-                        },
-                    ].map((f) => (
-                        <button
-                            key={f.id}
-                            onClick={() => setTableFilter(f.id as any)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition cursor-pointer ${
-                                tableFilter === f.id
-                                    ? f.activeClass || "bg-amber-500 text-black"
-                                    : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10"
-                            }`}
-                        >
-                            {f.label}
-                        </button>
-                    ))}
+                {/* Filter Pills with Lucide Icons */}
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                    <button
+                        onClick={() => setTableFilter("all")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
+                            tableFilter === "all"
+                                ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
+                                : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10"
+                        }`}
+                    >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>All Tables ({counts.total})</span>
+                    </button>
+
+                    <button
+                        onClick={() => setTableFilter("occupied")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
+                            tableFilter === "occupied"
+                                ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
+                                : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10"
+                        }`}
+                    >
+                        <UtensilsCrossed className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Dining ({counts.occupied})</span>
+                    </button>
+
+                    <button
+                        onClick={() => setTableFilter("available")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
+                            tableFilter === "available"
+                                ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20"
+                                : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10"
+                        }`}
+                    >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Available ({counts.available})</span>
+                    </button>
+
+                    <button
+                        onClick={() => setTableFilter("bill")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
+                            tableFilter === "bill"
+                                ? "bg-amber-400 text-black shadow-md shadow-amber-400/20"
+                                : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10"
+                        }`}
+                    >
+                        <Receipt className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Bill Requested ({counts.bill})</span>
+                    </button>
+
+                    <button
+                        onClick={() => setTableFilter("cleaning")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
+                            tableFilter === "cleaning"
+                                ? "bg-purple-500 text-white shadow-md shadow-purple-500/20"
+                                : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10"
+                        }`}
+                    >
+                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Cleaning Needed ({counts.cleaning})</span>
+                    </button>
+
+                    <button
+                        onClick={() => setTableFilter("calls")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
+                            tableFilter === "calls"
+                                ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
+                                : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10"
+                        }`}
+                    >
+                        <Bell className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Calls ({counts.calls})</span>
+                    </button>
                 </div>
             </div>
 
@@ -600,57 +839,80 @@ export default function CaptainWaiterPage() {
                 {isLoading ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {[...Array(8)].map((_, i) => (
-                            <div key={i} className="h-32 rounded-2xl bg-white/5 animate-pulse border border-white/5" />
+                            <div key={i} className="h-36 rounded-2xl bg-white/5 animate-pulse border border-white/5" />
                         ))}
                     </div>
                 ) : filteredTables.length === 0 ? (
                     <div className="text-center py-16 text-white/40">
                         <Utensils className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm font-bold">No tables match your filter</p>
+                        <p className="text-sm font-bold">No tables match your selected filter</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                         {filteredTables.map((table) => {
                             const order = getOrderForTable(table.id);
                             const billCall = serviceCalls.find((c) => c.table_id === table.id && c.call_type === "bill");
-                            const otherCall = serviceCalls.find((c) => c.table_id === table.id && c.call_type !== "bill");
+                            const cleanCall = serviceCalls.find((c) => c.table_id === table.id && (c.call_type === "clean" || c.call_type === "cleaning"));
+                            const waterCall = serviceCalls.find((c) => c.table_id === table.id && c.call_type === "water");
+                            const waiterCall = serviceCalls.find((c) => c.table_id === table.id && c.call_type === "waiter");
+
                             const isOccupied = !!order || table.status === "occupied";
+                            const isCleaningNeeded = !!cleanCall || table.status === "cleaning";
+                            const isBillRequested = !!billCall || table.status === "billing";
+
+                            // Dynamic Card Border & Styling
+                            let cardStyle = "border-emerald-500/40 bg-emerald-950/10 hover:border-emerald-400";
+                            if (isBillRequested) {
+                                cardStyle = "border-amber-400 bg-amber-950/60 shadow-xl shadow-amber-500/20 animate-pulse";
+                            } else if (isCleaningNeeded) {
+                                cardStyle = "border-purple-500 bg-purple-950/40 shadow-lg shadow-purple-500/20";
+                            } else if (waterCall || waiterCall) {
+                                cardStyle = "border-sky-400 bg-sky-950/40 shadow-lg shadow-sky-500/20";
+                            } else if (isOccupied) {
+                                cardStyle = "border-amber-500/80 bg-amber-950/20 shadow-md shadow-amber-500/10 hover:border-amber-400";
+                            }
 
                             return (
                                 <div
                                     key={table.id}
                                     onClick={() => handleTableClick(table)}
-                                    className={`relative p-3.5 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[150px] ${
-                                        billCall
-                                            ? "border-amber-400 bg-amber-950/60 shadow-xl shadow-amber-500/20 animate-pulse"
-                                            : otherCall
-                                            ? "border-blue-400 bg-blue-950/40 shadow-lg shadow-blue-500/20"
-                                            : isOccupied
-                                            ? "border-amber-500/80 bg-amber-950/20 shadow-md shadow-amber-500/10 hover:border-amber-400"
-                                            : "border-emerald-500/40 bg-emerald-950/10 hover:border-emerald-400"
-                                    }`}
+                                    className={`relative p-3.5 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[165px] ${cardStyle}`}
                                 >
-                                    {/* Top Status Indicators */}
-                                    <div className="flex items-center justify-between">
+                                    {/* Top Status Header */}
+                                    <div className="flex items-center justify-between gap-1">
                                         <span className="text-lg font-black font-mono text-white">
                                             {table.label}
                                         </span>
-                                        {billCall ? (
-                                            <span className="px-2 py-0.5 rounded-full bg-amber-400 text-black font-black text-[10px] uppercase tracking-wider flex items-center gap-1">
-                                                <span>🧾 Bill</span>
-                                            </span>
-                                        ) : otherCall ? (
-                                            <span className="p-1 rounded-md bg-blue-500 text-black">
-                                                <Bell className="w-3.5 h-3.5 fill-black" />
-                                            </span>
-                                        ) : isOccupied ? (
-                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-                                        ) : (
-                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                                        )}
+
+                                        {/* Status Badges */}
+                                        <div className="flex items-center gap-1">
+                                            {isBillRequested ? (
+                                                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-black font-black text-[10px] uppercase tracking-wider flex items-center gap-1">
+                                                    <Receipt className="w-3 h-3" />
+                                                    <span>Bill</span>
+                                                </span>
+                                            ) : isCleaningNeeded ? (
+                                                <span className="px-2 py-0.5 rounded-full bg-purple-500 text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-1">
+                                                    <Sparkles className="w-3 h-3" />
+                                                    <span>Clean</span>
+                                                </span>
+                                            ) : waterCall ? (
+                                                <span className="p-1 rounded-md bg-sky-500 text-black" title="Water requested">
+                                                    <Droplets className="w-3.5 h-3.5" />
+                                                </span>
+                                            ) : waiterCall ? (
+                                                <span className="p-1 rounded-md bg-blue-500 text-black" title="Waiter requested">
+                                                    <Bell className="w-3.5 h-3.5" />
+                                                </span>
+                                            ) : isOccupied ? (
+                                                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+                                            ) : (
+                                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* Order Snapshot */}
+                                    {/* Order / Table Status Body */}
                                     {order ? (
                                         <div className="space-y-1 my-auto">
                                             <p className="text-sm font-black text-amber-300 font-mono">
@@ -667,16 +929,50 @@ export default function CaptainWaiterPage() {
                                                 {formatRelativeTime(order.created_at)}
                                             </p>
                                         </div>
+                                    ) : isCleaningNeeded ? (
+                                        <div className="my-auto text-center py-1">
+                                            <p className="text-[11px] font-black text-purple-300 flex items-center justify-center gap-1">
+                                                <Sparkles className="w-3 h-3" />
+                                                Cleaning Needed
+                                            </p>
+                                            <p className="text-[9px] text-white/40">Vacated table</p>
+                                        </div>
                                     ) : (
-                                        <div className="my-auto text-center">
+                                        <div className="my-auto text-center py-1">
                                             <p className="text-[11px] font-bold text-emerald-400">Vacant</p>
                                             <p className="text-[9px] text-white/40">Tap to Punch Order</p>
                                         </div>
                                     )}
 
-                                    {/* Bottom Quick Button */}
+                                    {/* Bottom Quick Action */}
                                     <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-bold">
-                                        {isOccupied && order ? (
+                                        {isBillRequested && order ? (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedTable(table);
+                                                    setTableOrder(order);
+                                                    setIsSettlementModalOpen(true);
+                                                }}
+                                                className="w-full py-1 px-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-black flex items-center justify-center gap-1 shadow-md transition"
+                                            >
+                                                <CreditCard className="w-3 h-3" />
+                                                <span>Settle Bill</span>
+                                            </button>
+                                        ) : isCleaningNeeded ? (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleToggleCleaningStatus(table, true);
+                                                }}
+                                                className="w-full py-1 px-2 rounded-lg bg-purple-500 hover:bg-purple-400 text-white font-black flex items-center justify-center gap-1 shadow-sm transition"
+                                            >
+                                                <Check className="w-3 h-3" />
+                                                <span>Mark Cleaned</span>
+                                            </button>
+                                        ) : isOccupied && order ? (
                                             <button
                                                 type="button"
                                                 onClick={(e) => {
@@ -691,8 +987,8 @@ export default function CaptainWaiterPage() {
                                                 <span>Settle Bill</span>
                                             </button>
                                         ) : (
-                                            <div className="flex items-center justify-between w-full">
-                                                <span className="text-emerald-400">Available</span>
+                                            <div className="flex items-center justify-between w-full text-emerald-400">
+                                                <span>Ready to Seat</span>
                                                 <ArrowRight className="w-3 h-3 text-white/50" />
                                             </div>
                                         )}
@@ -719,13 +1015,30 @@ export default function CaptainWaiterPage() {
                                 <div className="flex items-center gap-2">
                                     <h3 className="text-lg font-black text-white">{selectedTable.label}</h3>
                                     <span
-                                        className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                        className={`text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 ${
                                             tableOrder
                                                 ? "bg-amber-500/20 text-amber-300 border border-amber-400/30"
+                                                : selectedTable.status === "cleaning"
+                                                ? "bg-purple-500/20 text-purple-300 border border-purple-400/30"
                                                 : "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30"
                                         }`}
                                     >
-                                        {tableOrder ? "Occupied Dining" : "Available"}
+                                        {tableOrder ? (
+                                            <>
+                                                <UtensilsCrossed className="w-3 h-3" />
+                                                <span>Occupied Dining</span>
+                                            </>
+                                        ) : selectedTable.status === "cleaning" ? (
+                                            <>
+                                                <Sparkles className="w-3 h-3" />
+                                                <span>Cleaning Needed</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle2 className="w-3 h-3" />
+                                                <span>Available</span>
+                                            </>
+                                        )}
                                     </span>
                                 </div>
                                 {tableOrder && (
@@ -745,6 +1058,37 @@ export default function CaptainWaiterPage() {
 
                         {/* Body */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {/* Service Calls for this Table */}
+                            {serviceCalls.filter((c) => c.table_id === selectedTable.id).length > 0 && (
+                                <div className="p-3 rounded-2xl bg-indigo-950/40 border border-indigo-400/30 space-y-2">
+                                    <div className="flex items-center justify-between text-xs font-bold text-indigo-300">
+                                        <span className="flex items-center gap-1.5">
+                                            <Bell className="w-3.5 h-3.5 text-indigo-400" />
+                                            Active Service Buzzer Calls
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {serviceCalls
+                                            .filter((c) => c.table_id === selectedTable.id)
+                                            .map((c) => (
+                                                <div
+                                                    key={c.id}
+                                                    className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-black/40 border border-white/10"
+                                                >
+                                                    {renderCallTypeBadge(c)}
+                                                    <button
+                                                        onClick={() => handleAttendServiceCall(c.id)}
+                                                        className="p-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition cursor-pointer"
+                                                        title="Attend Call"
+                                                    >
+                                                        <Check className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {tableOrder ? (
                                 <div className="space-y-4">
                                     {/* Existing Items in Order */}
@@ -753,7 +1097,7 @@ export default function CaptainWaiterPage() {
                                             <span>Current Placed Items</span>
                                             <span>{tableOrder.items?.length || 0} dishes</span>
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 max-h-56 overflow-y-auto">
                                             {tableOrder.items?.map((it: any) => (
                                                 <div
                                                     key={it.id}
@@ -770,7 +1114,8 @@ export default function CaptainWaiterPage() {
                                                             </span>
                                                         )}
                                                         {it.notes && (
-                                                            <p className="text-[10px] text-rose-300">
+                                                            <p className="text-[10px] text-rose-300 flex items-center gap-1 mt-0.5">
+                                                                <MessageSquare className="w-2.5 h-2.5" />
                                                                 Note: {it.notes}
                                                             </p>
                                                         )}
@@ -799,14 +1144,14 @@ export default function CaptainWaiterPage() {
                                         </div>
                                     </div>
 
-                                    {/* Action Buttons for Active Table */}
+                                    {/* Action Buttons for Active Dining Table */}
                                     <div className="grid grid-cols-2 gap-2 pt-2">
                                         <button
                                             onClick={() => setIsSettlementModalOpen(true)}
-                                            className="col-span-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 cursor-pointer"
+                                            className="col-span-2 py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 cursor-pointer"
                                         >
                                             <CreditCard className="w-4 h-4" />
-                                            <span>Settle Table Bill (Dynamic UPI / Cash / Split)</span>
+                                            <span>Settle Table Bill (Dynamic UPI / Cash)</span>
                                         </button>
 
                                         <button
@@ -818,11 +1163,14 @@ export default function CaptainWaiterPage() {
                                         </button>
 
                                         <button
-                                            onClick={() => setIsTransferModalOpen(true)}
+                                            onClick={() => {
+                                                setTransferTargetTableId(null);
+                                                setIsTransferModalOpen(true);
+                                            }}
                                             className="py-3 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-white/15 cursor-pointer"
                                         >
                                             <ArrowLeftRight className="w-4 h-4 text-cyan-400" />
-                                            <span>Transfer Table</span>
+                                            <span>Transfer / Merge Table</span>
                                         </button>
 
                                         <button
@@ -843,24 +1191,45 @@ export default function CaptainWaiterPage() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-center py-10 space-y-4">
+                                <div className="text-center py-8 space-y-4">
                                     <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
                                         <Utensils className="w-8 h-8" />
                                     </div>
                                     <div>
-                                        <h4 className="text-base font-black text-white">Table is Available</h4>
+                                        <h4 className="text-base font-black text-white">Table is Vacant & Ready</h4>
                                         <p className="text-xs text-white/50 max-w-xs mx-auto mt-1">
-                                            Guests are seated? Punch in their first round of Mandi, Biryani, and beverages.
+                                            Punch in first round of Mandi, Biryani, Starters, and Beverages for guests seated at {selectedTable.label}.
                                         </p>
                                     </div>
 
                                     <button
                                         onClick={() => setIsMenuSheetOpen(true)}
-                                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+                                        className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer"
                                     >
                                         <Plus className="w-4 h-4" />
                                         <span>Start New Order for {selectedTable.label}</span>
                                     </button>
+
+                                    {/* Table Cleaning Quick Toggle */}
+                                    <div className="pt-4 border-t border-white/10">
+                                        {selectedTable.status === "cleaning" ? (
+                                            <button
+                                                onClick={() => handleToggleCleaningStatus(selectedTable, true)}
+                                                className="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                                            >
+                                                <Check className="w-4 h-4" />
+                                                <span>Mark Table Cleaned & Ready</span>
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleToggleCleaningStatus(selectedTable, false)}
+                                                className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-purple-300 font-bold text-xs flex items-center justify-center gap-2 border border-purple-500/30 cursor-pointer"
+                                            >
+                                                <Sparkles className="w-4 h-4 text-purple-400" />
+                                                <span>Flag Table Needs Cleaning</span>
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -882,10 +1251,10 @@ export default function CaptainWaiterPage() {
                             </button>
                             <div>
                                 <h3 className="text-sm font-black text-white">
-                                    {tableOrder ? `Running KOT • ${selectedTable?.label}` : `New Order • ${selectedTable?.label}`}
+                                    {tableOrder ? `Running KOT • Table ${selectedTable?.label}` : `New Order • Table ${selectedTable?.label}`}
                                 </h3>
                                 <p className="text-[10px] text-amber-400 font-bold">
-                                    {cartItems.length} items to dispatch
+                                    {cartItems.length} items staged for kitchen
                                 </p>
                             </div>
                         </div>
@@ -904,24 +1273,55 @@ export default function CaptainWaiterPage() {
 
                     {/* Search & Category Pills */}
                     <div className="p-3 bg-[#16120e] border-b border-white/5 space-y-2">
-                        <div className="relative">
-                            <Search className="w-4 h-4 text-white/40 absolute left-3 top-1/2 -translate-y-1/2" />
-                            <input
-                                type="text"
-                                placeholder="Search dishes (e.g. Mandi, Naan, 65, Chai)..."
-                                value={menuSearch}
-                                onChange={(e) => setMenuSearch(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder:text-white/40 focus:outline-hidden focus:border-amber-500"
-                            />
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <Search className="w-4 h-4 text-white/40 absolute left-3 top-1/2 -translate-y-1/2" />
+                                <input
+                                    type="text"
+                                    placeholder="Search dishes (e.g. Mandi, Naan, 65, Biryani)..."
+                                    value={menuSearch}
+                                    onChange={(e) => setMenuSearch(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder:text-white/40 focus:outline-hidden focus:border-amber-500"
+                                />
+                            </div>
+
+                            {/* Diet Filter Switch */}
+                            <div className="flex rounded-xl bg-black/40 border border-white/10 p-0.5">
+                                <button
+                                    onClick={() => setDietFilter("all")}
+                                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                                        dietFilter === "all" ? "bg-amber-500 text-black font-black" : "text-white/60"
+                                    }`}
+                                >
+                                    All
+                                </button>
+                                <button
+                                    onClick={() => setDietFilter("veg")}
+                                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                                        dietFilter === "veg" ? "bg-emerald-500 text-black font-black" : "text-emerald-400"
+                                    }`}
+                                >
+                                    Veg
+                                </button>
+                                <button
+                                    onClick={() => setDietFilter("non_veg")}
+                                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                                        dietFilter === "non_veg" ? "bg-red-500 text-white font-black" : "text-red-400"
+                                    }`}
+                                >
+                                    Non-Veg
+                                </button>
+                            </div>
                         </div>
 
+                        {/* Category Pills */}
                         <div className="flex gap-1.5 overflow-x-auto pb-1">
                             <button
                                 onClick={() => setSelectedCategory("all")}
                                 className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ${
                                     selectedCategory === "all"
-                                        ? "bg-amber-500 text-black"
-                                        : "bg-white/5 text-white/60 border border-white/10"
+                                        ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
+                                        : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
                                 }`}
                             >
                                 All Categories
@@ -932,8 +1332,8 @@ export default function CaptainWaiterPage() {
                                     onClick={() => setSelectedCategory(cat.id)}
                                     className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ${
                                         selectedCategory === cat.id
-                                            ? "bg-amber-500 text-black"
-                                            : "bg-white/5 text-white/60 border border-white/10"
+                                            ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
+                                            : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
                                     }`}
                                 >
                                     {cat.name}
@@ -953,8 +1353,8 @@ export default function CaptainWaiterPage() {
                                     <div className="flex-1">
                                         <div className="flex items-center gap-1.5">
                                             <span
-                                                className={`w-2 h-2 rounded-full ${
-                                                    item.is_veg ? "bg-emerald-400" : "bg-red-400"
+                                                className={`w-2.5 h-2.5 rounded-full ${
+                                                    item.is_veg ? "bg-emerald-400" : "bg-red-500"
                                                 }`}
                                             />
                                             <h4 className="text-xs font-black text-white">{item.name}</h4>
@@ -969,15 +1369,16 @@ export default function CaptainWaiterPage() {
 
                                     {/* Add button or Variants */}
                                     {item.has_variants && item.variants && item.variants.length > 0 ? (
-                                        <div className="flex flex-wrap gap-1 justify-end max-w-[200px]">
+                                        <div className="flex flex-wrap gap-1.5 justify-end max-w-[220px]">
                                             {item.variants.map((v) => (
                                                 <button
                                                     key={v.id}
                                                     type="button"
                                                     onClick={() => handleAddItemToCart(item, v)}
-                                                    className="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-400/30 text-[10px] font-black transition cursor-pointer"
+                                                    className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-400/40 text-[11px] font-black transition cursor-pointer min-h-[36px] flex items-center gap-1"
                                                 >
-                                                    + {v.name} ({formatRupees(v.price_paise)})
+                                                    <Plus className="w-3 h-3" />
+                                                    <span>{v.name} ({formatRupees(v.price_paise)})</span>
                                                 </button>
                                             ))}
                                         </div>
@@ -985,9 +1386,10 @@ export default function CaptainWaiterPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleAddItemToCart(item)}
-                                            className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs shadow-md transition cursor-pointer"
+                                            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs shadow-md transition cursor-pointer min-h-[36px] flex items-center gap-1"
                                         >
-                                            + Add
+                                            <Plus className="w-3.5 h-3.5" />
+                                            <span>Add</span>
                                         </button>
                                     )}
                                 </div>
@@ -995,47 +1397,154 @@ export default function CaptainWaiterPage() {
                         ))}
                     </div>
 
-                    {/* Staged Cart Items Bar at Bottom */}
+                    {/* Staged Cart Items Bar at Bottom with Full Kitchen Notes & Special Instructions */}
                     {cartItems.length > 0 && (
-                        <div className="p-3 bg-[#181410] border-t border-white/10 space-y-2 pb-safe shrink-0">
+                        <div className="p-3 bg-[#181410] border-t border-white/10 space-y-2 pb-safe shrink-0 shadow-2xl">
                             <div className="flex items-center justify-between text-xs font-bold text-white/70">
-                                <span>Staged for KOT ({cartItems.length})</span>
-                                <span className="font-mono text-amber-400">{formatRupees(cartTotalPaise)}</span>
+                                <span className="flex items-center gap-1.5">
+                                    <Utensils className="w-3.5 h-3.5 text-amber-400" />
+                                    Staged for KOT ({cartItems.length} {cartItems.length === 1 ? "dish" : "dishes"})
+                                </span>
+                                <span className="font-mono text-amber-400 font-black">{formatRupees(cartTotalPaise)}</span>
                             </div>
 
-                            <div className="max-h-36 overflow-y-auto space-y-1.5">
+                            <div className="max-h-48 overflow-y-auto space-y-2">
                                 {cartItems.map((ci, idx) => (
                                     <div
                                         key={idx}
-                                        className="p-2 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-xs"
+                                        className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs"
                                     >
-                                        <div className="flex-1 pr-2">
-                                            <p className="font-bold text-white leading-tight">
-                                                {ci.name} {ci.variant_name ? `(${ci.variant_name})` : ""}
-                                            </p>
-                                            {ci.notes && (
-                                                <p className="text-[10px] text-amber-300">Note: {ci.notes}</p>
-                                            )}
-                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex-1 pr-2">
+                                                <p className="font-bold text-white leading-tight">
+                                                    {ci.name} {ci.variant_name ? `(${ci.variant_name})` : ""}
+                                                </p>
+                                                <p className="text-[10px] text-amber-400/90 font-mono mt-0.5">
+                                                    {formatRupees(ci.price_paise * ci.qty)}
+                                                </p>
+                                            </div>
 
-                                        {/* Quick Note Pills */}
-                                        <div className="flex items-center gap-1">
-                                            <div className="flex items-center gap-1 bg-black/40 border border-white/10 rounded-lg p-0.5">
+                                            {/* Quantity Adjusters */}
+                                            <div className="flex items-center gap-1">
+                                                <div className="flex items-center gap-1 bg-black/60 border border-white/10 rounded-lg p-0.5">
+                                                    <button
+                                                        onClick={() => handleUpdateCartQty(idx, -1)}
+                                                        className="w-7 h-7 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition"
+                                                        title="Decrease"
+                                                    >
+                                                        <Minus className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    <span className="w-6 text-center font-mono font-black text-sm">{ci.qty}</span>
+                                                    <button
+                                                        onClick={() => handleUpdateCartQty(idx, 1)}
+                                                        className="w-7 h-7 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition"
+                                                        title="Increase"
+                                                    >
+                                                        <Plus className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+
                                                 <button
-                                                    onClick={() => handleUpdateCartQty(idx, -1)}
-                                                    className="w-5 h-5 rounded bg-white/10 text-white flex items-center justify-center cursor-pointer"
+                                                    onClick={() => handleRemoveCartItem(idx)}
+                                                    className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 cursor-pointer"
+                                                    title="Remove item"
                                                 >
-                                                    <Minus className="w-3 h-3" />
-                                                </button>
-                                                <span className="w-5 text-center font-mono font-bold">{ci.qty}</span>
-                                                <button
-                                                    onClick={() => handleUpdateCartQty(idx, 1)}
-                                                    className="w-5 h-5 rounded bg-white/10 text-white flex items-center justify-center cursor-pointer"
-                                                >
-                                                    <Plus className="w-3 h-3" />
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             </div>
                                         </div>
+
+                                        {/* Notes Display & Toggle Button */}
+                                        <div className="pt-1 border-t border-white/5 flex items-center justify-between gap-2">
+                                            <div className="flex-1 overflow-hidden">
+                                                {ci.notes ? (
+                                                    <div className="flex items-center gap-1 text-[10px] text-amber-300">
+                                                        <MessageSquare className="w-3 h-3 shrink-0" />
+                                                        <span className="truncate">Note: {ci.notes}</span>
+                                                        <button
+                                                            onClick={() => handleClearItemNotes(idx)}
+                                                            className="text-white/40 hover:text-white ml-1 cursor-pointer"
+                                                            title="Clear note"
+                                                        >
+                                                            <X className="w-2.5 h-2.5" />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[10px] text-white/40 italic">No kitchen instruction</span>
+                                                )}
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveNoteItemIdx(activeNoteItemIdx === idx ? null : idx);
+                                                    setCustomNoteInput("");
+                                                }}
+                                                className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition cursor-pointer flex items-center gap-1 ${
+                                                    activeNoteItemIdx === idx
+                                                        ? "bg-amber-500 text-black border-amber-400"
+                                                        : "bg-white/5 text-amber-300/80 border-amber-400/20 hover:bg-white/10"
+                                                }`}
+                                            >
+                                                <MessageSquare className="w-3 h-3" />
+                                                <span>{activeNoteItemIdx === idx ? "Close" : "+ Note"}</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Expandable Kitchen Instructions / Notes Panel */}
+                                        {activeNoteItemIdx === idx && (
+                                            <div className="p-2.5 rounded-xl bg-black/60 border border-amber-400/30 space-y-2 mt-1 animate-in fade-in duration-200">
+                                                <p className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
+                                                    <ChefHat className="w-3 h-3" />
+                                                    Special Customer Kitchen Instructions:
+                                                </p>
+
+                                                {/* Quick Instruction Chips */}
+                                                <div className="flex flex-wrap gap-1">
+                                                    {QUICK_NOTES.map((qn) => {
+                                                        const isSelected = ci.notes?.includes(qn);
+                                                        return (
+                                                            <button
+                                                                key={qn}
+                                                                type="button"
+                                                                onClick={() => handleAddNoteToCartItem(idx, qn)}
+                                                                className={`px-2 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                                                                    isSelected
+                                                                        ? "bg-amber-400 text-black font-black"
+                                                                        : "bg-white/10 text-white/80 hover:bg-white/15 border border-white/10"
+                                                                }`}
+                                                            >
+                                                                {qn}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                {/* Custom Note Freeform Input */}
+                                                <div className="flex items-center gap-1 pt-1">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Custom instruction (e.g. Nut allergy, less oil)..."
+                                                        value={customNoteInput}
+                                                        onChange={(e) => setCustomNoteInput(e.target.value)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "Enter") {
+                                                                e.preventDefault();
+                                                                handleSaveCustomNote(idx);
+                                                            }
+                                                        }}
+                                                        className="flex-1 bg-white/5 border border-white/15 rounded-lg px-2.5 py-1 text-[11px] text-white placeholder:text-white/40 focus:outline-hidden focus:border-amber-400"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSaveCustomNote(idx)}
+                                                        className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-black cursor-pointer shrink-0"
+                                                    >
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -1043,12 +1552,12 @@ export default function CaptainWaiterPage() {
                             <button
                                 onClick={handleSubmitKitchenKOT}
                                 disabled={isSubmittingOrder}
-                                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs shadow-xl flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                             >
                                 <Flame className="w-4 h-4 text-black" />
                                 <span>
                                     {isSubmittingOrder
-                                        ? "Sending KOT..."
+                                        ? "Sending KOT to Kitchen..."
                                         : `Send KOT to Kitchen (${formatRupees(cartTotalPaise)})`}
                                 </span>
                             </button>
@@ -1057,58 +1566,130 @@ export default function CaptainWaiterPage() {
                 </div>
             )}
 
-            {/* TABLE TRANSFER MODAL */}
+            {/* TABLE TRANSFER & MERGE MODAL */}
             {isTransferModalOpen && tableOrder && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-                    <div className="w-full max-w-sm bg-[#1a1612] border border-white/15 rounded-3xl p-6 space-y-4 shadow-2xl">
+                    <div className="w-full max-w-md bg-[#1a1612] border border-white/15 rounded-3xl p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-base font-black text-white">Transfer {selectedTable?.label}</h3>
+                            <div className="flex items-center gap-2">
+                                <ArrowLeftRight className="w-5 h-5 text-cyan-400" />
+                                <h3 className="text-base font-black text-white">Transfer / Merge {selectedTable?.label}</h3>
+                            </div>
                             <button
                                 onClick={() => setIsTransferModalOpen(false)}
-                                className="p-1 rounded-lg text-white/50 hover:text-white"
+                                className="p-1 rounded-lg text-white/50 hover:text-white cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
+                        <div className="p-3 rounded-2xl bg-black/40 border border-white/10 text-xs space-y-1">
+                            <div className="flex justify-between text-white/60">
+                                <span>Source Order</span>
+                                <span className="font-mono text-white">#{tableOrder.order_number}</span>
+                            </div>
+                            <div className="flex justify-between text-white/60">
+                                <span>Current Total</span>
+                                <span className="font-mono text-amber-400 font-bold">{formatRupees(tableOrder.total_paise)}</span>
+                            </div>
+                        </div>
+
                         <p className="text-xs text-white/60">
-                            Select destination table to move Order #{tableOrder.order_number} ({formatRupees(tableOrder.total_paise)}):
+                            Select destination table. Vacant tables will receive a clean transfer. Occupied tables will trigger an order merge:
                         </p>
 
-                        <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                        <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto">
                             {tables
                                 .filter((t) => t.id !== selectedTable?.id)
-                                .map((t) => (
-                                    <button
-                                        key={t.id}
-                                        type="button"
-                                        onClick={() => setTransferTargetTableId(t.id)}
-                                        className={`p-2.5 rounded-xl border text-xs font-black transition cursor-pointer ${
-                                            transferTargetTableId === t.id
-                                                ? "border-cyan-400 bg-cyan-950/60 text-cyan-300"
-                                                : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
-                                        }`}
-                                    >
-                                        {t.label}
-                                    </button>
-                                ))}
+                                .map((t) => {
+                                    const destOrder = getOrderForTable(t.id);
+                                    const isOccupied = !!destOrder || t.status === "occupied";
+                                    const isSelected = transferTargetTableId === t.id;
+
+                                    return (
+                                        <button
+                                            key={t.id}
+                                            type="button"
+                                            onClick={() => setTransferTargetTableId(t.id)}
+                                            className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                                                isSelected
+                                                    ? "border-cyan-400 bg-cyan-950/60 shadow-lg shadow-cyan-500/20"
+                                                    : "border-white/10 bg-white/5 hover:bg-white/10"
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-black text-white font-mono">{t.label}</span>
+                                                {isOccupied ? (
+                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                                                        Dining
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                                        Vacant
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className="mt-2 text-[10px]">
+                                                {destOrder ? (
+                                                    <p className="text-amber-300 font-mono font-bold">
+                                                        Merge • {formatRupees(destOrder.total_paise)}
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-emerald-400">Transfer here</p>
+                                                )}
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                         </div>
+
+                        {/* Summary / Warning if Target Table is Occupied (Merge) */}
+                        {transferTargetTableId && (() => {
+                            const destOrder = getOrderForTable(transferTargetTableId);
+                            const destTable = tables.find((t) => t.id === transferTargetTableId);
+                            if (destOrder) {
+                                return (
+                                    <div className="p-3 rounded-2xl bg-amber-950/40 border border-amber-400/30 text-xs space-y-1">
+                                        <p className="font-bold text-amber-300 flex items-center gap-1.5">
+                                            <Layers className="w-4 h-4" />
+                                            Table Merge Confirmation:
+                                        </p>
+                                        <p className="text-[11px] text-white/70">
+                                            Table {destTable?.label} already has Order #{destOrder.order_number} ({formatRupees(destOrder.total_paise)}).
+                                            All items from {selectedTable?.label} will be merged into {destTable?.label}.
+                                        </p>
+                                        <p className="text-[11px] font-black text-amber-400 pt-1 font-mono">
+                                            New Combined Bill: {formatRupees(tableOrder.total_paise + destOrder.total_paise)}
+                                        </p>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
 
                         <div className="grid grid-cols-2 gap-2 pt-2">
                             <button
                                 type="button"
                                 onClick={() => setIsTransferModalOpen(false)}
-                                className="py-2.5 rounded-xl bg-white/10 text-white/80 font-bold text-xs cursor-pointer"
+                                className="py-2.5 rounded-xl bg-white/10 text-white/80 font-bold text-xs cursor-pointer hover:bg-white/15"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
-                                onClick={handleTransferTable}
+                                onClick={handleTransferOrMergeTable}
                                 disabled={!transferTargetTableId || isTransferring}
-                                className="py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs disabled:opacity-50 cursor-pointer shadow-lg"
+                                className="py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs disabled:opacity-50 cursor-pointer shadow-lg flex items-center justify-center gap-1.5"
                             >
-                                {isTransferring ? "Transferring..." : "Confirm Transfer"}
+                                <ArrowLeftRight className="w-3.5 h-3.5" />
+                                <span>
+                                    {isTransferring
+                                        ? "Processing..."
+                                        : getOrderForTable(transferTargetTableId || 0)
+                                        ? "Confirm Merge"
+                                        : "Confirm Transfer"}
+                                </span>
                             </button>
                         </div>
                     </div>

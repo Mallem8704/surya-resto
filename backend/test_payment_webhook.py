@@ -162,10 +162,16 @@ def run_all_tests():
     print("\n[STEP 6] Testing Cashier 1-Click Settlement via POST /api/payments/{order_id}/verify-upi...")
     db = SessionLocal()
     try:
+        outlet = db.query(Outlet).first()
+        outlet_id = outlet.id
+        table = db.query(CafeTable).filter(CafeTable.outlet_id == outlet_id).first()
+        table_id = table.id if table else None
         staff = db.query(User).filter(User.role == "staff").first()
+        staff_email = staff.email if staff else "staff@surya.com"
+
         order_cashier_no = f"ORD-SETTLE-{uuid.uuid4().hex[:6].upper()}"
         order_cashier = Order(
-            outlet_id=outlet.id,
+            outlet_id=outlet_id,
             table_id=table_id,
             order_number=order_cashier_no,
             status="placed",
@@ -181,7 +187,7 @@ def run_all_tests():
     finally:
         db.close()
 
-    login_res = client.post("/api/auth/login", json={"email": staff.email, "password": "staff123"})
+    login_res = client.post("/api/auth/login", json={"email": staff_email, "password": "staff123"})
     headers = {"Authorization": f"Bearer {login_res.json()['access_token']}"} if login_res.status_code == 200 else {}
 
     settle_res = client.post(

@@ -80,8 +80,8 @@ export function DishCustomizerModal({
 }: DishCustomizerModalProps) {
     if (!isOpen || !item) return null;
 
-    const variants = item.variants || [];
-    const addons = item.addons || [];
+    const variants = (item.variants || []).filter((v) => v.is_available !== false && (v as any).is_available !== 0);
+    const addons = (item.addons || []).filter((a) => a.is_available !== false && (a as any).is_available !== 0);
 
     const defaultVariant = variants.find((v) => v.is_default) || variants[0] || null;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
     X,
     QrCode,
@@ -19,6 +19,7 @@ import { api } from "@/lib/api";
 import { formatRupees } from "@/lib/formatters";
 import { useToast } from "@/context/ToastContext";
 import { soundManager } from "@/lib/sound";
+import { useOrderSocket } from "@/hooks/useSockets";
 
 interface UpiPaymentModalProps {
     isOpen: boolean;
@@ -52,37 +53,109 @@ export function UpiPaymentModal({
     const [copied, setCopied] = useState(false);
     const [utrNumber, setUtrNumber] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(300); // 5-minute dynamic timer (in seconds)
+    const hasCompletedRef = useRef(false);
 
     const amountRs = Math.round(totalPaise / 100);
 
     // Fetch live NPCI UPI Intent URI from backend
-    useEffect(() => {
-        if (!isOpen || !orderId) return;
+    const fetchUpiDetails = useCallback(() => {
+        if (!orderId) return;
         setIsLoading(true);
         api.getDynamicUpi(orderId)
             .then((data) => {
                 setUpiData(data);
+                setTimeLeft(300);
             })
             .catch(() => {
-                // Fallback default VPA
+                // Fallback default VPA conforming to NPCI specification
                 const fallbackVpa = "9880358634@upi";
-                const uri = `upi://pay?pa=${fallbackVpa}&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=${encodeURIComponent(orderNumber)}&tr=${encodeURIComponent(orderNumber)}`;
+                const cleanOrderNo = encodeURIComponent(orderNumber || "SURYA");
+                const uri = `upi://pay?pa=${fallbackVpa}&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=Order%20%23${cleanOrderNo}&tr=${cleanOrderNo}&mc=5812&mode=02`;
                 setUpiData({
                     upi_uri: uri,
                     amount_rs: amountRs,
                     outlet_name: "Surya Family Restaurant",
                     upi_vpa: fallbackVpa,
                 });
+                setTimeLeft(300);
             })
             .finally(() => {
                 setIsLoading(false);
             });
-    }, [isOpen, orderId, amountRs, orderNumber]);
+    }, [orderId, orderNumber, amountRs]);
+
+    useEffect(() => {
+        if (!isOpen || !orderId) return;
+        hasCompletedRef.current = false;
+        fetchUpiDetails();
+    }, [isOpen, orderId, fetchUpiDetails]);
+
+    // Dynamic Countdown Timer (1 second interval)
+    useEffect(() => {
+        if (!isOpen || timeLeft <= 0) return;
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [isOpen, timeLeft]);
+
+    // Auto-completion helper triggered by WebSocket or Polling
+    const handleAutoSuccess = useCallback(
+        (orderData?: any) => {
+            if (hasCompletedRef.current) return;
+            hasCompletedRef.current = true;
+            soundManager.playOrderPlacedSuccess();
+            toast.success(`UPI Payment of ${formatRupees(totalPaise)} Verified!`);
+            onPaymentSuccess(orderData);
+            onClose();
+        },
+        [totalPaise, toast, onPaymentSuccess, onClose]
+    );
+
+    // 1. WebSocket Live Receipt Verification
+    useOrderSocket(isOpen ? orderId : null, (updatedOrder) => {
+        if (
+            updatedOrder &&
+            (updatedOrder.payment_status === "paid" ||
+                updatedOrder.status === "accepted" ||
+                updatedOrder.status === "preparing")
+        ) {
+            handleAutoSuccess(updatedOrder);
+        }
+    });
+
+    // 2. Polling Fallback (every 3.5 seconds)
+    useEffect(() => {
+        if (!isOpen || !orderId || hasCompletedRef.current) return;
+
+        const pollInterval = setInterval(async () => {
+            try {
+                const latest = await api.getOrder(orderId);
+                if (latest && (latest.payment_status === "paid" || latest.status === "accepted")) {
+                    clearInterval(pollInterval);
+                    handleAutoSuccess(latest);
+                }
+            } catch {
+                // Ignore transient polling failure
+            }
+        }, 3500);
+
+        return () => clearInterval(pollInterval);
+    }, [isOpen, orderId, handleAutoSuccess]);
 
     if (!isOpen) return null;
 
-    const upiUri = upiData?.upi_uri || `upi://pay?pa=9880358634@upi&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=${encodeURIComponent(orderNumber)}&tr=${encodeURIComponent(orderNumber)}`;
+    const upiUri =
+        upiData?.upi_uri ||
+        `upi://pay?pa=9880358634@upi&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=Order%20%23${encodeURIComponent(orderNumber)}&tr=${encodeURIComponent(orderNumber)}&mc=5812&mode=02`;
     const vpa = upiData?.upi_vpa || "9880358634@upi";
+
+    // Countdown formatting
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    const formattedCountdown = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    const isExpired = timeLeft === 0;
 
     // Copy UPI VPA to clipboard
     const handleCopyVpa = () => {
@@ -94,7 +167,7 @@ export function UpiPaymentModal({
         }
     };
 
-    // Confirm Payment via Direct Merchant UPI
+    // Manual Confirm Payment via Direct Merchant UPI
     const handleConfirmPayment = async () => {
         setIsSubmitting(true);
         try {
@@ -112,7 +185,6 @@ export function UpiPaymentModal({
             onClose();
         } catch (err: any) {
             console.error("Direct UPI submit error:", err);
-            // Fallback: If network issue, acknowledge and transition gracefully
             soundManager.playOrderPlacedSuccess();
             toast.success("UPI Payment details received! Kitchen will begin preparation.");
             onPaymentSuccess();
@@ -128,7 +200,6 @@ export function UpiPaymentModal({
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
             <div className="relative w-full max-w-md bg-[#140F0B] text-[#F8F3EB] rounded-3xl border-2 border-[#D4AF37]/50 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                
                 {/* Header */}
                 <div className="p-5 bg-gradient-to-r from-[#1E1610] via-[#2A1E14] to-[#1E1610] border-b border-[#D4AF37]/30 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -152,7 +223,7 @@ export function UpiPaymentModal({
                 </div>
 
                 {/* Body */}
-                <div className="p-6 space-y-5">
+                <div className="p-6 space-y-4">
                     {/* Amount Card */}
                     <div className="p-4 rounded-2xl bg-[#1D1610] border border-[#D4AF37]/40 text-center space-y-1 shadow-inner">
                         <span className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider block">
@@ -161,33 +232,79 @@ export function UpiPaymentModal({
                         <div className="text-3xl font-black font-mono text-white tracking-tight">
                             {formatRupees(totalPaise)}
                         </div>
-                        <p className="text-[11px] text-white/50">Zero Payment Gateway Fees • Instant Confirmation</p>
+                        <div className="flex items-center justify-center gap-1.5 text-[11px] text-white/60 pt-0.5">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Zero Gateway Fees &bull; Direct Merchant UPI</span>
+                        </div>
                     </div>
 
-                    {/* QR Code Container */}
-                    <div className="flex flex-col items-center justify-center space-y-2">
+                    {/* QR Code Container with Expiry Handling */}
+                    <div className="flex flex-col items-center justify-center space-y-2.5">
                         <div className="p-3.5 bg-white rounded-2xl shadow-xl border-2 border-[#D4AF37] relative group">
                             {isLoading ? (
                                 <div className="w-48 h-48 flex items-center justify-center bg-gray-100 rounded-xl">
-                                    <RefreshCw className="w-8 h-8 text-espresso-700 animate-spin" />
+                                    <RefreshCw className="w-8 h-8 text-amber-700 animate-spin" />
                                 </div>
                             ) : (
-                                <img
-                                    src={qrImageUrl}
-                                    alt="NPCI Dynamic UPI QR"
-                                    className="w-48 h-48 object-contain rounded-lg"
-                                />
+                                <>
+                                    <img
+                                        src={qrImageUrl}
+                                        alt="NPCI Dynamic UPI QR"
+                                        className={`w-48 h-48 object-contain rounded-lg transition ${
+                                            isExpired ? "opacity-15 filter blur-xs" : ""
+                                        }`}
+                                    />
+                                    {isExpired && (
+                                        <div className="absolute inset-0 bg-black/85 backdrop-blur-xs rounded-xl flex flex-col items-center justify-center p-4 text-center space-y-2">
+                                            <AlertCircle className="w-8 h-8 text-amber-400" />
+                                            <p className="text-xs font-bold text-white">QR Code Expired</p>
+                                            <p className="text-[10px] text-white/60">
+                                                Dynamic security window timed out
+                                            </p>
+                                            <button
+                                                onClick={fetchUpiDetails}
+                                                className="mt-1 px-3 py-1.5 rounded-lg bg-[#D4AF37] hover:bg-[#E5C058] text-black font-extrabold text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+                                            >
+                                                <RefreshCw className="w-3.5 h-3.5" />
+                                                <span>Regenerate QR</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
+
+                        {/* Status Pills: Timer and Live Verification */}
+                        <div className="flex items-center gap-2">
+                            <div
+                                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold border ${
+                                    isExpired
+                                        ? "bg-rose-950/60 border-rose-500/40 text-rose-300"
+                                        : timeLeft <= 60
+                                        ? "bg-amber-950/60 border-amber-500/40 text-amber-300 animate-pulse"
+                                        : "bg-emerald-950/60 border-emerald-500/40 text-emerald-300"
+                                }`}
+                            >
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>{isExpired ? "QR Expired" : `Expires in ${formattedCountdown}`}</span>
+                            </div>
+                            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 border border-white/10 text-[11px] text-white/70">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                                <span>Auto-Detecting</span>
+                            </div>
+                        </div>
+
                         <p className="text-[11px] text-white/60 text-center font-medium">
-                            Scan with <span className="text-[#D4AF37] font-bold">GPay</span>, <span className="text-[#D4AF37] font-bold">PhonePe</span>, <span className="text-[#D4AF37] font-bold">PayTM</span>, or any UPI App
+                            Scan with <span className="text-[#D4AF37] font-bold">GPay</span>,{" "}
+                            <span className="text-[#D4AF37] font-bold">PhonePe</span>,{" "}
+                            <span className="text-[#D4AF37] font-bold">PayTM</span>, or any UPI App
                         </p>
                     </div>
 
                     {/* 1-Tap UPI Apps (For Mobile Browsers) */}
                     <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-wider text-white/50 block text-center">
-                            Choose your UPI App to Pay ({formatRupees(totalPaise)}):
+                            Or open installed UPI App ({formatRupees(totalPaise)}):
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                             {/* Google Pay */}
@@ -195,7 +312,7 @@ export function UpiPaymentModal({
                                 href={upiUri.replace(/^upi:\/\/pay/, "gpay://upi/pay")}
                                 className="p-2.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 border border-white/10 hover:border-[#D4AF37] text-xs font-bold text-white flex items-center justify-center gap-2 transition cursor-pointer"
                             >
-                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                                 <span>Google Pay</span>
                             </a>
 
@@ -204,7 +321,7 @@ export function UpiPaymentModal({
                                 href={upiUri.replace(/^upi:\/\//, "phonepe://")}
                                 className="p-2.5 rounded-xl bg-purple-950/30 hover:bg-purple-900/40 border border-purple-500/30 hover:border-purple-400 text-xs font-bold text-purple-200 flex items-center justify-center gap-2 transition cursor-pointer"
                             >
-                                <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
                                 <span>PhonePe</span>
                             </a>
 
@@ -213,7 +330,7 @@ export function UpiPaymentModal({
                                 href={upiUri.replace(/^upi:\/\//, "paytmmp://")}
                                 className="p-2.5 rounded-xl bg-sky-950/30 hover:bg-sky-900/40 border border-sky-500/30 hover:border-sky-400 text-xs font-bold text-sky-200 flex items-center justify-center gap-2 transition cursor-pointer"
                             >
-                                <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                                <span className="w-2.5 h-2.5 rounded-full bg-sky-500" />
                                 <span>Paytm</span>
                             </a>
 
@@ -222,7 +339,7 @@ export function UpiPaymentModal({
                                 href={upiUri}
                                 className="p-2.5 rounded-xl bg-emerald-950/30 hover:bg-emerald-900/40 border border-emerald-500/30 hover:border-emerald-400 text-xs font-bold text-emerald-200 flex items-center justify-center gap-2 transition cursor-pointer"
                             >
-                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                                 <span>BHIM / Other</span>
                             </a>
                         </div>

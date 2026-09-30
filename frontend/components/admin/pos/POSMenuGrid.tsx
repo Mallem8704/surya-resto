@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Search, Flame, Sparkles, Plus, Check } from "lucide-react";
+import { Search, Flame, Sparkles, Plus, Check, X } from "lucide-react";
 import { formatRupees } from "@/lib/formatters";
 
 interface MenuItemData {
@@ -254,9 +254,9 @@ export function POSMenuGrid({
                             </div>
                             <button
                                 onClick={() => setVariantModalItem(null)}
-                                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white"
+                                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition cursor-pointer"
                             >
-                                ✕
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 

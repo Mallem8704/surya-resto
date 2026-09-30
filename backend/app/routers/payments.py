@@ -1,4 +1,6 @@
 import os
+import re
+import json
 import hmac
 import hashlib
 import datetime
@@ -175,13 +177,188 @@ async def verify_razorpay_payment(
 
 
 @router.post("/razorpay-webhook")
-async def razorpay_webhook_safe_handler(request: Request):
-    """Direct Merchant UPI mode active - gateway webhooks handled safely with zero external fees."""
-    logger.info("[PAYMENTS] Webhook received. System operates on Direct Merchant UPI.")
+async def razorpay_webhook_safe_handler(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Razorpay Webhook Handler:
+    1. Verify HMAC-SHA256 signature using RAZORPAY_WEBHOOK_SECRET against X-Razorpay-Signature.
+    2. Parse webhook event payload for 'payment.captured' and 'order.paid'.
+    3. Look up order, update payment status to 'paid', record Payment and Audit log.
+    4. Broadcast real-time WebSocket notifications to cashier, kitchen, and customer channels.
+    """
+    body_bytes = await request.body()
+    signature = request.headers.get("x-razorpay-signature") or request.headers.get("X-Razorpay-Signature")
+
+    # 1. HMAC-SHA256 Signature Verification
+    if RAZORPAY_WEBHOOK_SECRET:
+        if not signature:
+            logger.warning("[PAYMENTS:Webhook] Missing X-Razorpay-Signature header")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Missing webhook signature",
+            )
+        expected_sig = hmac.new(
+            RAZORPAY_WEBHOOK_SECRET.encode(),
+            body_bytes,
+            hashlib.sha256,
+        ).hexdigest()
+
+        if not hmac.compare_digest(expected_sig, signature):
+            logger.warning("[PAYMENTS:Webhook] Invalid signature received")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid webhook signature",
+            )
+    else:
+        logger.info("[PAYMENTS:Webhook] RAZORPAY_WEBHOOK_SECRET not configured; operating in direct/permissive mode")
+
+    # 2. Parse Payload
+    try:
+        payload = json.loads(body_bytes.decode("utf-8")) if body_bytes else {}
+    except Exception as e:
+        logger.error(f"[PAYMENTS:Webhook] Failed to parse JSON body: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Malformed JSON payload",
+        )
+
+    event_type = payload.get("event", "")
+    logger.info(f"[PAYMENTS:Webhook] Received Razorpay event: {event_type}")
+
+    # We process payment.captured and order.paid
+    if event_type not in ("payment.captured", "order.paid"):
+        return {
+            "status": "ok",
+            "gateway": "direct_merchant_upi",
+            "action": "ignored",
+            "event": event_type,
+            "message": f"Event '{event_type}' acknowledged; only payment.captured and order.paid trigger automated fulfillment.",
+        }
+
+    # Extract payment and order details from nested payload
+    payment_entity = payload.get("payload", {}).get("payment", {}).get("entity", {})
+    order_entity = payload.get("payload", {}).get("order", {}).get("entity", {})
+
+    payment_id = payment_entity.get("id") or f"RZP-WH-{uuid.uuid4().hex[:8]}"
+    amount_paise = payment_entity.get("amount") or order_entity.get("amount_paid") or 0
+    method = (payment_entity.get("method") or "upi").lower()
+    rzp_order_id = payment_entity.get("order_id") or order_entity.get("id") or ""
+
+    # Find internal order reference from notes, receipt, or rzp_order_id
+    notes = payment_entity.get("notes") or order_entity.get("notes") or {}
+    order_id_raw = notes.get("order_id") or notes.get("internal_order_id")
+    order_number = notes.get("order_number") or order_entity.get("receipt")
+
+    order = None
+    if order_id_raw:
+        try:
+            order = db.query(Order).options(joinedload(Order.items), joinedload(Order.table)).filter(Order.id == int(order_id_raw)).first()
+        except (ValueError, TypeError):
+            pass
+
+    if not order and order_number:
+        order = db.query(Order).options(joinedload(Order.items), joinedload(Order.table)).filter(Order.order_number == str(order_number).strip()).first()
+
+    if not order and rzp_order_id:
+        existing_pmt = db.query(Payment).filter(Payment.notes.like(f"%{rzp_order_id}%")).first()
+        if existing_pmt:
+            order = db.query(Order).options(joinedload(Order.items), joinedload(Order.table)).filter(Order.id == existing_pmt.order_id).first()
+
+    if not order:
+        logger.warning(f"[PAYMENTS:Webhook] Order could not be resolved for payment_id={payment_id}, rzp_order_id={rzp_order_id}")
+        return {
+            "status": "ok",
+            "gateway": "direct_merchant_upi",
+            "action": "unresolved_order",
+            "payment_id": payment_id,
+            "message": "Webhook processed safely; order could not be identified in database.",
+        }
+
+    # Idempotency check: if already marked paid, return graceful status
+    if order.payment_status == "paid":
+        logger.info(f"[PAYMENTS:Webhook] Order #{order.order_number} is already paid. Idempotent skip.")
+        return {
+            "status": "ok",
+            "gateway": "direct_merchant_upi",
+            "action": "already_paid",
+            "order_number": order.order_number,
+            "payment_status": "paid",
+        }
+
+    # 3. Update Order and Record Payment in DB
+    order.payment_status = "paid"
+    order.payment_method = method if method in ("upi", "card", "cash") else "upi"
+
+    payment = Payment(
+        order_id=order.id,
+        method=order.payment_method,
+        txn_id=payment_id,
+        amount_paise=amount_paise if amount_paise > 0 else order.total_paise,
+        status="completed",
+        paid_at=datetime.datetime.utcnow(),
+        notes=f"Razorpay Webhook ({event_type}): {rzp_order_id}",
+    )
+    db.add(payment)
+
+    log_audit(
+        db=db,
+        outlet_id=order.outlet_id,
+        user_id=None,
+        action="razorpay_webhook_captured",
+        entity_type="payment",
+        entity_id=order.id,
+        details={
+            "order_number": order.order_number,
+            "amount_paise": payment.amount_paise,
+            "amount_formatted": f"₹{payment.amount_paise / 100:.2f}",
+            "txn_id": payment_id,
+            "event": event_type,
+            "method": order.payment_method,
+        },
+    )
+
+    db.commit()
+    db.refresh(order)
+
+    # 4. Broadcast Real-Time Order Updates via WebSocket
+    from app.routers.orders import format_order_response
+    formatted = format_order_response(order)
+    order_data = formatted.model_dump(mode="json")
+
+    try:
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_payment_updated",
+            data=order_data,
+        )
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_status_updated",
+            data=order_data,
+        )
+        await manager.broadcast_outlet_event(
+            outlet_id=order.outlet_id,
+            event_type="order_updated",
+            data=order_data,
+        )
+        await manager.broadcast_to_order(
+            order_id=order.id,
+            event_type="order_status_updated",
+            data=order_data,
+            outlet_id=order.outlet_id,
+        )
+    except Exception as ws_err:
+        logger.warning(f"[WS] Broadcast error in razorpay_webhook_safe_handler: {ws_err}")
+
     return {
         "status": "ok",
         "gateway": "direct_merchant_upi",
-        "message": "Direct Merchant UPI active with zero gateway fees",
+        "event": event_type,
+        "order_number": order.order_number,
+        "payment_status": "paid",
+        "payment_id": payment_id,
+        "amount_paise": payment.amount_paise,
     }
 
 
@@ -277,17 +454,30 @@ def generate_dynamic_upi_qr(
     payee_name: str = DEFAULT_MERCHANT_NAME,
     amount_rupees: float = 0.0,
     order_number: str = "",
+    mc: str = "5812",
 ) -> str:
     """Generate official NPCI Dynamic UPI Intent URI strictly conforming to NPCI standard:
-    upi://pay?pa={upi_vpa}&pn={payee_name}&am={amount_rupees}&cu=INR&tn={order_number}&tr={order_number}
+    upi://pay?pa={upi_vpa}&pn={payee_name}&am={amount_rupees}&cu=INR&tn={order_number}&tr={order_number}&mc={mc}&mode=02
     """
     clean_vpa = (upi_vpa or DEFAULT_MERCHANT_VPA).strip()
     clean_name = (payee_name or DEFAULT_MERCHANT_NAME).replace("&", "and").strip()
     encoded_name = urllib.parse.quote(clean_name)
     clean_order_no = str(order_number or "").strip()
-    encoded_tn = urllib.parse.quote(clean_order_no if clean_order_no else "Surya Kadiri")
-    encoded_tr = urllib.parse.quote(clean_order_no if clean_order_no else "SURYA")
-    return f"upi://pay?pa={clean_vpa}&pn={encoded_name}&am={amount_rupees:.2f}&cu=INR&tn={encoded_tn}&tr={encoded_tr}"
+
+    # NPCI tn (Transaction Note): URL-encoded string up to 80 chars
+    tn_text = clean_order_no if clean_order_no else "Surya Kadiri"
+    encoded_tn = urllib.parse.quote(tn_text[:80])
+
+    # NPCI tr (Transaction Reference ID): URL-safe string up to 35 chars
+    clean_tr = re.sub(r"[^a-zA-Z0-9_-]", "", clean_order_no)[:35]
+    if not clean_tr:
+        clean_tr = f"SURYA{int(datetime.datetime.utcnow().timestamp())}"
+
+    # Amount: strictly non-negative float formatted with 2 decimal places per NPCI
+    safe_amount = max(0.0, float(amount_rupees))
+    clean_mc = (mc or "5812").strip()
+
+    return f"upi://pay?pa={clean_vpa}&pn={encoded_name}&am={safe_amount:.2f}&cu=INR&tn={encoded_tn}&tr={clean_tr}&mc={clean_mc}&mode=02"
 
 
 @router.get("/{order_id}/dynamic-upi", response_model=DynamicUpiQrResponse)

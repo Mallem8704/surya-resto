@@ -25,10 +25,11 @@ if DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
     engine_kwargs["connect_args"] = connect_args
 else:
+    # Optimized for Supabase Cloud PostgreSQL / PgBouncer connection limits
     engine_kwargs.update({
-        "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
-        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "10")),
-        "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "1800")),
+        "pool_size": int(os.getenv("DB_POOL_SIZE", "10")),
+        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "5")),
+        "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "300")),
     })
 
 engine = create_engine(DATABASE_URL, **engine_kwargs)

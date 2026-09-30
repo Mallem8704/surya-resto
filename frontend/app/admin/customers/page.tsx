@@ -386,32 +386,36 @@ export default function AdminCustomersPage() {
                         {/* Tier Filter Tabs */}
                         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
                             {[
-                                { id: "all", label: "All Diners", count: summary.total_customers },
-                                { id: "vip", label: "⭐ VIP", count: summary.vip_count },
-                                { id: "returning", label: "🔁 Returning", count: summary.returning_count },
-                                { id: "new", label: "🌱 New", count: summary.new_count },
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setSelectedTier(tab.id)}
-                                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                                        selectedTier === tab.id
-                                            ? "bg-espresso-900 text-white shadow-sm"
-                                            : "bg-cream-100 text-espresso-700 hover:bg-cream-200/80"
-                                    }`}
-                                >
-                                    {tab.label}{" "}
-                                    <span
-                                        className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] ${
+                                { id: "all", label: "All Diners", icon: Users, count: summary.total_customers },
+                                { id: "vip", label: "VIP", icon: Crown, count: summary.vip_count },
+                                { id: "returning", label: "Returning", icon: Repeat, count: summary.returning_count },
+                                { id: "new", label: "New", icon: Sparkles, count: summary.new_count },
+                            ].map((tab) => {
+                                const Icon = tab.icon;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setSelectedTier(tab.id)}
+                                        className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer inline-flex items-center gap-1.5 ${
                                             selectedTier === tab.id
-                                                ? "bg-white/20 text-white"
-                                                : "bg-espresso-200 text-espresso-800"
+                                                ? "bg-espresso-900 text-white shadow-sm"
+                                                : "bg-cream-100 text-espresso-700 hover:bg-cream-200/80"
                                         }`}
                                     >
-                                        {tab.count}
-                                    </span>
-                                </button>
-                            ))}
+                                        <Icon className="w-3.5 h-3.5" />
+                                        <span>{tab.label}</span>
+                                        <span
+                                            className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${
+                                                selectedTier === tab.id
+                                                    ? "bg-white/20 text-white"
+                                                    : "bg-espresso-200 text-espresso-800"
+                                            }`}
+                                        >
+                                            {tab.count}
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

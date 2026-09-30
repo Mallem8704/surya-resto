@@ -460,7 +460,10 @@ export function OrderTracker({ initialOrder, onOrderMore }: OrderTrackerProps) {
                     {/* Bill Requested Active Pill */}
                     {order.payment_status !== "paid" && isBillRequested && (
                         <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-400/30 text-amber-950 text-xs font-bold flex items-center justify-between animate-pulse">
-                            <span>🧾 Bill of {formatRupees(order.total_paise)} requested. Floor captain is coming to your table!</span>
+                            <span className="inline-flex items-center gap-1.5">
+                                <Receipt className="w-4 h-4 text-amber-700 shrink-0" />
+                                <span>Bill of {formatRupees(order.total_paise)} requested. Floor captain is coming to your table!</span>
+                            </span>
                             <span className="w-2 h-2 rounded-full bg-amber-500" />
                         </div>
                     )}

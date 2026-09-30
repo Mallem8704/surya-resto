@@ -22,6 +22,8 @@ import {
     ChevronRight,
     Star,
     HeartHandshake,
+    Wind,
+    Utensils,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
@@ -45,18 +47,25 @@ const TIME_SLOTS = {
     dinner: ["06:30 PM", "07:00 PM", "07:30 PM", "08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM", "10:00 PM", "10:30 PM"],
 };
 
-const SEATING_PREFERENCES = [
-    { id: "family_ac", label: "Family AC Dining Hall", desc: "Comfortable air-conditioned private family section", icon: "❄️" },
-    { id: "standard", label: "Standard Table Dining", desc: "Classic chair seating near central dining hall", icon: "🪑" },
-    { id: "window", label: "Window View Table", desc: "Breezy seating with view of Kadiri Bypass Road", icon: "🌿" },
+interface SeatingOption {
+    id: string;
+    label: string;
+    desc: string;
+    icon: React.ComponentType<{ className?: string }>;
+}
+
+const SEATING_PREFERENCES: SeatingOption[] = [
+    { id: "family_ac", label: "Family AC Dining Hall", desc: "Comfortable air-conditioned private family section", icon: Wind },
+    { id: "standard", label: "Standard Table Dining", desc: "Classic chair seating near central dining hall", icon: Utensils },
+    { id: "window", label: "Window View Table", desc: "Breezy seating with view of Kadiri Bypass Road", icon: Compass },
 ];
 
 const OCCASIONS = [
     { id: "casual", label: "Casual Dining" },
-    { id: "birthday", label: "Birthday Celebration 🎂" },
-    { id: "anniversary", label: "Anniversary 💐" },
-    { id: "family", label: "Family Get-Together 👨‍👩‍👧‍👦" },
-    { id: "business", label: "Business Meeting 💼" },
+    { id: "birthday", label: "Birthday Celebration" },
+    { id: "anniversary", label: "Anniversary" },
+    { id: "family", label: "Family Get-Together" },
+    { id: "business", label: "Business Meeting" },
 ];
 
 function BookTableContent() {
@@ -439,7 +448,7 @@ function BookTableContent() {
                                                 : "bg-[#1A140F] border-white/10 hover:border-white/20"
                                         }`}
                                     >
-                                        <span className="text-xl">{sp.icon}</span>
+                                        <sp.icon className="w-5 h-5 text-[#D4AF37] shrink-0 mt-0.5" />
                                         <div>
                                             <div className="font-bold text-xs text-white flex items-center gap-1.5">
                                                 <span>{sp.label}</span>

@@ -5,7 +5,7 @@ import re
 import json
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from jose import JWTError, jwt
 
 from app.database import get_db
@@ -92,10 +92,11 @@ def login_customer(req: CustomerLoginReq, request: Request, db: Session = Depend
         )
 
     if not customer.hashed_password:
-        # Set password for legacy/walk-in account on first login
-        customer.hashed_password = get_password_hash(req.password)
-        db.commit()
-        db.refresh(customer)
+        customer_login_limiter.record_failure(request)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No password set for this account. Please register to set up your password."
+        )
     elif not verify_password(req.password, customer.hashed_password):
         customer_login_limiter.record_failure(request)
         raise HTTPException(
@@ -162,10 +163,10 @@ def normalize_phone(phone: str) -> str:
         cleaned = cleaned[2:]
     elif len(cleaned) > 10 and cleaned.startswith("0"):
         cleaned = cleaned[1:]
-    if len(cleaned) != 10:
+    if len(cleaned) != 10 or not re.match(r"^[6-9]\d{9}$", cleaned):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Please provide a valid 10-digit Indian mobile number."
+            detail="Please provide a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9)."
         )
     return cleaned
 
@@ -325,17 +326,38 @@ def verify_otp(req: CustomerVerifyOTPReq, db: Session = Depends(get_db)):
 
 
 @router.get("/profile", response_model=CustomerOut)
+@router.get("/me", response_model=CustomerOut)
 def get_customer_profile(current_customer: Customer = Depends(get_current_customer)):
     return CustomerOut.model_validate(current_customer)
 
 
+@router.get("/addresses", response_model=List[CustomerAddressOut])
+@router.get("/address", response_model=List[CustomerAddressOut])
+def get_customer_addresses(
+    current_customer: Customer = Depends(get_current_customer),
+    db: Session = Depends(get_db)
+):
+    """Retrieve all saved addresses for the authenticated customer."""
+    addresses = (
+        db.query(CustomerAddress)
+        .filter(CustomerAddress.customer_id == current_customer.id)
+        .order_by(CustomerAddress.is_default.desc(), CustomerAddress.id.desc())
+        .all()
+    )
+    return [CustomerAddressOut.model_validate(a) for a in addresses]
+
+
 @router.post("/address", response_model=CustomerAddressOut)
+@router.post("/addresses", response_model=CustomerAddressOut)
 def save_customer_address(
     req: CustomerAddressCreate,
     current_customer: Customer = Depends(get_current_customer),
     db: Session = Depends(get_db)
 ):
-    if req.is_default:
+    existing_count = db.query(CustomerAddress).filter(CustomerAddress.customer_id == current_customer.id).count()
+    should_be_default = req.is_default or existing_count == 0
+
+    if should_be_default:
         db.query(CustomerAddress).filter(CustomerAddress.customer_id == current_customer.id).update({"is_default": False})
         current_customer.default_address = req.address_line
 
@@ -344,12 +366,42 @@ def save_customer_address(
         label=req.label,
         address_line=req.address_line,
         landmark=req.landmark,
-        is_default=req.is_default,
+        is_default=should_be_default,
     )
     db.add(addr)
     db.commit()
     db.refresh(addr)
     return CustomerAddressOut.model_validate(addr)
+
+
+@router.delete("/addresses/{address_id}")
+@router.delete("/address/{address_id}")
+def delete_customer_address(
+    address_id: int,
+    current_customer: Customer = Depends(get_current_customer),
+    db: Session = Depends(get_db)
+):
+    addr = db.query(CustomerAddress).filter(
+        CustomerAddress.id == address_id,
+        CustomerAddress.customer_id == current_customer.id
+    ).first()
+    if not addr:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address not found")
+
+    was_default = addr.is_default
+    db.delete(addr)
+    db.commit()
+
+    if was_default:
+        next_addr = db.query(CustomerAddress).filter(CustomerAddress.customer_id == current_customer.id).first()
+        if next_addr:
+            next_addr.is_default = True
+            current_customer.default_address = next_addr.address_line
+        else:
+            current_customer.default_address = None
+        db.commit()
+
+    return {"status": "success", "message": "Address deleted successfully"}
 
 
 @router.get("/orders")
@@ -358,7 +410,7 @@ def get_customer_orders(
     db: Session = Depends(get_db)
 ):
     from sqlalchemy import or_
-    orders = db.query(Order).filter(
+    orders = db.query(Order).options(selectinload(Order.items)).filter(
         or_(
             Order.customer_id == current_customer.id,
             Order.customer_phone == current_customer.phone,

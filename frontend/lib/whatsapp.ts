@@ -120,7 +120,9 @@ export function getCustomerWhatsAppInvoiceLink(order: PrintOrderData, outlet?: P
         itemLines += `${idx + 1}. *${it.item_name}* (x${it.qty}) ${it.variant_name ? `[${it.variant_name}]` : ""} - ₹${itemTotal}\n`;
     });
 
-    const trackingUrl = typeof window !== "undefined" ? `${window.location.origin}/order?branch=1` : `http://localhost:3000/order?branch=1`;
+    const trackingUrl = typeof window !== "undefined"
+        ? `${window.location.origin}${isDelivery ? "/delivery" : "/order?branch=1"}`
+        : `http://localhost:3000${isDelivery ? "/delivery" : "/order?branch=1"}`;
 
     const message = 
 `☀️ *${outletName.toUpperCase()}* ☀️

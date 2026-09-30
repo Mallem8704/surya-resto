@@ -88,6 +88,18 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
         }
     }, [isOpen, outlet?.id]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                onClose();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose]);
+
     // Open Shift Submit
     const handleOpenShiftSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -99,7 +111,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                 shift_name: shiftName,
                 notes: openNotes,
             }, outlet?.id);
-            toast.success(`🚀 Shift started with ₹${floatRs.toFixed(2)} opening float`);
+            toast.success(`Shift started with ₹${floatRs.toFixed(2)} opening float`);
             fetchShiftStatus();
         } catch (err: any) {
             toast.error(err.message || "Failed to open shift");
@@ -200,9 +212,9 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                         onChange={(e) => setShiftName(e.target.value)}
                                         className="w-full px-3 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400 font-bold"
                                     >
-                                        <option value="Morning / Lunch Shift">🌅 Morning / Lunch Shift (7 AM - 4 PM)</option>
-                                        <option value="Evening / Dinner Shift">🍗 Evening / Dinner Shift (4 PM - 11:30 PM)</option>
-                                        <option value="Full Day Shift">🌟 Full Day Continuous Shift</option>
+                                        <option value="Morning / Lunch Shift">Morning / Lunch Shift (7:00 AM - 4:00 PM)</option>
+                                        <option value="Evening / Dinner Shift">Evening / Dinner Shift (4:00 PM - 11:30 PM)</option>
+                                        <option value="Full Day Shift">Full Day Continuous Shift</option>
                                     </select>
                                 </div>
 
@@ -256,7 +268,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                 className="w-full py-3.5 rounded-2xl bg-[#D4AF37] hover:bg-[#C59B27] text-black font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition cursor-pointer"
                             >
                                 <Briefcase className="w-4 h-4" />
-                                <span>{isOpening ? "Starting Shift..." : "Open Shift &amp; Unlock Register"}</span>
+                                <span>{isOpening ? "Starting Shift..." : "Open Shift & Unlock Register"}</span>
                             </button>
                         </form>
                     ) : (
@@ -265,28 +277,40 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                            ══════════════════════════════════════════════════════════ */
                         <div className="space-y-6">
                             {/* Live Shift KPI Cards */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                                <div className="p-3 rounded-2xl bg-black/40 border border-white/10">
                                     <span className="text-[10px] text-white/50 block uppercase font-bold">Opening Float</span>
-                                    <span className="font-mono font-black text-base text-white">
+                                    <span className="font-mono font-black text-sm sm:text-base text-white">
                                         ₹{currentShift.opening_float_rupees.toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="p-3.5 rounded-2xl bg-black/40 border border-emerald-500/30">
+                                <div className="p-3 rounded-2xl bg-black/40 border border-emerald-500/30">
                                     <span className="text-[10px] text-emerald-400 block uppercase font-bold">Cash Sales</span>
-                                    <span className="font-mono font-black text-base text-emerald-400">
+                                    <span className="font-mono font-black text-sm sm:text-base text-emerald-400">
                                         +₹{currentShift.cash_sales_rupees.toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="p-3.5 rounded-2xl bg-black/40 border border-indigo-500/30">
+                                <div className="p-3 rounded-2xl bg-black/40 border border-teal-500/30">
+                                    <span className="text-[10px] text-teal-400 block uppercase font-bold">Petty Cash In</span>
+                                    <span className="font-mono font-black text-sm sm:text-base text-teal-400">
+                                        +₹{(currentShift.petty_cash_in_rupees || 0).toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="p-3 rounded-2xl bg-black/40 border border-rose-500/30">
+                                    <span className="text-[10px] text-rose-400 block uppercase font-bold">Petty Cash Out</span>
+                                    <span className="font-mono font-black text-sm sm:text-base text-rose-400">
+                                        -₹{(currentShift.petty_cash_out_rupees || 0).toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="p-3 rounded-2xl bg-black/40 border border-indigo-500/30">
                                     <span className="text-[10px] text-indigo-400 block uppercase font-bold">UPI Online QR</span>
-                                    <span className="font-mono font-black text-base text-indigo-400">
+                                    <span className="font-mono font-black text-sm sm:text-base text-indigo-400">
                                         ₹{currentShift.upi_sales_rupees.toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-400/40">
-                                    <span className="text-[10px] text-amber-300 block uppercase font-black">Expected Drawer Cash</span>
-                                    <span className="font-mono font-black text-lg text-[#D4AF37]">
+                                <div className="p-3 rounded-2xl bg-amber-500/15 border border-amber-400/40">
+                                    <span className="text-[10px] text-amber-300 block uppercase font-black">Expected Drawer</span>
+                                    <span className="font-mono font-black text-base text-[#D4AF37]">
                                         ₹{currentShift.expected_cash_rupees.toFixed(2)}
                                     </span>
                                 </div>
@@ -346,7 +370,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                             }`}
                                         >
                                             {differenceRupees === 0
-                                                ? "✓ EXACT MATCH (₹0.00)"
+                                                ? "EXACT MATCH (₹0.00)"
                                                 : differenceRupees > 0
                                                 ? `+₹${differenceRupees.toFixed(2)} (OVERAGE)`
                                                 : `-₹${Math.abs(differenceRupees).toFixed(2)} (SHORTAGE)`}

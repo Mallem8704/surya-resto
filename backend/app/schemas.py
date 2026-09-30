@@ -328,6 +328,7 @@ class OrderAppendItems(BaseModel):
 
 class OrderTransferTable(BaseModel):
     target_table_id: int
+    merge_if_occupied: Optional[bool] = False
 
 
 class OrderOut(BaseModel):
@@ -367,7 +368,8 @@ class OrderOut(BaseModel):
 
 class StockAdjustmentCreate(BaseModel):
     item_id: int
-    change_qty: int  # positive for restock, negative for wastage/deduction
+    change_qty: Optional[int] = None  # positive for restock, negative for wastage/deduction
+    stock_qty: Optional[int] = None  # absolute stock level target
     reason: str = "restock"  # 'restock', 'wastage', 'adjustment'
     notes: Optional[str] = None
 

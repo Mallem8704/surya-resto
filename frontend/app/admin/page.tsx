@@ -128,7 +128,7 @@ export default function AdminLiveOrdersKanbanPage() {
         } else if (event.event === "new_reservation" && event.data) {
             soundManager.playNewOrderChime();
             setTodayReservationsCount((prev) => prev + 1);
-            toast.success(`👑 New Table Pre-Booking #${event.data.reservation_number}: ${event.data.customer_name} (${event.data.party_size} Guests)!`);
+            toast.success(`New Table Pre-Booking #${event.data.reservation_number}: ${event.data.customer_name} (${event.data.party_size} Guests)!`);
         } else if ((event.event === "order_status_updated" || event.event === "order_updated") && event.data) {
             setOrders((prev) =>
                 prev.map((o) => (o.id === event.data.id ? { ...o, status: event.data.status, payment_status: event.data.payment_status || o.payment_status } : o))

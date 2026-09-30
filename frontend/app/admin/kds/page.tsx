@@ -21,6 +21,8 @@ import {
     Volume2,
     VolumeX,
     Bell,
+    CheckCheck,
+    Undo2,
 } from "lucide-react";
 import { printKOT } from "@/lib/thermalPrint";
 import { AudioUnlockBanner } from "@/components/admin/AudioUnlockBanner";
@@ -64,7 +66,15 @@ export default function KitchenDisplaySystemPage() {
     const [orders, setOrders] = useState<any[]>([]);
     const [isLoadingOrders, setIsLoadingOrders] = useState(true);
     const [pendingServiceCalls, setPendingServiceCalls] = useState<any[]>([]);
-    const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
+    const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const saved = localStorage.getItem("surya_kds_checked_items");
+                if (saved) return JSON.parse(saved);
+            } catch {}
+        }
+        return {};
+    });
     const [currentTime, setCurrentTime] = useState<Date>(new Date());
     const [showReady, setShowReady] = useState(false);
     const [soundEnabled, setSoundEnabled] = useState(true);
@@ -118,11 +128,31 @@ export default function KitchenDisplaySystemPage() {
                 soundManager.playNewOrderChime();
             }
             setOrders((prev) => [event.data, ...prev.filter((o) => o.id !== event.data.id)]);
-            toast.success(`New Kitchen Ticket #${event.data.order_number} for Table ${event.data.table_label}`);
+            toast.success(`New Kitchen Ticket #${event.data.order_number} for Table ${event.data.table_label || event.data.table_id || "Counter"}`);
+        } else if (event.event === "running_kot_added" && event.data) {
+            if (soundEnabled) {
+                soundManager.playNewOrderChime();
+            }
+            setOrders((prev) => {
+                const exists = prev.some((o) => o.id === event.data.id);
+                if (exists) {
+                    return prev.map((o) => (o.id === event.data.id ? event.data : o));
+                }
+                return [event.data, ...prev];
+            });
+            toast.info(`Running KOT appended to Table ${event.data.table_label || event.data.table_id} (#${event.data.order_number})`);
         } else if ((event.event === "order_status_updated" || event.event === "order_updated") && event.data) {
             setOrders((prev) =>
-                prev.map((o) => (o.id === event.data.id ? { ...o, status: event.data.status } : o))
+                prev.map((o) => (o.id === event.data.id ? { ...o, ...event.data } : o))
             );
+        } else if (event.event === "order_voided" && event.data) {
+            setOrders((prev) => prev.filter((o) => o.id !== event.data.id));
+            toast.info(`Ticket #${event.data.order_number} voided`);
+        } else if (event.event === "table_transferred" && event.data) {
+            setOrders((prev) =>
+                prev.map((o) => (o.id === event.data.id ? { ...o, ...event.data } : o))
+            );
+            toast.info(`Ticket #${event.data.order_number} moved to Table ${event.data.table_label}`);
         } else if (event.event === "service_call" && event.data) {
             if (soundEnabled) {
                 soundManager.playServiceCallAlert();
@@ -136,7 +166,13 @@ export default function KitchenDisplaySystemPage() {
 
     const toggleItemCheck = (orderId: number, itemId: number) => {
         const key = `${orderId}_${itemId}`;
-        setCheckedItems((prev) => ({ ...prev, [key]: !prev[key] }));
+        setCheckedItems((prev) => {
+            const next = { ...prev, [key]: !prev[key] };
+            try {
+                localStorage.setItem("surya_kds_checked_items", JSON.stringify(next));
+            } catch {}
+            return next;
+        });
     };
 
     const handleUpdateStatus = async (orderId: number, newStatus: string) => {
@@ -145,6 +181,9 @@ export default function KitchenDisplaySystemPage() {
             setOrders((prev) =>
                 prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
             );
+            if (newStatus === "ready" && soundEnabled) {
+                soundManager.playReadyChime();
+            }
             toast.success(`Ticket status updated to ${newStatus}`);
         } catch {
             toast.error("Failed to update ticket status");
@@ -280,19 +319,25 @@ export default function KitchenDisplaySystemPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                             {kdsOrders.map((order) => {
                                 const elapsed = getElapsedSeconds(order.created_at);
-                                const isOverdue = elapsed > 900; // > 15m
-                                const isWarning = elapsed > 420 && elapsed <= 900; // 7-15m
+                                const isDelayed = elapsed > 1200; // > 20m (Delayed / SLA breach)
+                                const isWarning = elapsed > 600 && elapsed <= 1200; // 10-20m (Warning)
+
+                                const itemsCount = order.items?.length || 0;
+                                const preppedCount = (order.items || []).filter((it: any) => checkedItems[`${order.id}_${it.id}`]).length;
+                                const allPrepped = itemsCount > 0 && preppedCount === itemsCount;
 
                                 return (
                                     <div
                                         key={order.id}
                                         className={`rounded-3xl border flex flex-col justify-between overflow-hidden shadow-xl transition-all ${
-                                            isOverdue
-                                                ? "bg-espresso-900 border-red-500/90 ring-2 ring-red-500/40 shadow-red-500/10"
+                                            isDelayed
+                                                ? "bg-espresso-900 border-red-500 ring-2 ring-red-500/50 shadow-red-500/20"
+                                                : isWarning
+                                                ? "bg-espresso-900 border-amber-500/80 ring-2 ring-amber-500/30 shadow-amber-500/10"
                                                 : order.status === "preparing"
                                                 ? "bg-espresso-900 border-saffron-500/70 ring-2 ring-saffron-500/20"
                                                 : order.status === "ready"
-                                                ? "bg-espresso-900/90 border-emerald-500/70"
+                                                ? "bg-espresso-900/95 border-emerald-500/70 ring-2 ring-emerald-500/20"
                                                 : "bg-espresso-900 border-espresso-700"
                                         }`}
                                     >
@@ -317,29 +362,57 @@ export default function KitchenDisplaySystemPage() {
 
                                                 {/* Elapsed Timer with Urgency Color Psychology */}
                                                 <div
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-black border tracking-wider ${
-                                                        isOverdue
-                                                            ? "bg-red-950 border-red-500 text-red-200 animate-pulse shadow-md shadow-red-500/30"
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-black border tracking-wider shrink-0 ${
+                                                        isDelayed
+                                                            ? "bg-red-950 border-red-500 text-red-200 animate-pulse shadow-md shadow-red-500/40"
                                                             : isWarning
                                                             ? "bg-amber-950 border-amber-500 text-amber-300"
                                                             : "bg-emerald-950 border-emerald-500 text-emerald-300"
                                                     }`}
                                                 >
-                                                    {isOverdue ? (
+                                                    {isDelayed ? (
                                                         <AlertCircle className="w-3.5 h-3.5 text-red-400 animate-bounce" />
+                                                    ) : isWarning ? (
+                                                        <Clock className="w-3.5 h-3.5 text-amber-400" />
                                                     ) : (
-                                                        <Clock className="w-3.5 h-3.5" />
+                                                        <Clock className="w-3.5 h-3.5 text-emerald-400" />
                                                     )}
                                                     <span>{formatElapsed(elapsed)}</span>
-                                                    {isOverdue && <span className="text-[10px] uppercase font-black">RUSH</span>}
+                                                    {isDelayed && (
+                                                        <span className="text-[10px] uppercase font-black bg-red-600 text-white px-1.5 py-0.5 rounded">
+                                                            DELAYED (&gt;20m)
+                                                        </span>
+                                                    )}
+                                                    {!isDelayed && isWarning && (
+                                                        <span className="text-[10px] uppercase font-black bg-amber-600/80 text-white px-1.5 py-0.5 rounded">
+                                                            WARN
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             {/* Checklist of Items */}
                                             <div className="p-5 space-y-3">
                                                 <div className="text-[11px] font-extrabold uppercase tracking-wider text-espresso-400 flex items-center justify-between">
-                                                    <span>Items Checklist ({order.items?.length || 0})</span>
-                                                    <span className="text-[10px] text-espresso-500">Tap to cross out</span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span>Items Checklist</span>
+                                                        <span
+                                                            className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
+                                                                allPrepped
+                                                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                                                    : "bg-espresso-800 text-espresso-300 border border-espresso-700"
+                                                            }`}
+                                                        >
+                                                            {preppedCount}/{itemsCount} Done
+                                                        </span>
+                                                    </div>
+                                                    {allPrepped ? (
+                                                        <span className="text-[10px] text-emerald-400 font-black flex items-center gap-1">
+                                                            <CheckCircle2 className="w-3 h-3" /> All Done
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[10px] text-espresso-500">Tap to cross out</span>
+                                                    )}
                                                 </div>
 
                                                 <div className="space-y-2.5">
@@ -433,17 +506,46 @@ export default function KitchenDisplaySystemPage() {
                                                     Start Preparing
                                                 </Button>
                                             ) : order.status === "preparing" ? (
-                                                <Button
-                                                    size="md"
-                                                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black cursor-pointer shadow-md"
-                                                    leftIcon={<CheckCircle2 className="w-4 h-4" />}
-                                                    onClick={() => handleUpdateStatus(order.id, "ready")}
-                                                >
-                                                    Mark as Ready
-                                                </Button>
+                                                <div className="flex-1 flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleUpdateStatus(order.id, "placed")}
+                                                        className="p-2.5 rounded-xl bg-espresso-800 hover:bg-espresso-700 text-espresso-400 hover:text-white border border-espresso-700 transition cursor-pointer"
+                                                        title="Revert to Placed"
+                                                    >
+                                                        <Undo2 className="w-4 h-4" />
+                                                    </button>
+                                                    <Button
+                                                        size="md"
+                                                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black cursor-pointer shadow-md"
+                                                        leftIcon={<CheckCircle2 className="w-4 h-4" />}
+                                                        onClick={() => handleUpdateStatus(order.id, "ready")}
+                                                    >
+                                                        Mark as Ready
+                                                    </Button>
+                                                </div>
+                                            ) : order.status === "ready" ? (
+                                                <div className="flex-1 flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleUpdateStatus(order.id, "preparing")}
+                                                        className="p-2.5 rounded-xl bg-espresso-800 hover:bg-espresso-700 text-espresso-400 hover:text-white border border-espresso-700 transition cursor-pointer"
+                                                        title="Revert to Preparing"
+                                                    >
+                                                        <Undo2 className="w-4 h-4" />
+                                                    </button>
+                                                    <Button
+                                                        size="md"
+                                                        className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-black cursor-pointer shadow-md"
+                                                        leftIcon={<CheckCheck className="w-4 h-4" />}
+                                                        onClick={() => handleUpdateStatus(order.id, "served")}
+                                                    >
+                                                        Mark Served
+                                                    </Button>
+                                                </div>
                                             ) : (
                                                 <div className="flex-1 text-center py-2 text-xs font-black text-emerald-400 bg-emerald-950/60 border border-emerald-800 rounded-xl">
-                                                    Ready for Serving / Packing
+                                                    Order Served
                                                 </div>
                                             )}
                                         </div>

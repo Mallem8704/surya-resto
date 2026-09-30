@@ -25,6 +25,13 @@ class ShiftCloseRequest(BaseModel):
     closing_notes: Optional[str] = None
 
 
+class PettyCashRequest(BaseModel):
+    type: str  # "cash_in" or "cash_out"
+    amount_paise: int
+    category: str
+    notes: Optional[str] = None
+
+
 @router.get("/current")
 def get_current_shift(
     outlet_id: Optional[int] = Query(None),
@@ -164,6 +171,59 @@ def open_cashier_shift(
         "message": f"Shift #{shift.id} ({shift.shift_name}) opened successfully",
         "shift_id": shift.id,
         "opening_float_rupees": round(shift.opening_float_paise / 100.0, 2),
+    }
+
+
+@router.post("/petty-cash")
+def record_petty_cash(
+    req: PettyCashRequest,
+    outlet_id: Optional[int] = Query(None),
+    current_user: User = Depends(require_staff_or_owner),
+    db: Session = Depends(get_db),
+):
+    """Record a Cash In or Cash Out petty cash drawer movement against the active shift."""
+    target_outlet_id = get_effective_outlet_id(outlet_id or current_user.outlet_id, db)
+
+    shift = (
+        db.query(CashierShift)
+        .filter(
+            CashierShift.outlet_id == target_outlet_id,
+            CashierShift.status == "open",
+        )
+        .order_by(CashierShift.id.desc())
+        .first()
+    )
+    if not shift:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No active cashier shift is currently open. Please open a shift first to track petty cash drawer movements.",
+        )
+
+    if req.type == "cash_in":
+        shift.petty_cash_in_paise = (shift.petty_cash_in_paise or 0) + req.amount_paise
+    elif req.type == "cash_out":
+        shift.petty_cash_out_paise = (shift.petty_cash_out_paise or 0) + req.amount_paise
+    else:
+        raise HTTPException(status_code=400, detail="Invalid petty cash type. Must be 'cash_in' or 'cash_out'.")
+
+    audit = AuditLog(
+        outlet_id=target_outlet_id,
+        user_id=current_user.id,
+        action=f"petty_{req.type}",
+        entity_type="cashier_shift",
+        entity_id=shift.id,
+        details=f"Petty {req.type.upper()}: ₹{round(req.amount_paise / 100.0, 2)} ({req.category}) - {req.notes or 'No notes'} recorded by {current_user.name}",
+    )
+    db.add(audit)
+    db.commit()
+    db.refresh(shift)
+
+    return {
+        "success": True,
+        "message": f"Petty cash ({req.type.replace('_', ' ').title()}) of ₹{round(req.amount_paise / 100.0, 2)} recorded on Shift #{shift.id}",
+        "shift_id": shift.id,
+        "petty_cash_in_rupees": round((shift.petty_cash_in_paise or 0) / 100.0, 2),
+        "petty_cash_out_rupees": round((shift.petty_cash_out_paise or 0) / 100.0, 2),
     }
 
 

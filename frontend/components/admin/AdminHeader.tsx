@@ -288,8 +288,11 @@ export function AdminHeader({
                                         </div>
                                     </div>
 
-                                    <p className="text-[10px] text-espresso-500 leading-tight pt-1">
-                                        🛡️ <strong>Zero Internet Downtime:</strong> Counter billing &amp; KDS always run locally with 0 latency. Orders automatically replicate to free Supabase PostgreSQL whenever internet is available.
+                                    <p className="text-[10px] text-espresso-500 leading-tight pt-1 flex items-start gap-1.5">
+                                        <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                        <span>
+                                            <strong>Zero Internet Downtime:</strong> Counter billing &amp; KDS always run locally with 0 latency. Orders automatically replicate to free Supabase PostgreSQL whenever internet is available.
+                                        </span>
                                     </p>
                                 </div>
 

@@ -8,6 +8,11 @@ logger = logging.getLogger("surya_ws")
 router = APIRouter(tags=["WebSockets"])
 
 
+def safe_json_dumps(payload: Any) -> str:
+    """Safe JSON serializer with string fallback for dates, decimals, and custom objects."""
+    return json.dumps(payload, default=str)
+
+
 class ConnectionManager:
     """Manages active WebSocket connections for Admin Dashboards and Customer Order Trackers."""
 
@@ -28,10 +33,12 @@ class ConnectionManager:
         logger.info(f"[WS] Admin connected for outlet {outlet_id}. Total: {len(self.admin_connections.get(outlet_id, set()))}")
 
     async def disconnect_admin(self, websocket: WebSocket, outlet_id: int = 1):
-        """Unregister an admin dashboard connection."""
+        """Unregister an admin dashboard connection and clean up empty rooms."""
         async with self._lock:
             if outlet_id in self.admin_connections and websocket in self.admin_connections[outlet_id]:
                 self.admin_connections[outlet_id].remove(websocket)
+                if not self.admin_connections[outlet_id]:
+                    del self.admin_connections[outlet_id]
         logger.info(f"[WS] Admin disconnected for outlet {outlet_id}")
 
     async def connect_order(self, websocket: WebSocket, order_id: int):
@@ -44,7 +51,7 @@ class ConnectionManager:
         logger.info(f"[WS] Customer connected for order {order_id}. Total: {len(self.order_connections.get(order_id, set()))}")
 
     async def disconnect_order(self, websocket: WebSocket, order_id: int):
-        """Unregister a customer order tracking connection."""
+        """Unregister a customer order tracking connection and clean up empty rooms."""
         async with self._lock:
             if order_id in self.order_connections and websocket in self.order_connections[order_id]:
                 self.order_connections[order_id].remove(websocket)
@@ -54,7 +61,7 @@ class ConnectionManager:
 
     async def broadcast_to_admin(self, outlet_id: int, event_type: str, data: Any):
         """Broadcast live event to all connected admin dashboards for the given outlet."""
-        message = json.dumps({"event": event_type, "data": data})
+        message = safe_json_dumps({"event": event_type, "data": data})
         targets = []
         async with self._lock:
             if outlet_id in self.admin_connections:
@@ -71,21 +78,24 @@ class ConnectionManager:
             await asyncio.gather(*(send_safe(ws) for ws in targets), return_exceptions=True)
 
     async def broadcast_to_order(self, order_id: int, event_type: str, data: Any, outlet_id: int = 1):
-        """Broadcast live status update to customer tracking connections and admin boards."""
-        message = json.dumps({"event": event_type, "data": data})
+        """Broadcast live status update to customer tracking connections and admin boards concurrently."""
+        message = safe_json_dumps({"event": event_type, "data": data})
 
-        # 1. Notify specific customer order connections
+        # 1. Notify specific customer order connections concurrently
         customer_targets = []
         async with self._lock:
             if order_id in self.order_connections:
                 customer_targets = list(self.order_connections[order_id])
 
-        for ws in customer_targets:
+        async def send_safe_customer(ws):
             try:
                 await ws.send_text(message)
             except Exception as e:
                 logger.warning(f"[WS] Failed sending to customer socket for order {order_id}: {e}")
                 await self.disconnect_order(ws, order_id)
+
+        if customer_targets:
+            await asyncio.gather(*(send_safe_customer(ws) for ws in customer_targets), return_exceptions=True)
 
         # 2. Also notify admins so live Kanban board stays synchronized
         await self.broadcast_to_admin(outlet_id=outlet_id, event_type=event_type, data=data)
@@ -97,6 +107,10 @@ class ConnectionManager:
     async def broadcast_outlet_event(self, outlet_id: int, event_type: str, data: Any):
         """Broadcast live event to all connected admin/staff devices (Cashier POS, Captain POS, KDS) for the given outlet."""
         await self.broadcast_to_admin(outlet_id=outlet_id, event_type=event_type, data=data)
+
+    async def broadcast_stock_update(self, outlet_id: int, data: Any):
+        """Broadcast real-time inventory and stock updates to admin dashboards."""
+        await self.broadcast_to_admin(outlet_id=outlet_id, event_type="stock_updated", data=data)
 
 
 # Global singleton connection manager
@@ -126,19 +140,22 @@ async def websocket_hub(
         await manager.connect_order(websocket, order_id)
         try:
             # Send initial welcome confirmation
-            await websocket.send_text(json.dumps({
+            await websocket.send_text(safe_json_dumps({
                 "event": "connected",
                 "message": f"Connected to live updates for Order #{order_id}",
                 "order_id": order_id,
             }))
             while True:
                 data = await websocket.receive_text()
-                # Respond to client ping / heartbeat
-                if data == "ping":
-                    await websocket.send_text(json.dumps({"event": "pong"}))
+                # Respond to client ping / heartbeat (handles text "ping", case-insensitivity, or JSON {"type":"ping"})
+                data_clean = data.strip().lower()
+                if data_clean == "ping" or '"ping"' in data_clean:
+                    await websocket.send_text(safe_json_dumps({"event": "pong"}))
         except WebSocketDisconnect:
-            await manager.disconnect_order(websocket, order_id)
-        except Exception:
+            pass
+        except Exception as e:
+            logger.warning(f"[WS] Customer connection error for order #{order_id}: {e}")
+        finally:
             await manager.disconnect_order(websocket, order_id)
 
     else:
@@ -160,16 +177,19 @@ async def websocket_hub(
             
         await manager.connect_admin(websocket, outlet_id)
         try:
-            await websocket.send_text(json.dumps({
+            await websocket.send_text(safe_json_dumps({
                 "event": "connected",
                 "message": f"Admin live stream connected for Outlet #{outlet_id}",
                 "outlet_id": outlet_id,
             }))
             while True:
                 data = await websocket.receive_text()
-                if data == "ping":
-                    await websocket.send_text(json.dumps({"event": "pong"}))
+                data_clean = data.strip().lower()
+                if data_clean == "ping" or '"ping"' in data_clean:
+                    await websocket.send_text(safe_json_dumps({"event": "pong"}))
         except WebSocketDisconnect:
-            await manager.disconnect_admin(websocket, outlet_id)
-        except Exception:
+            pass
+        except Exception as e:
+            logger.warning(f"[WS] Admin connection error for outlet #{outlet_id}: {e}")
+        finally:
             await manager.disconnect_admin(websocket, outlet_id)

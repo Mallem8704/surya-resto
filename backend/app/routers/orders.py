@@ -405,12 +405,53 @@ async def create_order(
 
     formatted_response = format_order_response(new_order, db=db)
 
-    # Broadcast real-time event to Admin Dashboards
+    # Broadcast real-time event to Admin Dashboards (both new_order and order_created for full compatibility)
+    order_data = formatted_response.model_dump(mode="json")
     await manager.broadcast_to_admin(
         outlet_id=outlet_id,
         event_type="new_order",
-        data=formatted_response.model_dump(mode="json"),
+        data=order_data,
     )
+    await manager.broadcast_to_admin(
+        outlet_id=outlet_id,
+        event_type="order_created",
+        data=order_data,
+    )
+
+    # Broadcast stock_updated for any inventory items deducted by this order
+    for oi_data in order_items_to_create:
+        try:
+            mi = db.query(MenuItem).filter(MenuItem.id == oi_data["item_id"]).first()
+            if mi and mi.track_stock:
+                await manager.broadcast_stock_update(
+                    outlet_id=outlet_id,
+                    data={
+                        "item_id": mi.id,
+                        "item_name": mi.name,
+                        "stock_qty": mi.stock_qty,
+                        "track_stock": mi.track_stock,
+                        "low_stock_threshold": mi.low_stock_threshold,
+                        "is_available": mi.is_available,
+                        "status": "out_of_stock" if mi.stock_qty <= 0 else ("low_stock" if mi.stock_qty <= mi.low_stock_threshold else "in_stock"),
+                        "change_qty": -oi_data["qty"],
+                        "reason": "sale",
+                        "order_number": new_order.order_number,
+                    },
+                )
+                if mi.stock_qty <= mi.low_stock_threshold:
+                    await manager.broadcast_to_admin(
+                        outlet_id=outlet_id,
+                        event_type="stock:low",
+                        data={
+                            "item_id": mi.id,
+                            "item_name": mi.name,
+                            "stock_qty": mi.stock_qty,
+                            "low_stock_threshold": mi.low_stock_threshold,
+                            "status": "out_of_stock" if mi.stock_qty <= 0 else "low_stock",
+                        },
+                    )
+        except Exception:
+            pass
 
     return formatted_response
 
@@ -493,6 +534,12 @@ async def update_order_status(
     await manager.broadcast_to_order(
         order_id=order.id,
         event_type="order_status_updated",
+        data=formatted_response.model_dump(mode="json"),
+        outlet_id=order.outlet_id,
+    )
+    await manager.broadcast_to_order(
+        order_id=order.id,
+        event_type="order_updated",
         data=formatted_response.model_dump(mode="json"),
         outlet_id=order.outlet_id,
     )
@@ -736,6 +783,38 @@ async def append_order_items(
                 event_type="running_kot_added",
                 data=resp.model_dump(mode="json"),
             )
+            # Broadcast stock updates for appended items
+            for it_req in data.items:
+                mi = db.query(MenuItem).filter(MenuItem.id == it_req.item_id).first()
+                if mi and mi.track_stock:
+                    stock_status = "out_of_stock" if mi.stock_qty <= 0 else ("low_stock" if mi.stock_qty <= mi.low_stock_threshold else "in_stock")
+                    await manager.broadcast_stock_update(
+                        outlet_id=order.outlet_id,
+                        data={
+                            "item_id": mi.id,
+                            "item_name": mi.name,
+                            "stock_qty": mi.stock_qty,
+                            "track_stock": mi.track_stock,
+                            "low_stock_threshold": mi.low_stock_threshold,
+                            "is_available": mi.is_available,
+                            "status": stock_status,
+                            "change_qty": -it_req.qty,
+                            "reason": "sale",
+                            "order_number": order.order_number,
+                        },
+                    )
+                    if mi.stock_qty <= mi.low_stock_threshold:
+                        await manager.broadcast_to_admin(
+                            outlet_id=order.outlet_id,
+                            event_type="stock:low",
+                            data={
+                                "item_id": mi.id,
+                                "item_name": mi.name,
+                                "stock_qty": mi.stock_qty,
+                                "low_stock_threshold": mi.low_stock_threshold,
+                                "status": stock_status,
+                            },
+                        )
         except Exception as ws_err:
             pass
 
@@ -787,8 +866,90 @@ async def transfer_order_table(
         )
 
     prev_table_id = order.table_id
+
+    # Check if target table already has an active dining order
+    target_order = (
+        db.query(Order)
+        .options(joinedload(Order.items))
+        .filter(
+            Order.table_id == target_table.id,
+            Order.id != order.id,
+            Order.status.in_(["placed", "accepted", "preparing", "ready", "served"]),
+            Order.payment_status != "paid",
+        )
+        .order_by(Order.created_at.desc())
+        .first()
+    )
+
+    if target_order:
+        if not data.merge_if_occupied:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Table '{target_table.label}' already has active Order #{target_order.order_number}. Enable 'merge_if_occupied' to combine tables.",
+            )
+
+        # TABLE MERGE: Move all order items into target_order
+        for it in order.items:
+            it.order_id = target_order.id
+        db.flush()
+
+        db.refresh(target_order)
+        subtotal = sum(it.total_price_paise for it in target_order.items)
+        tax = round(subtotal * 0.05)
+        target_order.subtotal_paise = subtotal
+        target_order.tax_paise = tax
+        target_order.total_paise = subtotal + tax
+        target_order.updated_at = datetime.datetime.utcnow()
+
+        # Mark source order as merged/cancelled
+        order.status = "cancelled"
+        order.customer_notes = f"Merged into Table {target_table.label} (Order #{target_order.order_number})"
+        order.updated_at = datetime.datetime.utcnow()
+
+        # Free previous table
+        if prev_table_id:
+            prev_table = db.query(CafeTable).filter(CafeTable.id == prev_table_id).first()
+            if prev_table:
+                prev_table.status = "free"
+                prev_table.active_order_id = None
+
+        db.commit()
+        db.refresh(target_order)
+        db.refresh(order)
+
+        resp = format_order_response(target_order)
+        await manager.broadcast_to_admin(
+            outlet_id=target_order.outlet_id,
+            event_type="table_transferred",
+            data=resp.model_dump(mode="json"),
+        )
+        await manager.broadcast_to_admin(
+            outlet_id=target_order.outlet_id,
+            event_type="order_status_updated",
+            data=resp.model_dump(mode="json"),
+        )
+
+        log_audit(
+            db=db,
+            outlet_id=target_order.outlet_id,
+            user_id=current_user.id,
+            action="merge_tables",
+            entity_type="order",
+            entity_id=target_order.id,
+            details={
+                "source_order_id": order.id,
+                "target_order_id": target_order.id,
+                "from_table": prev_table_id,
+                "to_table": target_table.id,
+                "new_total_paise": target_order.total_paise,
+            },
+        )
+        return resp
+
+    # Standard Table Transfer (Target table is vacant)
     order.table_id = target_table.id
     target_table.status = "occupied"
+    target_table.active_order_id = order.id
 
     # Check if previous table has remaining active orders
     if prev_table_id:
@@ -800,7 +961,8 @@ async def transfer_order_table(
         if remaining == 0:
             prev_table = db.query(CafeTable).filter(CafeTable.id == prev_table_id).first()
             if prev_table:
-                prev_table.status = "available"
+                prev_table.status = "free"
+                prev_table.active_order_id = None
 
     order.updated_at = datetime.datetime.utcnow()
     db.commit()

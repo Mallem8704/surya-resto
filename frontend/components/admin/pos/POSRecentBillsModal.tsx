@@ -17,6 +17,9 @@ import {
     Phone,
     FileText,
     ArrowRightLeft,
+    Bike,
+    ShoppingBag,
+    Utensils,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
@@ -72,6 +75,24 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
         }
     }, [isOpen, outlet?.id]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                if (showChangePayment) {
+                    setShowChangePayment(false);
+                } else if (showVoidModal) {
+                    setShowVoidModal(false);
+                } else {
+                    onClose();
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, showChangePayment, showVoidModal, onClose]);
+
     const filteredOrders = useMemo(() => {
         return orders.filter((o) => {
             const query = searchQuery.toLowerCase().trim();
@@ -92,7 +113,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
         });
     }, [orders, searchQuery, statusFilter]);
 
-    // 🖨️ Duplicate Bill Reprint
+    // Duplicate Bill Reprint
     const handleReprint = (order: any) => {
         const printData: PrintOrderData = {
             id: order.id,
@@ -121,10 +142,10 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
             })),
         };
         printPOSReceipt(printData, outlet);
-        toast.success(`🖨️ Duplicate bill #${order.order_number} sent to printer`);
+        toast.success(`Duplicate bill #${order.order_number} sent to printer`);
     };
 
-    // 🔄 Change Payment Method
+    // Change Payment Method
     const handleChangePaymentSubmit = async () => {
         if (!selectedOrder) return;
         setIsUpdatingPayment(true);
@@ -142,7 +163,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
         }
     };
 
-    // ❌ Void / Cancel Order
+    // Void / Cancel Order
     const handleVoidSubmit = async () => {
         if (!selectedOrder || !voidReason.trim()) {
             toast.error("Please enter a mandatory cancellation reason");
@@ -270,7 +291,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                                         #{o.order_number}
                                                     </span>
                                                     <span className="text-[10px] text-white/50 block">
-                                                        {new Date(o.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} • {o.order_type === "delivery" ? "🛵 Delivery" : o.order_type === "takeaway" ? "🛍️ Takeaway" : `🍽️ Table ${o.table?.label || "1"}`}
+                                                        {new Date(o.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} • {o.order_type === "delivery" ? "Delivery" : o.order_type === "takeaway" ? "Takeaway" : `Table ${o.table?.label || "1"}`}
                                                     </span>
                                                 </div>
                                                 <div className="text-right">
@@ -336,8 +357,23 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
                                         <div className="p-2.5 rounded-xl bg-black/40 border border-white/5">
                                             <span className="text-[10px] text-white/40 block">Type / Seating</span>
-                                            <span className="font-bold text-white">
-                                                {selectedOrder.order_type === "delivery" ? "🛵 Delivery" : selectedOrder.order_type === "takeaway" ? "🛍️ Takeaway" : `🍽️ Table ${selectedOrder.table?.label || "1"}`}
+                                            <span className="font-bold text-white inline-flex items-center gap-1.5 mt-0.5">
+                                                {selectedOrder.order_type === "delivery" ? (
+                                                    <>
+                                                        <Bike className="w-3.5 h-3.5 text-amber-400" />
+                                                        <span>Delivery</span>
+                                                    </>
+                                                ) : selectedOrder.order_type === "takeaway" ? (
+                                                    <>
+                                                        <ShoppingBag className="w-3.5 h-3.5 text-amber-400" />
+                                                        <span>Takeaway</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Utensils className="w-3.5 h-3.5 text-amber-400" />
+                                                        <span>Table {selectedOrder.table?.label || "1"}</span>
+                                                    </>
+                                                )}
                                             </span>
                                         </div>
                                         <div className="p-2.5 rounded-xl bg-black/40 border border-white/5">
@@ -469,9 +505,9 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
 
                             <div className="grid grid-cols-3 gap-2">
                                 {[
-                                    { id: "cash", label: "💵 Cash", icon: Banknote },
-                                    { id: "upi", label: "📱 UPI / QR", icon: QrCode },
-                                    { id: "card", label: "💳 Card", icon: CreditCard },
+                                    { id: "cash", label: "Cash", icon: Banknote },
+                                    { id: "upi", label: "UPI / QR", icon: QrCode },
+                                    { id: "card", label: "Card", icon: CreditCard },
                                 ].map((m) => (
                                     <button
                                         key={m.id}

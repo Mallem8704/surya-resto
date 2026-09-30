@@ -34,6 +34,7 @@ import {
     RefreshCw,
     Flame,
     UtensilsCrossed,
+    Utensils,
     SlidersHorizontal,
     UserCheck,
     LogIn,
@@ -43,6 +44,14 @@ import {
     Smartphone,
     Info,
     LogOut,
+    Tag,
+    Check,
+    Percent,
+    Salad,
+    CircleDot,
+    Crown,
+    Soup,
+    Coffee,
 } from "lucide-react";
 import { getDishImage } from "@/lib/dishImages";
 import { useCustomer } from "@/context/CustomerContext";
@@ -72,19 +81,57 @@ import { MenuGridSkeleton } from "@/components/order/MenuGridSkeleton";
 import { UpiPaymentModal } from "@/components/order/UpiPaymentModal";
 import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 
-export const CATEGORY_EMOJIS: Record<number | string, string> = {
-    all: "🍽️",
-    1: "🍛", // Biryani & Pulao Specials
-    2: "🥘", // Punjabi & North Indian Curries
-    3: "🍢", // Tandoori & Kebabs
-    4: "🍗", // Non-Veg Starters & Andhra Specials
-    5: "🥗", // Veg Starters & Crispies
-    6: "🫓", // Indian Breads & Naans
-    7: "👑", // Arabic Mandi Specials
-    8: "🍜", // Chinese Rice & Noodles
-    9: "🍧", // Desserts & Sweets
-    10: "🥤", // Beverages & Lassi
-};
+export function getCategoryIcon(catId: number | string, className: string = "w-3.5 h-3.5") {
+    switch (Number(catId)) {
+        case 1:
+            return <Flame className={`${className} text-orange-500`} />;
+        case 2:
+            return <UtensilsCrossed className={`${className} text-amber-600`} />;
+        case 3:
+            return <Flame className={`${className} text-red-500`} />;
+        case 4:
+            return <Sparkles className={`${className} text-rose-600`} />;
+        case 5:
+            return <Salad className={`${className} text-emerald-600`} />;
+        case 6:
+            return <CircleDot className={`${className} text-amber-600`} />;
+        case 7:
+            return <Crown className={`${className} text-amber-500`} />;
+        case 8:
+            return <Soup className={`${className} text-orange-500`} />;
+        case 9:
+            return <Sparkles className={`${className} text-pink-500`} />;
+        case 10:
+            return <Coffee className={`${className} text-cyan-600`} />;
+        default:
+            return <Utensils className={`${className} text-espresso-700`} />;
+    }
+}
+
+export const AVAILABLE_PROMOS = [
+    {
+        code: "WELCOME50",
+        label: "Flat ₹50 OFF",
+        description: "On Kadiri Deliveries above ₹250",
+        minPaise: 25000,
+        discountPaise: 5000,
+    },
+    {
+        code: "BIRYANI10",
+        label: "10% OFF",
+        description: "On Biryani & Pulao Orders (above ₹300)",
+        minPaise: 30000,
+        percent: 10,
+        maxDiscountPaise: 10000,
+    },
+    {
+        code: "SURYA100",
+        label: "Flat ₹100 OFF",
+        description: "On Surya Family Feasts above ₹600",
+        minPaise: 60000,
+        discountPaise: 10000,
+    },
+];
 
 interface MenuItemData extends CustomizerItemData {
     category_id: number;
@@ -555,24 +602,126 @@ function DeliveryOrderContent() {
     useOrderSocket(activeOrder?.id, (updatedData) => {
         if (process.env.NODE_ENV === "development") console.log("[DeliverySocket] Order updated:", updatedData);
         setActiveOrder((prev) => (prev ? { ...prev, ...updatedData } : null));
-        if (updatedData.status === "out_for_delivery") {
+        const newStatus = updatedData.delivery_status || updatedData.status;
+        if (newStatus === "preparing") {
             soundManager.playReadyChime();
-            toast.success("Rider is on the way with your food!");
-        } else if (updatedData.status === "delivered") {
+            toast.info("Kitchen is preparing your fresh Surya feast!");
+        } else if (newStatus === "out_for_delivery") {
+            soundManager.playReadyChime();
+            toast.success("Rider is on the way with your food across Kadiri!");
+        } else if (newStatus === "delivered") {
             soundManager.playReadyChime();
             toast.success("Food Delivered! Enjoy your Surya feast!");
+        } else if (newStatus === "cancelled") {
+            toast.error("Order was cancelled. Please call restaurant at 098803 58634.");
         }
     });
 
-    // Cart calculations
+    // Cart calculations with Free Delivery (₹0) and Promo Code Discounts
     const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.qty, 0), [cart]);
     const subtotalPaise = useMemo(
         () => cart.reduce((sum, item) => sum + item.unitPricePaise * item.qty, 0),
         [cart]
     );
-    const taxPaise = useMemo(() => Math.round(subtotalPaise * 0.05), [subtotalPaise]);
-    const deliveryFeePaise = 0; // 100% FREE DELIVERY
-    const totalPaise = subtotalPaise + taxPaise + deliveryFeePaise;
+    const discountPaise = appliedCoupon ? appliedCoupon.discount_paise : 0;
+    const discountedSubtotal = Math.max(0, subtotalPaise - discountPaise);
+    const taxPaise = useMemo(() => Math.round(discountedSubtotal * 0.05), [discountedSubtotal]);
+    const deliveryFeePaise = 0; // 100% FREE DELIVERY across Kadiri Town
+    const totalPaise = discountedSubtotal + taxPaise + deliveryFeePaise;
+
+    // Promo code validation & application (WELCOME50, BIRYANI10, SURYA100)
+    const handleApplyCoupon = async (codeToApply?: string) => {
+        const rawCode = (codeToApply || couponCodeInput).trim().toUpperCase();
+        if (!rawCode) {
+            toast.error("Please enter a promo code");
+            return;
+        }
+
+        setIsValidatingCoupon(true);
+        try {
+            let validatedDiscountPaise = 0;
+            let validatedMessage = "";
+
+            try {
+                const res = await api.validateCoupon({
+                    code: rawCode,
+                    subtotal_paise: subtotalPaise,
+                    outlet_id: selectedBranch,
+                });
+                if (res && res.valid && typeof res.discount_paise === "number") {
+                    validatedDiscountPaise = res.discount_paise;
+                    validatedMessage = res.message || `Code ${rawCode} applied!`;
+                } else if (res && !res.valid) {
+                    toast.error(res.message || `Code ${rawCode} is invalid or requirements not met`);
+                    setIsValidatingCoupon(false);
+                    return;
+                }
+            } catch {
+                // Offline fallback against known authentic promo list
+                const localPromo = AVAILABLE_PROMOS.find((p) => p.code === rawCode);
+                if (!localPromo) {
+                    toast.error("Invalid promo code. Try WELCOME50, BIRYANI10, or SURYA100");
+                    setIsValidatingCoupon(false);
+                    return;
+                }
+
+                if (subtotalPaise < localPromo.minPaise) {
+                    toast.error(
+                        `Code ${localPromo.code} requires minimum order of ${formatRupees(localPromo.minPaise)}`
+                    );
+                    setIsValidatingCoupon(false);
+                    return;
+                }
+
+                let calcDisc = 0;
+                if (localPromo.discountPaise) {
+                    calcDisc = localPromo.discountPaise;
+                } else if (localPromo.percent) {
+                    calcDisc = Math.round((subtotalPaise * localPromo.percent) / 100);
+                    if (localPromo.maxDiscountPaise) {
+                        calcDisc = Math.min(calcDisc, localPromo.maxDiscountPaise);
+                    }
+                }
+                validatedDiscountPaise = calcDisc;
+                validatedMessage = `${localPromo.label} applied!`;
+            }
+
+            if (validatedDiscountPaise > 0) {
+                setAppliedCoupon({
+                    code: rawCode,
+                    discount_paise: validatedDiscountPaise,
+                    message: validatedMessage,
+                });
+                setCouponCodeInput(rawCode);
+                soundManager.playOrderPlacedSuccess();
+                toast.success(`Success! ${rawCode}: Saved ${formatRupees(validatedDiscountPaise)}!`);
+            } else {
+                toast.error(`Coupon ${rawCode} is not applicable on current cart value.`);
+            }
+        } finally {
+            setIsValidatingCoupon(false);
+        }
+    };
+
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponCodeInput("");
+        toast.info("Promo code removed");
+    };
+
+    // Auto re-validate / adjust coupon discount if cart items change
+    useEffect(() => {
+        if (!appliedCoupon) return;
+        const promo = AVAILABLE_PROMOS.find((p) => p.code === appliedCoupon.code);
+        if (promo && subtotalPaise < promo.minPaise) {
+            setAppliedCoupon(null);
+            toast.warning(`Coupon ${promo.code} removed (minimum order was ${formatRupees(promo.minPaise)})`);
+        } else if (promo && promo.percent) {
+            let newDisc = Math.round((subtotalPaise * promo.percent) / 100);
+            if (promo.maxDiscountPaise) newDisc = Math.min(newDisc, promo.maxDiscountPaise);
+            setAppliedCoupon((prev) => prev ? { ...prev, discount_paise: newDisc } : null);
+        }
+    }, [subtotalPaise, appliedCoupon?.code]);
 
     // Handle Add to Cart Button Click on Dish Card
     const handleDishCardClick = (item: MenuItemData) => {
@@ -701,16 +850,26 @@ function DeliveryOrderContent() {
             return;
         }
 
-        const phoneClean = (customer?.phone || customerPhone).trim().replace(/\D/g, "");
-        if (phoneClean.length < 10) {
-            toast.error("Please enter a valid 10-digit mobile number");
+        let phoneClean = (customerPhone.trim() || customer?.phone || "").replace(/\D/g, "");
+        if (phoneClean.startsWith("91") && phoneClean.length === 12) {
+            phoneClean = phoneClean.slice(2);
+        }
+
+        if (phoneClean.length !== 10 || !/^[6-9]\d{9}$/.test(phoneClean)) {
+            toast.error("Please enter a valid 10-digit Indian mobile number (starting with 6-9)");
             return;
         }
 
-        if (!deliveryAddress.trim() || deliveryAddress.trim().length < 5) {
-            toast.error("Please enter complete delivery address in Kadiri");
+        const trimmedAddress = deliveryAddress.trim();
+        if (!trimmedAddress || trimmedAddress.length < 8) {
+            toast.error("Please enter complete delivery address with House/Flat No. & Street in Kadiri");
             return;
         }
+
+        const addressHasKadiri = /kadiri/i.test(trimmedAddress);
+        const fullAddress = landmark.trim()
+            ? `${trimmedAddress}, Landmark: ${landmark.trim()}${addressHasKadiri ? "" : ", Kadiri"}`
+            : `${trimmedAddress}${addressHasKadiri ? "" : ", Kadiri"}`;
 
         setIsPlacingOrder(true);
         try {
@@ -719,10 +878,6 @@ function DeliveryOrderContent() {
                 typeof crypto !== "undefined" && crypto.randomUUID
                     ? crypto.randomUUID()
                     : `idemp_${Math.random().toString(36).substring(2)}_${Date.now()}`;
-
-            const fullAddress = landmark.trim()
-                ? `${deliveryAddress.trim()}, Landmark: ${landmark.trim()}, Kadiri`
-                : `${deliveryAddress.trim()}, Kadiri`;
 
             const payload = {
                 outlet_id: selectedBranch,
@@ -754,6 +909,8 @@ function DeliveryOrderContent() {
                     outlet_id: selectedBranch,
                     status: "placed",
                     subtotal_paise: subtotalPaise,
+                    discount_paise: discountPaise,
+                    coupon_code: appliedCoupon?.code,
                     tax_paise: taxPaise,
                     total_paise: totalPaise,
                     payment_status: "pending",
@@ -1056,7 +1213,7 @@ function DeliveryOrderContent() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
+                        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto shrink-0">
                             <a
                                 href="https://maps.app.goo.gl/mx51L23iDJuwmThY8"
                                 target="_blank"
@@ -1074,6 +1231,16 @@ function DeliveryOrderContent() {
                                 <MessageSquare className="w-3.5 h-3.5" />
                                 <span>Share Invoice</span>
                             </button>
+
+                            <a
+                                href="https://wa.me/919880358634?text=Hi%20Surya%20Restaurant%2C%20regarding%20my%20delivery%20order"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                            >
+                                <PhoneCall className="w-3.5 h-3.5" />
+                                <span>WhatsApp Surya</span>
+                            </a>
                         </div>
                     </div>
                 </main>
@@ -1086,7 +1253,7 @@ function DeliveryOrderContent() {
                         orderId={pendingUpiOrder.id}
                         orderNumber={pendingUpiOrder.order_number}
                         totalPaise={pendingUpiOrder.total_paise}
-                        customerPhone={customerPhone}
+                        customerPhone={pendingUpiOrder.customer_phone || customerPhone}
                         onPaymentSuccess={(updated) => {
                             setActiveOrder((prev: any) =>
                                 prev ? { ...prev, payment_status: "paid" } : prev
@@ -1284,7 +1451,7 @@ function DeliveryOrderContent() {
                                 : "bg-white text-espresso-800 border border-cream-300 hover:bg-cream-100 shadow-2xs"
                         }`}
                     >
-                        <span>🍽️</span>
+                        <Utensils className="w-3.5 h-3.5" />
                         <span>{language === "te" ? "అన్నీ (ఆల్ కేటగిరీలు)" : "All Dishes"}</span>
                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                             selectedCategory === "all" ? "bg-white/20 text-white" : "bg-cream-100 text-espresso-600"
@@ -1295,7 +1462,6 @@ function DeliveryOrderContent() {
                     {categories.map((cat) => {
                         const count = menuItems.filter((i) => i.category_id === cat.id).length;
                         const isSelected = selectedCategory === cat.id;
-                        const emoji = CATEGORY_EMOJIS[cat.id] || "🍽️";
 
                         return (
                             <button
@@ -1307,7 +1473,7 @@ function DeliveryOrderContent() {
                                         : "bg-white text-espresso-800 border border-cream-300 hover:bg-cream-100 shadow-2xs"
                                 }`}
                             >
-                                <span>{emoji}</span>
+                                <span>{getCategoryIcon(cat.id, "w-3.5 h-3.5")}</span>
                                 <span>{language === "te" && cat.name_te ? cat.name_te : cat.name}</span>
                                 {count > 0 && (
                                     <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
@@ -1550,7 +1716,94 @@ function DeliveryOrderContent() {
                                 </div>
                             </div>
 
-                            {/* 2. Customer Delivery Address Form */}
+                            {/* 2. Promo Code / Coupon Section */}
+                            <div className="bg-gradient-to-r from-amber-50/70 via-orange-50/50 to-amber-50/70 rounded-2xl p-4 border border-amber-200/80 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1.5">
+                                        <Tag className="w-3.5 h-3.5 text-amber-600" />
+                                        <span>Apply Promo Code</span>
+                                    </h4>
+                                    {appliedCoupon && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveCoupon}
+                                            className="text-[11px] font-bold text-red-600 hover:text-red-700 flex items-center gap-0.5 cursor-pointer"
+                                        >
+                                            <X className="w-3 h-3" />
+                                            <span>Remove</span>
+                                        </button>
+                                    )}
+                                </div>
+
+                                {appliedCoupon ? (
+                                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 shadow-2xs">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                            <div>
+                                                <span className="text-xs font-black font-mono tracking-wide">{appliedCoupon.code}</span>
+                                                <span className="text-[11px] text-emerald-700 block">{appliedCoupon.message}</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-xs font-black font-mono text-emerald-700">
+                                            -{formatRupees(appliedCoupon.discount_paise)}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={couponCodeInput}
+                                                onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") {
+                                                        e.preventDefault();
+                                                        handleApplyCoupon();
+                                                    }
+                                                }}
+                                                placeholder="Enter coupon (e.g. WELCOME50)"
+                                                className="flex-1 px-3 py-2 text-xs font-mono font-bold uppercase rounded-xl border border-amber-300 bg-white text-espresso-950 placeholder:text-espresso-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                                            />
+                                            <button
+                                                type="button"
+                                                disabled={!couponCodeInput.trim() || isValidatingCoupon}
+                                                onClick={() => handleApplyCoupon()}
+                                                className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl text-xs font-black tracking-wider transition disabled:opacity-50 cursor-pointer shadow-xs"
+                                            >
+                                                {isValidatingCoupon ? "VALIDATING..." : "APPLY"}
+                                            </button>
+                                        </div>
+
+                                        {/* Quick 1-tap Promo Chips */}
+                                        <div className="flex flex-wrap gap-1.5 pt-0.5">
+                                            {AVAILABLE_PROMOS.map((promo) => {
+                                                const isEligible = subtotalPaise >= promo.minPaise;
+                                                return (
+                                                    <button
+                                                        key={promo.code}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setCouponCodeInput(promo.code);
+                                                            handleApplyCoupon(promo.code);
+                                                        }}
+                                                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition flex items-center gap-1 cursor-pointer ${
+                                                            isEligible
+                                                                ? "bg-white hover:bg-amber-100 text-amber-950 border-amber-300 shadow-2xs"
+                                                                : "bg-cream-100/70 text-espresso-400 border-cream-200"
+                                                        }`}
+                                                    >
+                                                        <Percent className="w-2.5 h-2.5 text-amber-600" />
+                                                        <span className="font-mono font-black">{promo.code}</span>
+                                                        <span className="opacity-75">({promo.label})</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 3. Customer Delivery Address Form */}
                             <form id="delivery-form" onSubmit={handlePlaceDeliveryOrder} className="space-y-4">
                                 <h3 className="text-xs font-black uppercase tracking-wider text-espresso-500">
                                     Kadiri Delivery Information
@@ -1657,15 +1910,16 @@ function DeliveryOrderContent() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-espresso-800 mb-1">
-                                            Phone Number *
+                                            Phone Number * (10 Digits)
                                         </label>
                                         <div className="relative">
                                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-espresso-400" />
                                             <input
                                                 type="tel"
                                                 required
+                                                maxLength={10}
                                                 value={customerPhone}
-                                                onChange={(e) => setCustomerPhone(e.target.value)}
+                                                onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                                                 placeholder="10-digit mobile number"
                                                 className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-terracotta-200 focus:ring-2 focus:ring-terracotta-500 bg-cream-50/20 text-espresso-900 placeholder:text-espresso-400 font-mono"
                                             />
@@ -1674,9 +1928,12 @@ function DeliveryOrderContent() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-espresso-800 mb-1">
-                                        House No, Street & Area in Kadiri *
-                                    </label>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <label className="block text-xs font-bold text-espresso-800">
+                                            House No, Street & Area in Kadiri *
+                                        </label>
+                                        <span className="text-[10px] text-terracotta-600 font-semibold">Kadiri Town Limits</span>
+                                    </div>
                                     <div className="relative">
                                         <MapPin className="absolute left-3 top-3 w-3.5 h-3.5 text-espresso-400" />
                                         <textarea
@@ -1687,6 +1944,27 @@ function DeliveryOrderContent() {
                                             placeholder="e.g. Flat 302, Green Valley Apts, Near Clock Tower, Kadiri"
                                             className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-terracotta-200 focus:ring-2 focus:ring-terracotta-500 bg-cream-50/20 text-espresso-900 placeholder:text-espresso-400"
                                         />
+                                    </div>
+                                    {/* Quick Kadiri Area Tags */}
+                                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                        <span className="text-[10px] text-espresso-400 font-medium">Quick Areas:</span>
+                                        {["Bypass Road", "Opp. RTC Bus Stand", "Clock Tower", "Police Quarters", "Kummaravandla Palli", "Dhandubatu Street"].map((area) => (
+                                            <button
+                                                key={area}
+                                                type="button"
+                                                onClick={() => {
+                                                    setDeliveryAddress((prev) => {
+                                                        const clean = prev.trim();
+                                                        if (!clean) return `${area}, Kadiri`;
+                                                        if (clean.includes(area)) return clean;
+                                                        return `${clean}, ${area}`;
+                                                    });
+                                                }}
+                                                className="text-[10px] px-2 py-0.5 rounded-md bg-cream-100 hover:bg-terracotta-100 text-espresso-700 border border-cream-200 cursor-pointer transition"
+                                            >
+                                                + {area}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -1726,18 +2004,27 @@ function DeliveryOrderContent() {
                                         type="text"
                                         value={cookingNotes}
                                         onChange={(e) => setCookingNotes(e.target.value)}
-                                        placeholder="e.g. Extra spicy, keep mayonnaise separate, call before arriving"
+                                        placeholder="e.g. Extra spicy, keep salan separate, call before arriving"
                                         className="w-full px-3 py-2 text-xs rounded-xl border border-terracotta-200 focus:ring-2 focus:ring-terracotta-500 bg-cream-50/20 text-espresso-900 placeholder:text-espresso-400"
                                     />
                                 </div>
                             </form>
 
-                            {/* 3. Bill Summary */}
+                            {/* 4. Bill Summary */}
                             <div className="bg-cream-50/70 rounded-2xl p-4 border border-terracotta-100 space-y-2 text-xs">
                                 <div className="flex justify-between text-espresso-600">
                                     <span>Item Subtotal</span>
                                     <span className="font-mono">{formatRupees(subtotalPaise)}</span>
                                 </div>
+                                {appliedCoupon && appliedCoupon.discount_paise > 0 && (
+                                    <div className="flex justify-between text-emerald-700 font-bold">
+                                        <span className="flex items-center gap-1">
+                                            <Tag className="w-3 h-3" />
+                                            <span>Coupon ({appliedCoupon.code})</span>
+                                        </span>
+                                        <span className="font-mono">-{formatRupees(appliedCoupon.discount_paise)}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-espresso-600">
                                     <span>GST (5%)</span>
                                     <span className="font-mono">{formatRupees(taxPaise)}</span>
@@ -1763,7 +2050,10 @@ function DeliveryOrderContent() {
                                 isLoading={isPlacingOrder}
                                 className="w-full py-3.5 text-sm font-bold shadow-lg shadow-terracotta-600/30 flex items-center justify-between"
                             >
-                                <span>{isCustomerLoggedIn ? "Confirm & Order Free Delivery 🛵" : "Sign In & Order Delivery 🛵"}</span>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <span>{isCustomerLoggedIn ? "Confirm & Order Free Delivery" : "Sign In & Order Delivery"}</span>
+                                    <Bike className="w-4 h-4" />
+                                </span>
                                 <span className="font-mono font-black">{formatRupees(totalPaise)}</span>
                             </Button>
                         </div>

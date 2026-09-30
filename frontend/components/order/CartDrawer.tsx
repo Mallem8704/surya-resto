@@ -13,6 +13,9 @@ import {
     Smartphone,
     Receipt,
     Sparkles,
+    Utensils,
+    QrCode,
+    Flame,
 } from "lucide-react";
 import { formatRupees } from "@/lib/formatters";
 import { useLanguage } from "@/context/LanguageContext";
@@ -41,7 +44,11 @@ interface CartDrawerProps {
     onUpdateQty: (id: number, delta: number, cartKey?: string) => void;
     onUpdateNotes: (id: number, notes: string, cartKey?: string) => void;
     onClearItem: (id: number, cartKey?: string) => void;
-    onCheckout: (paymentMethod: "counter" | "upi", customerNotes: string) => Promise<void>;
+    onCheckout: (
+        paymentMethod: "counter" | "upi",
+        customerNotes: string,
+        promo?: { code: string; discount_paise: number }
+    ) => Promise<void>;
     isPlacingOrder: boolean;
     onClearCart?: () => void;
 }
@@ -149,7 +156,11 @@ export function CartDrawer({
         }
 
         try {
-            await onCheckout(selectedPayment, customerNotes.trim());
+            await onCheckout(
+                selectedPayment,
+                customerNotes.trim(),
+                appliedCoupon ? { code: appliedCoupon.code, discount_paise: appliedCoupon.discount_paise } : undefined
+            );
         } catch (err: any) {
             console.error("Direct checkout failed:", err);
         }
@@ -173,8 +184,8 @@ export function CartDrawer({
                         </div>
                         <div>
                             <h3 className="text-base font-black tracking-wide text-white">Table Order Cart</h3>
-                            <p className="text-[11px] text-amber-200 font-bold flex items-center gap-1">
-                                <span>🍽️ Table {tableLabel || "T1"}</span>
+                            <p className="text-[11px] text-amber-200 font-bold flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1"><Utensils className="w-3 h-3 text-amber-300" /> Table {tableLabel || "T1"}</span>
                                 <span className="text-white/40">•</span>
                                 <span className="text-white/80">Direct to Kitchen</span>
                             </p>
@@ -366,7 +377,7 @@ export function CartDrawer({
 
                             {appliedCoupon && (
                                 <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center justify-between">
-                                    <span>🎉 {appliedCoupon.message}</span>
+                                    <span className="inline-flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-emerald-600" /> {appliedCoupon.message}</span>
                                     <span className="font-mono font-black">-{formatRupees(appliedCoupon.discount_paise)}</span>
                                 </div>
                             )}
@@ -406,8 +417,8 @@ export function CartDrawer({
                                             : "border-cream-300 bg-white text-espresso-700"
                                     }`}
                                 >
-                                    <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span>⚡ UPI at Table</span>
+                                    <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>UPI at Table</span>
                                 </button>
                             </div>
                         </div>
@@ -453,8 +464,9 @@ export function CartDrawer({
                                 <ChefHat className="w-4 h-4 text-amber-300" />
                                 <span>Send Order to Kitchen • {formatRupees(totalPaise)}</span>
                             </div>
-                            <span className="text-[10px] font-medium text-amber-100/90">
-                                ⚡ Direct KOT to Chef at Table {tableLabel || "T1"}
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-100/90">
+                                <Flame className="w-3 h-3 text-amber-300 shrink-0" />
+                                <span>Direct KOT to Chef at Table {tableLabel || "T1"}</span>
                             </span>
                         </Button>
                     )}

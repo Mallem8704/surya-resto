@@ -52,6 +52,12 @@
       }
     },
     {
+      "source": "/health",
+      "destination": {
+        "service": "surya-resto-backend"
+      }
+    },
+    {
       "source": "/(.*)",
       "destination": {
         "service": "frontend"

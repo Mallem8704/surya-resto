@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { UtensilsCrossed, RefreshCw } from "lucide-react";
 
 export default function GlobalError({
   error,
@@ -25,7 +26,22 @@ export default function GlobalError({
         }}
       >
         <div style={{ textAlign: "center" as const, maxWidth: 400 }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🍽️</div>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 16,
+              background: "#fee2e2",
+              border: "1px solid #fecaca",
+              color: "#c0392b",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px auto",
+            }}
+          >
+            <UtensilsCrossed size={32} />
+          </div>
           <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>
             Oops! Something went wrong
           </h2>
@@ -50,6 +66,10 @@ export default function GlobalError({
               window.location.reload();
             }}
             style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
               padding: "12px 32px",
               fontSize: 14,
               fontWeight: 700,
@@ -60,7 +80,8 @@ export default function GlobalError({
               cursor: "pointer",
             }}
           >
-            🔄 Reload Page
+            <RefreshCw size={16} />
+            <span>Reload Page</span>
           </button>
         </div>
       </body>

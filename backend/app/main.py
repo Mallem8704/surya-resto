@@ -398,14 +398,18 @@ allowed_origins_raw = os.getenv("ALLOWED_ORIGINS") or os.getenv("FRONTEND_URL", 
 env_origins = [u.strip() for u in allowed_origins_raw.split(",") if u.strip()]
 
 if is_production:
-    # Strictly use the explicit list from ALLOWED_ORIGINS (or production defaults)
+    # Strictly use the explicit list from ALLOWED_ORIGINS and production defaults
     default_prod_origins = [
-        "https://surya-resto.vercel.app",
+        "https://suryafamilyrestaurant.com",
+        "https://www.suryafamilyrestaurant.com",
         "https://suryafamilyrestaurant.in",
+        "https://www.suryafamilyrestaurant.in",
+        "https://surya-resto.vercel.app",
+        "https://admin.suryafamilyrestaurant.com",
         "https://admin.suryafamilyrestaurant.in",
         "https://frontend-lake-iota-65.vercel.app",
     ]
-    origins = list(dict.fromkeys(env_origins if env_origins else default_prod_origins))
+    origins = list(dict.fromkeys(default_prod_origins + env_origins))
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
@@ -414,7 +418,7 @@ if is_production:
         allow_headers=["*"],
     )
 else:
-    # Development: allow localhost origins and regex pattern
+    # Development: allow localhost origins, production domains, and regex pattern
     dev_origins = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
@@ -424,6 +428,10 @@ else:
         "http://127.0.0.1:3002",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://suryafamilyrestaurant.com",
+        "https://www.suryafamilyrestaurant.com",
+        "https://suryafamilyrestaurant.in",
+        "https://www.suryafamilyrestaurant.in",
         "https://surya-resto.vercel.app",
         *env_origins,
     ]
@@ -526,6 +534,7 @@ def root():
 
 
 @app.get("/api/health")
+@app.get("/health")
 def health_check():
     """Health check endpoint verifying database connectivity and service status in < 1ms."""
     now_iso = datetime.now(timezone.utc).isoformat()

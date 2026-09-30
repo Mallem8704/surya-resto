@@ -63,8 +63,16 @@ export function useOrderSocket(
             ws.onmessage = (event) => {
                 try {
                     const parsed: SocketEvent = JSON.parse(event.data);
+                    // Heartbeat ping-pong is internal maintenance; avoid re-rendering components
+                    if (parsed.event === "pong") return;
                     setLastEvent(parsed);
-                    if (parsed.event === "order_status_updated" && parsed.data) {
+                    if (
+                        (parsed.event === "order_status_updated" ||
+                         parsed.event === "order_updated" ||
+                         parsed.event === "order_created" ||
+                         parsed.event === "order_voided") &&
+                        parsed.data
+                    ) {
                         onStatusChangeRef.current?.(parsed.data);
                     }
                 } catch (err) {
@@ -76,17 +84,25 @@ export function useOrderSocket(
                 setError("Connection error");
             };
 
-            ws.onclose = () => {
+            ws.onclose = (event: CloseEvent) => {
                 setIsConnected(false);
-                if (!isMountedRef.current) return; // Don't reconnect if unmounted
-                const delay = Math.min(backoffRef.current, 30000);
-                backoffRef.current = delay * 1.5;
+                if (!isMountedRef.current) return;
+                // Terminal authorization/policy failures should not loop infinitely
+                if (event.code === 1008) {
+                    setError(event.reason || "Unauthorized or invalid order parameters");
+                    return;
+                }
+                const baseDelay = Math.min(backoffRef.current, 30000);
+                const jitter = Math.floor(Math.random() * 500);
+                const delay = baseDelay + jitter;
+                backoffRef.current = Math.min(baseDelay * 1.5, 30000);
+                if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
                 reconnectTimeoutRef.current = setTimeout(connect, delay);
             };
         } catch (err: any) {
             setError(err.message || "Failed to initialize WebSocket");
         }
-    }, [orderId]); // Only depends on orderId, NOT onStatusChange
+    }, [orderId]);
 
     useEffect(() => {
         isMountedRef.current = true;
@@ -158,6 +174,8 @@ export function useAdminSocket(
             ws.onmessage = (event) => {
                 try {
                     const parsed: SocketEvent = JSON.parse(event.data);
+                    // Heartbeat ping-pong is internal maintenance; avoid state re-rendering
+                    if (parsed.event === "pong") return;
                     setLastEvent(parsed);
                     onEventRef.current?.(parsed);
                 } catch (err) {
@@ -169,17 +187,25 @@ export function useAdminSocket(
                 setError("Connection error");
             };
 
-            ws.onclose = () => {
+            ws.onclose = (event: CloseEvent) => {
                 setIsConnected(false);
                 if (!isMountedRef.current) return;
-                const delay = Math.min(backoffRef.current, 30000);
-                backoffRef.current = delay * 1.5;
+                // Terminal authorization/policy failures should not loop endlessly
+                if (event.code === 1008) {
+                    setError(event.reason || "Unauthorized: invalid or missing admin token");
+                    return;
+                }
+                const baseDelay = Math.min(backoffRef.current, 30000);
+                const jitter = Math.floor(Math.random() * 500);
+                const delay = baseDelay + jitter;
+                backoffRef.current = Math.min(baseDelay * 1.5, 30000);
+                if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
                 reconnectTimeoutRef.current = setTimeout(connect, delay);
             };
         } catch (err: any) {
             setError(err.message || "Failed to initialize Admin WebSocket");
         }
-    }, [outletId]); // Only depends on outletId, NOT onEvent
+    }, [outletId]);
 
     useEffect(() => {
         isMountedRef.current = true;

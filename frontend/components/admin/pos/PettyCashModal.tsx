@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { Banknote, ArrowDownRight, ArrowUpRight, Save, History } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Banknote, ArrowDownRight, ArrowUpRight, Save, History, X } from "lucide-react";
 import { formatRupees } from "@/lib/formatters";
 import { useToast } from "@/context/ToastContext";
+import { api } from "@/lib/api";
 
 interface PettyCashModalProps {
     isOpen: boolean;
@@ -18,6 +19,18 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
     const [category, setCategory] = useState("Groceries / Milk / Vegetables");
     const [notes, setNotes] = useState("");
     const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                onClose();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose]);
 
     if (!isOpen) return null;
 
@@ -41,12 +54,26 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
 
         setIsSaving(true);
         try {
-            // Save to local petty cash register
+            const amountPaise = Math.round(amt * 100);
+
+            // Record to active shift on backend
+            try {
+                await api.recordPettyCash({
+                    type,
+                    amount_paise: amountPaise,
+                    category,
+                    notes: notes.trim(),
+                }, outletId);
+            } catch (apiErr: any) {
+                console.warn("Backend shift petty cash sync note:", apiErr.message);
+            }
+
+            // Save to local petty cash register fallback
             const logEntry = {
                 id: Date.now(),
                 outlet_id: outletId,
                 type,
-                amount_paise: Math.round(amt * 100),
+                amount_paise: amountPaise,
                 category,
                 notes: notes.trim(),
                 timestamp: new Date().toISOString(),
@@ -55,7 +82,7 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
             const existing = JSON.parse(localStorage.getItem(`petty_cash_${outletId}`) || "[]");
             localStorage.setItem(`petty_cash_${outletId}`, JSON.stringify([logEntry, ...existing]));
 
-            toast.success(`${type === "cash_out" ? "💸 Cash Out recorded" : "💵 Cash In recorded"}: ₹${amt}`);
+            toast.success(`${type === "cash_out" ? "Cash Out recorded" : "Cash In recorded"}: ₹${amt}`);
             setAmountRupees("");
             setNotes("");
             onClose();
@@ -76,7 +103,9 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
                             Cash Drawer &amp; Petty Cash
                         </h3>
                     </div>
-                    <button onClick={onClose} className="text-white/60 hover:text-white text-xs">✕</button>
+                    <button onClick={onClose} className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition cursor-pointer">
+                        <X className="w-4 h-4" />
+                    </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">

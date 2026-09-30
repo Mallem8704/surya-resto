@@ -16,6 +16,7 @@ import {
     Shield,
     Sparkles,
     ChevronDown,
+    Store,
 } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -84,7 +85,7 @@ export default function AdminReservationsPage() {
         if (event.event === "new_reservation" && event.data) {
             soundManager.playNewOrderChime();
             setReservations((prev) => [event.data, ...prev.filter((r) => r.id !== event.data.id)]);
-            toast.success(`👑 New Table Pre-Booking: ${event.data.reservation_number} for ${event.data.customer_name} (${event.data.party_size} Guests)!`);
+            toast.success(`New Table Pre-Booking: ${event.data.reservation_number} for ${event.data.customer_name} (${event.data.party_size} Guests)!`);
         } else if (event.event === "reservation_status_updated" && event.data) {
             setReservations((prev) =>
                 prev.map((r) => (r.id === event.data.id ? { ...r, status: event.data.status, table_id: event.data.table_id, table_label: event.data.table_label } : r))
@@ -153,7 +154,8 @@ export default function AdminReservationsPage() {
                                             : "text-espresso-700 hover:bg-cream-100"
                                     }`}
                                 >
-                                    <span>🏛️ Surya Family Restaurant (Kadiri)</span>
+                                    <Store className="w-3.5 h-3.5" />
+                                    <span>Surya Family Restaurant (Kadiri)</span>
                                 </button>
                                 <button
                                     onClick={() => setSelectedBranchId(2)}
@@ -163,14 +165,16 @@ export default function AdminReservationsPage() {
                                             : "text-espresso-700 hover:bg-cream-100"
                                     }`}
                                 >
-                                    <span>🌟 Branch 2</span>
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>Branch 2</span>
                                 </button>
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-terracotta-50 border border-terracotta-200 shadow-xs">
                                 <span className="w-2 h-2 rounded-full bg-terracotta-500 animate-pulse" />
-                                <span className="text-xs font-black text-espresso-900">
-                                    {outlet?.name || (selectedBranchId === 1 ? "🏛️ Surya Family Restaurant (Kadiri)" : "🌟 Branch 2")}
+                                <span className="text-xs font-black text-espresso-900 inline-flex items-center gap-1">
+                                    <Store className="w-3.5 h-3.5" />
+                                    <span>{outlet?.name || (selectedBranchId === 1 ? "Surya Family Restaurant (Kadiri)" : "Branch 2")}</span>
                                 </span>
                                 <span className="text-[9px] font-bold text-espresso-500 uppercase tracking-wider">Assigned</span>
                             </div>

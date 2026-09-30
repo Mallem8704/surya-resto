@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Lock, Mail, ArrowRight, MapPin, Building2, Shield, UserCheck } from "lucide-react";
+import { Lock, Mail, ArrowRight, MapPin, Building2, Shield, UserCheck, Sun, Crown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { Button } from "@/components/ui/Button";
@@ -42,8 +42,8 @@ function AdminLoginContent() {
         <main className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex flex-col justify-center items-center p-4 select-none">
             <div className="max-w-md w-full space-y-5">
                 <div className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/20 text-3xl">
-                        ☀️
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/20 text-white">
+                        <Sun className="w-8 h-8" />
                     </div>
                     <h1 className="text-2xl font-black text-white tracking-tight">Surya Family Restaurant</h1>
                     <p className="text-amber-400/90 text-sm mt-0.5 font-bold">Kadiri Operations Cockpit</p>
@@ -73,16 +73,18 @@ function AdminLoginContent() {
                             <button
                                 type="button"
                                 onClick={() => handleQuickFill("owner@suryafamilyrestaurant.in", "surya_admin_2026")}
-                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold transition shadow-sm cursor-pointer text-left"
+                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold transition shadow-sm cursor-pointer text-left flex items-center gap-1.5"
                             >
-                                👑 Manager / Owner
+                                <Crown className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                <span>Manager / Owner</span>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => handleQuickFill("staff@suryafamilyrestaurant.in", "surya_staff_2026")}
-                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold transition shadow-sm cursor-pointer text-left"
+                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold transition shadow-sm cursor-pointer text-left flex items-center gap-1.5"
                             >
-                                🧑‍🍳 Floor Cashier
+                                <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                <span>Floor Cashier</span>
                             </button>
                         </div>
                     </div>

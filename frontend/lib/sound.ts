@@ -32,6 +32,15 @@ class SoundManager {
         window.addEventListener("pointerdown", onFirstInteraction, { passive: true, once: true });
         window.addEventListener("keydown", onFirstInteraction, { passive: true, once: true });
         window.addEventListener("touchstart", onFirstInteraction, { passive: true, once: true });
+
+        // Wall tablet screen-wake / focus auto-resume handler
+        const onWakeOrFocus = () => {
+            if (this.ctx && this.ctx.state === "suspended" && this.hasUserUnlocked) {
+                this.ctx.resume().catch(() => {});
+            }
+        };
+        window.addEventListener("visibilitychange", onWakeOrFocus, { passive: true });
+        window.addEventListener("focus", onWakeOrFocus, { passive: true });
     }
 
     private getContext(): AudioContext | null {
@@ -134,6 +143,11 @@ class SoundManager {
         const ctx = this.getContext();
         if (!ctx) return;
 
+        if (ctx.state === "suspended") {
+            ctx.resume().then(() => this.playNewOrderChime()).catch(() => {});
+            return;
+        }
+
         try {
             const now = ctx.currentTime;
 
@@ -173,6 +187,11 @@ class SoundManager {
     playServiceCallAlert() {
         const ctx = this.getContext();
         if (!ctx) return;
+
+        if (ctx.state === "suspended") {
+            ctx.resume().then(() => this.playServiceCallAlert()).catch(() => {});
+            return;
+        }
 
         try {
             const now = ctx.currentTime;
@@ -268,6 +287,11 @@ class SoundManager {
     playReadyChime() {
         const ctx = this.getContext();
         if (!ctx) return;
+
+        if (ctx.state === "suspended") {
+            ctx.resume().then(() => this.playReadyChime()).catch(() => {});
+            return;
+        }
 
         try {
             const now = ctx.currentTime;

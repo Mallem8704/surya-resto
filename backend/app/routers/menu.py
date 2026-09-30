@@ -405,14 +405,17 @@ async def update_item_price(
 
 
 @router.patch("/{item_id}/stock", response_model=MenuItemOut)
-def adjust_stock(
+async def adjust_stock(
     item_id: int,
     data: MenuItemStockUpdate,
     current_user: User = Depends(require_staff_or_owner),
     db: Session = Depends(get_db),
 ):
     """Adjust item stock with reason (restock, wastage, adjustment) and log transaction."""
-    item = db.query(MenuItem).filter(MenuItem.id == item_id, MenuItem.outlet_id == current_user.outlet_id).first()
+    query = db.query(MenuItem).filter(MenuItem.id == item_id)
+    if current_user.role != "owner":
+        query = query.filter(MenuItem.outlet_id == current_user.outlet_id)
+    item = query.first()
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -426,7 +429,7 @@ def adjust_stock(
 
     # Record stock transaction log
     stock_log = StockLog(
-        outlet_id=current_user.outlet_id,
+        outlet_id=item.outlet_id,
         item_id=item.id,
         change_qty=data.change_qty,
         reason=data.reason,
@@ -437,7 +440,7 @@ def adjust_stock(
 
     log_audit(
         db=db,
-        outlet_id=current_user.outlet_id,
+        outlet_id=item.outlet_id,
         user_id=current_user.id,
         action="stock_adjustment",
         entity_type="menu_item",
@@ -453,6 +456,40 @@ def adjust_stock(
     )
     db.commit()
     db.refresh(item)
+
+    # Broadcast real-time stock update and low-stock alert
+    try:
+        stock_status = "out_of_stock" if item.stock_qty <= 0 else ("low_stock" if item.track_stock and item.stock_qty <= item.low_stock_threshold else "in_stock")
+        await manager.broadcast_stock_update(
+            outlet_id=item.outlet_id,
+            data={
+                "item_id": item.id,
+                "item_name": item.name,
+                "stock_qty": item.stock_qty,
+                "track_stock": item.track_stock,
+                "low_stock_threshold": item.low_stock_threshold,
+                "is_available": item.is_available,
+                "status": stock_status,
+                "change_qty": data.change_qty,
+                "reason": data.reason,
+                "notes": data.notes,
+            },
+        )
+        if item.track_stock and item.stock_qty <= item.low_stock_threshold:
+            await manager.broadcast_to_admin(
+                outlet_id=item.outlet_id,
+                event_type="stock:low",
+                data={
+                    "item_id": item.id,
+                    "item_name": item.name,
+                    "stock_qty": item.stock_qty,
+                    "low_stock_threshold": item.low_stock_threshold,
+                    "status": stock_status,
+                },
+            )
+    except Exception:
+        pass
+
     return item
 
 

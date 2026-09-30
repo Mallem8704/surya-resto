@@ -294,7 +294,7 @@ export default function CashierPOSTerminalPage() {
                     }))
                 );
 
-                toast.success(`🔥 Running KOT sent to Kitchen for Table ${selectedTable?.label}!`);
+                toast.success(`Running KOT sent to Kitchen for Table ${selectedTable?.label}!`);
                 soundManager.playNewOrderChime();
 
                 printRunningKOT(
@@ -329,7 +329,7 @@ export default function CashierPOSTerminalPage() {
                     })),
                 });
 
-                toast.success(`🔥 Kitchen KOT #${res.order_number || res.id} sent!`);
+                toast.success(`Kitchen KOT #${res.order_number || res.id} sent!`);
                 soundManager.playNewOrderChime();
 
                 printKOT(res, outlet);
@@ -394,7 +394,7 @@ export default function CashierPOSTerminalPage() {
             if (paymentType === "cash") {
                 // Mark Cash Paid immediately
                 await api.markCashPaid(targetOrder.id);
-                toast.success(`💵 Order #${targetOrder.order_number || targetOrder.id} settled in Cash!`);
+                toast.success(`Order #${targetOrder.order_number || targetOrder.id} settled in Cash!`);
                 soundManager.playOrderPlacedSuccess();
 
                 // Print Final POS Receipt
@@ -422,7 +422,7 @@ export default function CashierPOSTerminalPage() {
     const handlePrintBillEstimate = () => {
         if (activeTableOrder) {
             printPOSReceipt(activeTableOrder, outlet);
-            toast.success("📄 Estimate bill sent to printer");
+            toast.success("Estimate bill sent to printer");
         } else if (cartItems.length > 0) {
             const subtotal = cartItems.reduce((a, b) => a + b.price_paise * b.qty, 0);
             const disc = discountPaise || 0;
@@ -456,7 +456,7 @@ export default function CashierPOSTerminalPage() {
                 })),
             };
             printPOSReceipt(mockOrder as any, outlet);
-            toast.success("📄 Estimate bill printed");
+            toast.success("Estimate bill printed");
         } else {
             toast.error("Ticket is empty");
         }
@@ -661,7 +661,7 @@ export default function CashierPOSTerminalPage() {
                         type="button"
                         onClick={() => {
                             printTestReceipt(outlet, paperWidth);
-                            toast.success(`🖨️ Sample ${paperWidth} receipt sent to printer`);
+                            toast.success(`Sample ${paperWidth} receipt sent to printer`);
                         }}
                         className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white/80 hover:text-white flex items-center gap-1 transition cursor-pointer"
                         title={`Test Thermal Receipt Printer (${paperWidth})`}

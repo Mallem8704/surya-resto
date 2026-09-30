@@ -270,9 +270,9 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
           </button>
         </form>
 
-        {/* Footer Guarantee */}
-        <p className="text-center text-[11px] text-white/40 mt-4">
-          🔐 Your session remains active for 90 days. Never worry about OTP delays or lost passwords.
+        <p className="text-center text-[11px] text-white/50 mt-4 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-amber-400/80 shrink-0" />
+          <span>Your session remains active for 90 days. Never worry about OTP delays or lost passwords.</span>
         </p>
       </div>
     </div>

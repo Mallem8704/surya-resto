@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, Clock, Flame, CheckCircle2, ArrowRight } from "lucide-react";
+import { Users, Clock, Flame, CheckCircle2, ArrowRight, X } from "lucide-react";
 import { formatRupees, formatRelativeTime } from "@/lib/formatters";
 
 interface POSTableSelectorModalProps {
@@ -79,9 +79,9 @@ export function POSTableSelectorModal({
 
                         <button
                             onClick={onClose}
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-sm"
+                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
                         >
-                            ✕
+                            <X className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
