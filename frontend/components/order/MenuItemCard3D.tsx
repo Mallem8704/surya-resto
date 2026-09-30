@@ -86,7 +86,7 @@ export function MenuItemCard3D({
     const [showDetails, setShowDetails] = useState(false);
     const [imageError, setImageError] = useState(false);
 
-    const isOutOfStock = !item.is_available || (item.track_stock && item.stock_qty <= 0);
+    const isOutOfStock = item.is_available === false || (item.track_stock === true && typeof item.stock_qty === "number" && item.stock_qty <= 0);
     const displayName = language === "te" && item.name_te ? item.name_te : item.name;
     const displayDesc = language === "te" && item.description_te ? item.description_te : item.description;
 

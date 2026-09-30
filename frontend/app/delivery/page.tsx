@@ -88,8 +88,10 @@ export const CATEGORY_EMOJIS: Record<number | string, string> = {
 
 interface MenuItemData extends CustomizerItemData {
     category_id: number;
-    is_available: boolean;
+    is_available?: boolean;
     is_special: boolean;
+    track_stock?: boolean;
+    stock_qty?: number;
 }
 
 interface CartItem {
@@ -149,7 +151,7 @@ function DeliveryDishCard({
 
     const hasVariants = Boolean(item.variants && item.variants.length > 0);
     const hasAddons = Boolean(item.addons && item.addons.length > 0);
-    const isOutOfStock = !item.is_available;
+    const isOutOfStock = item.is_available === false || (item.track_stock === true && typeof item.stock_qty === "number" && item.stock_qty <= 0);
 
     const displayName = language === "te" && item.name_te ? item.name_te : item.name;
     const displayDesc = item.description || "";

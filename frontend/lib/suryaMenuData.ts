@@ -15,6 +15,10 @@ export interface StaticMenuItem {
     is_spicy: boolean;
     is_best_seller: boolean;
     image_url: string;
+    is_available: boolean;
+    track_stock: boolean;
+    stock_qty: number;
+    is_special: boolean;
 }
 
 export interface StaticCategory {
@@ -98,7 +102,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
     },
 ];
 
-export const SURYA_MENU_ITEMS: StaticMenuItem[] = [
+const RAW_SURYA_MENU_ITEMS = [
     // Biryani & Pulao
     {
         id: 101,
@@ -659,3 +663,11 @@ export const SURYA_MENU_ITEMS: StaticMenuItem[] = [
         image_url: "/dishes/3d_beverages.jpg",
     },
 ];
+
+export const SURYA_MENU_ITEMS: StaticMenuItem[] = (RAW_SURYA_MENU_ITEMS as any[]).map((item) => ({
+    ...item,
+    is_available: true,
+    track_stock: false,
+    stock_qty: 100,
+    is_special: Boolean(item.is_best_seller),
+}));
