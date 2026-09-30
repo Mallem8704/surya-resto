@@ -3,12 +3,18 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { API_BASE } from "@/lib/api";
 
-// Derive WebSocket URL from API_BASE
+// Derive WebSocket URL from API_BASE or window location
 function getWsBase(): string {
     const envWs = process.env.NEXT_PUBLIC_WS_URL;
     if (envWs) return envWs;
-    // Convert http(s) to ws(s)
-    return API_BASE.replace(/^http/, "ws") + "/ws";
+    if (typeof window !== "undefined") {
+        if (!API_BASE) {
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            return `${protocol}//${window.location.host}/ws`;
+        }
+        return API_BASE.replace(/^http/, "ws") + "/ws";
+    }
+    return "ws://127.0.0.1:8000/ws";
 }
 
 export interface SocketEvent {

@@ -2,11 +2,24 @@
  * Reusable API Client for Surya Family Restaurant Backend.
  */
 
-export const API_BASE =
-    process.env.NEXT_PUBLIC_API_URL ||
-    (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
-        ? "https://surya-resto-backend.onrender.com"
-        : "http://127.0.0.1:8000");
+export function getApiBase(): string {
+    // 1. Explicit override if specified
+    if (process.env.NEXT_PUBLIC_API_URL) {
+        return process.env.NEXT_PUBLIC_API_URL;
+    }
+    // 2. Server-side (SSR / Server Actions / Route Handlers): use Vercel service binding
+    if (typeof window === "undefined") {
+        return process.env.BACKEND_URL || "http://127.0.0.1:8000";
+    }
+    // 3. Client-side on localhost (standalone local dev): point to local backend
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        return "http://127.0.0.1:8000";
+    }
+    // 4. Client-side in production (Vercel multi-service): use same-origin relative path
+    return "";
+}
+
+export const API_BASE = getApiBase();
 
 import { safeStorage } from "@/lib/safeStorage";
 
@@ -17,7 +30,15 @@ interface FetchOptions extends RequestInit {
 export async function apiFetch<T = any>(endpoint: string, options: FetchOptions = {}): Promise<T> {
     const { params, headers, ...customConfig } = options;
 
-    let url = endpoint.startsWith("http") ? endpoint : `${API_BASE}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+    const base = getApiBase();
+    let url: string;
+    if (endpoint.startsWith("http")) {
+        url = endpoint;
+    } else if (base) {
+        url = `${base.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
+    } else {
+        url = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    }
 
     if (params) {
         const queryParams = new URLSearchParams();

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "surya-resto-backend": {
+      "root": "backend",
+      "framework": "fastapi",
+      "entrypoint": "main.py",
+      "buildCommand": "pip install --upgrade pip && pip install -r requirements.txt"
+    },
+    "frontend": {
+      "root": "frontend",
+      "framework": "nextjs",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "surya-resto-backend",
+          "format": "url",
+          "env": "BACKEND_URL"
+        }
+      ]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "surya-resto-backend"
+      }
+    },
+    {
+      "source": "/uploads/(.*)",
+      "destination": {
+        "service": "surya-resto-backend"
+      }
+    },
+    {
+      "source": "/docs",
+      "destination": {
+        "service": "surya-resto-backend"
+      }
+    },
+    {
+      "source": "/openapi.json",
+      "destination": {
+        "service": "surya-resto-backend"
+      }
+    },
+    {
+      "source": "/ws",
+      "destination": {
+        "service": "surya-resto-backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
+  ]
+}
