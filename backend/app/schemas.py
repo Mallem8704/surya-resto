@@ -73,6 +73,9 @@ class OutletOut(BaseModel):
     gstin: Optional[str] = None
     fssai_license_number: Optional[str] = None
     upi_vpa: Optional[str] = None
+    allow_table_booking: bool = False
+    allow_table_ordering: bool = False
+    allow_delivery: bool = True
 
 
 class OutletUpdate(BaseModel):
@@ -87,6 +90,9 @@ class OutletUpdate(BaseModel):
     gstin: Optional[str] = None
     fssai_license_number: Optional[str] = None
     upi_vpa: Optional[str] = None
+    allow_table_booking: Optional[bool] = None
+    allow_table_ordering: Optional[bool] = None
+    allow_delivery: Optional[bool] = None
 
 
 class TableBase(BaseModel):

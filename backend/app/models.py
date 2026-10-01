@@ -29,6 +29,9 @@ class Outlet(Base):
     gstin = Column(String(30), nullable=True)  # GST Identification Number
     fssai_license_number = Column(String(30), nullable=True)  # FSSAI License Number
     upi_vpa = Column(String(100), nullable=True)  # e.g. "9880358634@upi"
+    allow_table_booking = Column(Boolean, default=False)
+    allow_table_ordering = Column(Boolean, default=False)
+    allow_delivery = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relationships

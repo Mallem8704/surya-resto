@@ -6,6 +6,8 @@ import Image from "next/image";
 import { StaffPortalModal } from "@/components/home/StaffPortalModal";
 import { HowItWorksModal } from "@/components/home/HowItWorksModal";
 import { BranchSelectorModal } from "@/components/home/BranchSelectorModal";
+import { useOutlet } from "@/context/OutletContext";
+import { isTableBookingEnabled, isTableOrderingEnabled } from "@/lib/features";
 import {
     Shield,
     Phone,
@@ -160,6 +162,10 @@ const Stars = ({ n }: { n: number }) => (
 
 /* ═══════════════════════════════════════════════════════════ */
 export default function SuryaLandingPage() {
+    const { outlet } = useOutlet();
+    const canBookTable = isTableBookingEnabled(outlet);
+    const canOrderTable = isTableOrderingEnabled(outlet);
+
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState("home");
@@ -167,6 +173,17 @@ export default function SuryaLandingPage() {
     const [staffModalOpen, setStaffModalOpen] = useState(false);
     const [howItWorksOpen, setHowItWorksOpen] = useState(false);
     const [branchModalOpen, setBranchModalOpen] = useState(false);
+
+    const navItems = NAV.filter(n => {
+        if (n.href === "#book-table" && !canBookTable) return false;
+        if (n.href === "#smart-table" && !canOrderTable) return false;
+        return true;
+    }).map(n => {
+        if (n.label === "Menu" && !canOrderTable) {
+            return { ...n, href: "/delivery?branch=1" };
+        }
+        return n;
+    });
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 10);
@@ -210,7 +227,7 @@ export default function SuryaLandingPage() {
 
                     {/* Desktop Nav */}
                     <nav className="hidden lg:flex items-center justify-center h-full flex-1 min-w-0 px-1">
-                        {NAV.map(n => {
+                        {navItems.map(n => {
                             const isActive = n.href === "#home"
                                 ? activeSection === "home"
                                 : n.href.startsWith("#") && activeSection === n.href.slice(1);
@@ -268,7 +285,7 @@ export default function SuryaLandingPage() {
 
                         {/* Quick Order Now CTA */}
                         <Link
-                            href="/order?branch=1&table=T1"
+                            href={canOrderTable ? "/order?branch=1&table=T1" : "/delivery?branch=1"}
                             className="hidden sm:inline-flex items-center gap-1.5 px-3 xl:px-4 py-1.5 rounded-full font-bold text-[11px] xl:text-xs uppercase tracking-wider transition shadow-md hover:brightness-110 shrink-0"
                             style={{ background: "#E5A93C", color: "#1A0800" }}
                         >
@@ -315,7 +332,7 @@ export default function SuryaLandingPage() {
                     <div className="lg:hidden border-t"
                         style={{ background: "#150500", borderColor: "rgba(255,255,255,.07)" }}>
                         <div className="max-w-7xl mx-auto px-5 py-3 flex flex-col">
-                            {NAV.map(n => n.href.startsWith("#") ? (
+                            {navItems.map(n => n.href.startsWith("#") ? (
                                 <button key={n.label} onClick={() => goto(n.href)}
                                     className="text-left py-3 border-b text-sm font-medium"
                                     style={{
@@ -450,55 +467,94 @@ export default function SuryaLandingPage() {
                             ))}
                         </div>
 
-                        {/* 3 Primary Action Buttons matching DineOS Luxury Style */}
+                        {/* Primary Action Buttons matching DineOS Luxury Style */}
                         <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 pt-1">
-                            {/* Button 1: Order at Table (Scan QR) */}
-                            <button
-                                type="button"
-                                onClick={() => setBranchModalOpen(true)}
-                                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#142318] hover:bg-[#1A3320] text-[#4ADE80] border-2 border-[#22C55E]/60 font-bold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2 shadow-lg transition active:scale-95 cursor-pointer"
-                            >
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                                    <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
-                                </svg>
-                                <div className="text-left">
-                                    <span className="block text-[11px] leading-tight font-extrabold text-white">ORDER AT TABLE</span>
-                                    <span className="text-[9px] font-mono tracking-widest text-[#4ADE80]">SCAN QR STAND</span>
-                                </div>
-                            </button>
+                            {/* Button 1: Order at Table OR Primary Online Order */}
+                            {canOrderTable ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setBranchModalOpen(true)}
+                                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#142318] hover:bg-[#1A3320] text-[#4ADE80] border-2 border-[#22C55E]/60 font-bold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2 shadow-lg transition active:scale-95 cursor-pointer"
+                                >
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                                        <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+                                    </svg>
+                                    <div className="text-left">
+                                        <span className="block text-[11px] leading-tight font-extrabold text-white">ORDER AT TABLE</span>
+                                        <span className="text-[9px] font-mono tracking-widest text-[#4ADE80]">SCAN QR STAND</span>
+                                    </div>
+                                </button>
+                            ) : (
+                                <Link
+                                    href="/delivery?branch=1"
+                                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#E5C058] to-[#C59B27] hover:from-[#E5C058] hover:to-[#D4AF37] text-black font-extrabold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2.5 shadow-xl shadow-[#D4AF37]/30 transition active:scale-95"
+                                >
+                                    <Truck className="w-4 h-4 text-black shrink-0" />
+                                    <div className="text-left">
+                                        <span className="block text-[12px] leading-tight font-black text-black">ORDER ONLINE NOW</span>
+                                        <span className="text-[9px] font-mono tracking-widest text-black/85">FREE DOORSTEP DELIVERY</span>
+                                    </div>
+                                </Link>
+                            )}
 
-                            {/* Button 2: Free Delivery */}
-                            <Link
-                                href="/delivery?branch=1"
-                                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#E5C058] to-[#C59B27] hover:from-[#E5C058] hover:to-[#D4AF37] text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2 shadow-lg shadow-[#D4AF37]/20 transition active:scale-95"
-                            >
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className="shrink-0">
-                                    <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" />
-                                </svg>
-                                <div className="text-left">
-                                    <span className="block text-[11px] leading-tight font-extrabold text-black">FREE DELIVERY</span>
-                                    <span className="text-[9px] font-mono tracking-widest text-black/75">HOT &amp; FRESH</span>
-                                </div>
-                            </Link>
+                            {/* Button 2: Free Delivery OR Explore Menu */}
+                            {canOrderTable ? (
+                                <Link
+                                    href="/delivery?branch=1"
+                                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#E5C058] to-[#C59B27] hover:from-[#E5C058] hover:to-[#D4AF37] text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2 shadow-lg shadow-[#D4AF37]/20 transition active:scale-95"
+                                >
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className="shrink-0">
+                                        <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" />
+                                    </svg>
+                                    <div className="text-left">
+                                        <span className="block text-[11px] leading-tight font-extrabold text-black">FREE DELIVERY</span>
+                                        <span className="text-[9px] font-mono tracking-widest text-black/75">HOT &amp; FRESH</span>
+                                    </div>
+                                </Link>
+                            ) : (
+                                <Link
+                                    href="/delivery?branch=1"
+                                    className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-[#200A02] hover:bg-[#2C1004] text-[#F3E5AB] border border-[#D4AF37]/50 font-bold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2 shadow-md transition active:scale-95"
+                                >
+                                    <Utensils className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                                    <div className="text-left">
+                                        <span className="block text-[11px] leading-tight font-extrabold text-[#D4AF37]">EXPLORE MENU</span>
+                                        <span className="text-[9px] font-mono tracking-widest text-white/70">48+ DISHES &amp; OFFERS</span>
+                                    </div>
+                                </Link>
+                            )}
 
-                            {/* Button 3: Pre-Book Table */}
-                            <Link
-                                href="/book-table"
-                                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#200A02] hover:bg-[#2C1004] text-[#F3E5AB] border-2 border-[#D4AF37]/70 font-bold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2 shadow-lg transition active:scale-95"
-                            >
-                                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" className="shrink-0">
-                                    <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
-                                </svg>
-                                <div className="text-left">
-                                    <span className="block text-[11px] leading-tight font-extrabold text-[#D4AF37]">PRE-BOOK TABLE</span>
-                                    <span className="text-[9px] font-mono tracking-widest text-white/80">ZERO WAIT VIP</span>
-                                </div>
-                            </Link>
+                            {/* Button 3: Pre-Book Table OR Call Takeaway */}
+                            {canBookTable ? (
+                                <Link
+                                    href="/book-table"
+                                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#200A02] hover:bg-[#2C1004] text-[#F3E5AB] border-2 border-[#D4AF37]/70 font-bold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2 shadow-lg transition active:scale-95"
+                                >
+                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" className="shrink-0">
+                                        <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
+                                    </svg>
+                                    <div className="text-left">
+                                        <span className="block text-[11px] leading-tight font-extrabold text-[#D4AF37]">PRE-BOOK TABLE</span>
+                                        <span className="text-[9px] font-mono tracking-widest text-white/80">ZERO WAIT VIP</span>
+                                    </div>
+                                </Link>
+                            ) : (
+                                <a
+                                    href={`tel:${PHONE_TEL}`}
+                                    className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-[#1C0A02]/80 hover:bg-[#2A1005] text-white/90 border border-white/20 font-bold text-xs uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2 transition active:scale-95"
+                                >
+                                    <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
+                                    <div className="text-left">
+                                        <span className="block text-[11px] leading-tight font-bold text-white">CALL TAKEAWAY</span>
+                                        <span className="text-[9px] font-mono tracking-widest text-white/60">{PHONE}</span>
+                                    </div>
+                                </a>
+                            )}
                         </div>
 
                         {/* Secondary Row: Explore Menu & Get Directions */}
                         <div className="flex flex-wrap items-center gap-3 pt-3">
-                            <Link href="/order?branch=1&table=T1"
+                            <Link href={canOrderTable ? "/order?branch=1&table=T1" : "/delivery?branch=1"}
                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] hover:underline py-1">
                                 <span>Explore 48 Authentic Dishes &rarr;</span>
                             </Link>
@@ -576,7 +632,7 @@ export default function SuryaLandingPage() {
                             </div>
 
                             {/* Order Now button (Deep maroon with shopping bag icon) */}
-                            <Link href="/order?branch=1&table=T1"
+                            <Link href={canOrderTable ? "/order?branch=1&table=T1" : "/delivery?branch=1"}
                                 className="mt-3.5 w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-bold text-xs text-white transition-all hover:brightness-110 shadow-md"
                                 style={{ background: "#581717" }}>
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -676,6 +732,7 @@ export default function SuryaLandingPage() {
             </section>
 
             {/* ═══════════════════ DINE-IN PRE-BOOKING (VIP TABLE RESERVATION) ═══════════════════ */}
+            {canBookTable && (
             <section id="book-table" className="py-20 bg-[#150600] text-white relative overflow-hidden border-t border-[#D4AF37]/20">
                 {/* Decorative background glow */}
                 <div className="absolute top-1/2 left-0 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
@@ -806,8 +863,10 @@ export default function SuryaLandingPage() {
                     </div>
                 </div>
             </section>
+            )}
 
             {/* ═══════════════════ SMART QR TABLE ORDERING SECTION ═══════════════════ */}
+            {canOrderTable && (
             <section id="smart-table" className="py-24 bg-[#0F0500] text-white relative overflow-hidden border-t border-[#D4AF37]/20">
                 <div className="max-w-7xl mx-auto px-5 relative z-10">
                     <div className="grid lg:grid-cols-12 gap-12 items-center">
@@ -933,6 +992,7 @@ export default function SuryaLandingPage() {
                     </div>
                 </div>
             </section>
+            )}
 
             {/* ═══════════════════ DOORSTEP DELIVERY SHOWCASE BANNER ═══════════════════ */}
             <section id="delivery" className="py-16 bg-gradient-to-r from-[#180700] via-[#240C03] to-[#180700] text-white relative overflow-hidden border-t border-[#D4AF37]/20">
@@ -1015,7 +1075,7 @@ export default function SuryaLandingPage() {
                         </div>
 
                         <div className="flex justify-center">
-                            <Link href="/order?branch=1&table=T1"
+                            <Link href={canOrderTable ? "/order?branch=1&table=T1" : "/delivery?branch=1"}
                                 className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm transition-all hover:opacity-90"
                                 style={{ border: "1.5px solid #D4AF37", color: "#D4AF37" }}>
                                 View Full Menu
@@ -1369,16 +1429,18 @@ export default function SuryaLandingPage() {
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>
                             {PHONE}
                         </a>
-                        <Link href="/order?branch=1&table=T1"
+                        <Link href="/delivery?branch=1"
                             className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm mb-4 hover:opacity-90 transition-all"
                             style={{ background: "#8B2020", color: "#fff" }}>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3z" /></svg>
-                            Order Now Online
+                            <Truck className="w-4 h-4 text-white" />
+                            Order Online (Free Delivery)
                         </Link>
-                        <Link href="/book-table" className="flex items-center gap-2 mb-2 hover:opacity-80 transition-all" style={{ color: "rgba(255,255,255,.45)", fontSize: 12.5 }}>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" /></svg>
-                            Book a Table
-                        </Link>
+                        {canBookTable && (
+                            <Link href="/book-table" className="flex items-center gap-2 mb-2 hover:opacity-80 transition-all" style={{ color: "rgba(255,255,255,.45)", fontSize: 12.5 }}>
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" /></svg>
+                                Book a Table
+                            </Link>
+                        )}
                         <Link href="/delivery" className="flex items-center gap-2 hover:opacity-80 transition-all" style={{ color: "rgba(255,255,255,.45)", fontSize: 12.5 }}>
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" /></svg>
                             Delivery Orders
@@ -1412,12 +1474,12 @@ export default function SuryaLandingPage() {
             {/* Floating Direct Online Order Button (Bottom Right) */}
             <div className="fixed bottom-4 sm:bottom-5 right-4 sm:right-5 z-40 pb-safe">
                 <Link
-                    href="/order?branch=1"
-                    className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full text-white font-extrabold text-xs sm:text-sm shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 group bg-gradient-to-r from-terracotta-600 via-amber-600 to-espresso-950 border border-amber-400/40 shadow-amber-950/30"
+                    href="/delivery?branch=1"
+                    className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full text-white font-extrabold text-xs sm:text-sm shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 group bg-gradient-to-r from-amber-600 via-orange-600 to-terracotta-700 border border-amber-300/40 shadow-amber-950/40"
                 >
-                    <UtensilsCrossed className="w-4 h-4 text-amber-300 shrink-0" />
-                    <span className="font-bold">Order Online Directly</span>
-                    <span className="hidden xs:inline-block px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 font-mono">Menu</span>
+                    <Truck className="w-4 h-4 text-amber-200 shrink-0" />
+                    <span className="font-bold">Order Online (Free Delivery)</span>
+                    <span className="hidden xs:inline-block px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 font-mono">Kadiri</span>
                 </Link>
             </div>
 

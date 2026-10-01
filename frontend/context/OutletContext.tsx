@@ -17,6 +17,9 @@ export interface OutletInfo {
     gstin: string | null;
     fssai_license_number: string | null;
     upi_vpa: string | null;
+    allow_table_booking?: boolean;
+    allow_table_ordering?: boolean;
+    allow_delivery?: boolean;
 }
 
 interface OutletContextType {
@@ -41,6 +44,9 @@ const DEFAULT_SURYA_OUTLET: OutletInfo = {
     gstin: "37SURYA0000A1Z5",
     fssai_license_number: "10124999000586",
     upi_vpa: "9880358634@upi",
+    allow_table_booking: false,
+    allow_table_ordering: false,
+    allow_delivery: true,
 };
 
 const OutletContext = createContext<OutletContextType | undefined>(undefined);

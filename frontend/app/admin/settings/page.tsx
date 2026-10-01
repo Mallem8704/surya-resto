@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAdminLiveState } from "@/hooks/useAdminLiveState";
 import { 
-    Settings, Store, MapPin, Phone, IndianRupee, Clock, Tag, Save, Shield, Sparkles, Plus, Trash2, Percent, CheckCircle2, Lock, Key, ShieldCheck 
+    Settings, Store, MapPin, Phone, IndianRupee, Clock, Tag, Save, Shield, Sparkles, Plus, Trash2, Percent, CheckCircle2, Lock, Key, ShieldCheck, Bike, Calendar, QrCode 
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -145,6 +145,9 @@ export default function SettingsPage() {
         gstin: "",
         fssai_license_number: "",
         upi_vpa: "",
+        allow_table_booking: false,
+        allow_table_ordering: false,
+        allow_delivery: true,
     });
 
     useEffect(() => {
@@ -160,6 +163,9 @@ export default function SettingsPage() {
                 gstin: outlet.gstin || "",
                 fssai_license_number: outlet.fssai_license_number || "",
                 upi_vpa: outlet.upi_vpa || "",
+                allow_table_booking: outlet.allow_table_booking ?? false,
+                allow_table_ordering: outlet.allow_table_ordering ?? false,
+                allow_delivery: outlet.allow_delivery ?? true,
             });
         }
     }, [outlet]);
@@ -410,6 +416,137 @@ export default function SettingsPage() {
                                             <p className="text-[11px] text-espresso-500">
                                                 Table Dynamic QRs and Thermal Bill QRs credit directly to this bank account instantly.
                                             </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ORDERING CHANNELS & OPERATING MODES */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
+                                    <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Sparkles className="w-4 h-4 text-amber-600" />
+                                            <h2 className="font-bold text-espresso-800">Ordering Channels & Operational Modes</h2>
+                                        </div>
+                                        <span className="text-[10px] font-black text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                            Live Public Control
+                                        </span>
+                                    </div>
+                                    <div className="p-6 space-y-5">
+                                        <p className="text-xs text-espresso-600 leading-relaxed">
+                                            Toggle customer ordering channels below. When a channel is paused or disabled, the public website automatically updates and guides customers to active channels.
+                                        </p>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {/* Channel 1: Online Delivery & Takeaway */}
+                                            <div className={`p-4 rounded-xl border-2 transition-all ${
+                                                formData.allow_delivery 
+                                                    ? "border-emerald-500 bg-emerald-50/40" 
+                                                    : "border-gray-200 bg-gray-50/50"
+                                            }`}>
+                                                <div className="flex items-start justify-between gap-2 mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                                            <Bike className="w-4 h-4" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-sm text-espresso-900 leading-tight">Online Delivery</h3>
+                                                            <span className="text-[10px] text-espresso-500 font-mono">/delivery</span>
+                                                        </div>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.allow_delivery}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, allow_delivery: e.target.checked }))}
+                                                            disabled={!isOwner}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                                    </label>
+                                                </div>
+                                                <p className="text-[11px] text-espresso-600 mb-2 leading-snug">
+                                                    Doorstep delivery and takeaway parcel pickup across Kadiri town.
+                                                </p>
+                                                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                                    formData.allow_delivery ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-700"
+                                                }`}>
+                                                    {formData.allow_delivery ? "● ACTIVE & OPEN" : "○ PAUSED"}
+                                                </span>
+                                            </div>
+
+                                            {/* Channel 2: Table Pre-Booking */}
+                                            <div className={`p-4 rounded-xl border-2 transition-all ${
+                                                formData.allow_table_booking 
+                                                    ? "border-amber-500 bg-amber-50/40" 
+                                                    : "border-gray-200 bg-gray-50/50"
+                                            }`}>
+                                                <div className="flex items-start justify-between gap-2 mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                                                            <Calendar className="w-4 h-4" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-sm text-espresso-900 leading-tight">Table Booking</h3>
+                                                            <span className="text-[10px] text-espresso-500 font-mono">/book-table</span>
+                                                        </div>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.allow_table_booking}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, allow_table_booking: e.target.checked }))}
+                                                            disabled={!isOwner}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                                                    </label>
+                                                </div>
+                                                <p className="text-[11px] text-espresso-600 mb-2 leading-snug">
+                                                    VIP dine-in pre-reservations for AC dining hall and family cabins.
+                                                </p>
+                                                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                                    formData.allow_table_booking ? "bg-amber-100 text-amber-800" : "bg-gray-200 text-gray-700"
+                                                }`}>
+                                                    {formData.allow_table_booking ? "● ACTIVE & OPEN" : "○ DISABLED (PAUSED)"}
+                                                </span>
+                                            </div>
+
+                                            {/* Channel 3: Table QR Ordering */}
+                                            <div className={`p-4 rounded-xl border-2 transition-all ${
+                                                formData.allow_table_ordering 
+                                                    ? "border-blue-500 bg-blue-50/40" 
+                                                    : "border-gray-200 bg-gray-50/50"
+                                            }`}>
+                                                <div className="flex items-start justify-between gap-2 mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                                                            <QrCode className="w-4 h-4" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-sm text-espresso-900 leading-tight">Table QR Order</h3>
+                                                            <span className="text-[10px] text-espresso-500 font-mono">/order?table=...</span>
+                                                        </div>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.allow_table_ordering}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, allow_table_ordering: e.target.checked }))}
+                                                            disabled={!isOwner}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                    </label>
+                                                </div>
+                                                <p className="text-[11px] text-espresso-600 mb-2 leading-snug">
+                                                    Dine-in customers scanning table QR stands to place orders directly.
+                                                </p>
+                                                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                                    formData.allow_table_ordering ? "bg-blue-100 text-blue-800" : "bg-gray-200 text-gray-700"
+                                                }`}>
+                                                    {formData.allow_table_ordering ? "● ACTIVE & OPEN" : "○ DISABLED (PAUSED)"}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

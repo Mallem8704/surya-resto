@@ -45,6 +45,7 @@ import { useOffline } from "@/context/OfflineContext";
 import { useCustomer } from "@/context/CustomerContext";
 import { api } from "@/lib/api";
 import { useOutlet } from "@/context/OutletContext";
+import { isTableOrderingEnabled } from "@/lib/features";
 import { safeStorage } from "@/lib/safeStorage";
 import type { MenuItemData } from "@/components/order/MenuItemCard";
 import {
@@ -599,6 +600,77 @@ function CustomerOrderContent() {
                         safeStorage.removeItem("surya_active_order_id", "session");
                     }}
                 />
+            </main>
+        );
+    }
+
+    // Check if table QR ordering is enabled for this outlet
+    const currentOutlet = branchOutlet || outlet;
+    const tableOrderingActive = isTableOrderingEnabled(currentOutlet);
+
+    if (!tableOrderingActive) {
+        return (
+            <main className="min-h-screen bg-cream-50 text-espresso-950 flex flex-col justify-between">
+                <header className="border-b border-cream-200 bg-white/90 backdrop-blur-md sticky top-0 z-40">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between">
+                        <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition">
+                            <SuryaSunLogo size={36} />
+                            <div>
+                                <span className="text-xs font-black uppercase tracking-wider text-amber-800 block">
+                                    Surya Family Restaurant
+                                </span>
+                                <span className="text-[10px] text-espresso-500 font-medium">
+                                    Opp. RTC Bus Stand, Kadiri
+                                </span>
+                            </div>
+                        </Link>
+                        <LanguageToggle />
+                    </div>
+                </header>
+
+                <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6">
+                    <div className="w-20 h-20 rounded-3xl bg-amber-500/15 border border-amber-400/40 text-amber-700 flex items-center justify-center mx-auto shadow-inner">
+                        <QrCode className="w-10 h-10" />
+                    </div>
+
+                    <div className="space-y-2">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                            <AlertCircle className="w-3.5 h-3.5 text-amber-700" />
+                            Table QR Ordering Paused
+                        </span>
+                        <h1 className="text-2xl sm:text-3xl font-black text-espresso-950">
+                            {language === "te"
+                                ? "ఆన్‌లైన్ డెలివరీ మాత్రమే అందుబాటులో ఉంది"
+                                : "Online Delivery & Takeaway Is Active"}
+                        </h1>
+                        <p className="text-sm text-espresso-600 max-w-md mx-auto">
+                            {language === "te"
+                                ? "డైన్-ఇన్ టేబుల్ సెల్ఫ్ ఆర్డరింగ్ ప్రస్తుతం తాత్కాలికంగా నిలిపివేయబడింది. దయచేసి వెయిటర్‌ని పిలవండి లేదా కదిరి అంతటా ఉచిత డోర్‌స్టెప్ డెలివరీ కోసం మా ఆన్‌లైన్ డెలివరీ ద్వారా ఆర్డర్ చేయండి!"
+                                : "Self-service Table QR ordering is currently paused. Please request service from our floor staff or order through our online delivery service with 100% free doorstep delivery across Kadiri!"}
+                        </p>
+                    </div>
+
+                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <Link
+                            href={`/delivery?branch=${outletId || 1}`}
+                            className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-espresso-950 font-black text-sm shadow-md transition flex items-center justify-center gap-2"
+                        >
+                            <Truck className="w-4 h-4" />
+                            <span>ORDER ONLINE NOW (FREE DELIVERY)</span>
+                            <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        <Link
+                            href="/"
+                            className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white hover:bg-cream-100 border border-cream-300 text-espresso-800 font-bold text-sm transition text-center"
+                        >
+                            Return to Home
+                        </Link>
+                    </div>
+                </div>
+
+                <footer className="text-center py-6 text-xs text-espresso-400 border-t border-cream-200">
+                    Surya Family Restaurant • Opp. RTC Bus Stand, Kadiri • Ph: +91 91771 78609
+                </footer>
             </main>
         );
     }

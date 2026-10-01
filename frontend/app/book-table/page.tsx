@@ -24,10 +24,13 @@ import {
     HeartHandshake,
     Wind,
     Utensils,
+    Bike,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
 import { useCustomer } from "@/context/CustomerContext";
+import { useOutlet } from "@/context/OutletContext";
+import { isTableBookingEnabled } from "@/lib/features";
 import { soundManager } from "@/lib/sound";
 import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -73,6 +76,8 @@ function BookTableContent() {
     const branchParam = searchParams.get("branch");
     const toast = useToast();
     const { customer } = useCustomer();
+    const { outlet } = useOutlet();
+    const isBookingActive = isTableBookingEnabled(outlet);
 
     const [outlets, setOutlets] = useState<any[]>([]);
     const [selectedBranch, setSelectedBranch] = useState<number>(branchParam === "2" ? 2 : 1);
@@ -223,7 +228,68 @@ function BookTableContent() {
                     </p>
                 </div>
 
-                {confirmedReservation ? (
+                {!isBookingActive ? (
+                    /* ══════════════════════════════════════════════════════════
+                       TABLE BOOKING PAUSED NOTICE (ONLINE DELIVERY ACTIVE)
+                       ══════════════════════════════════════════════════════════ */
+                    <div className="max-w-xl mx-auto bg-[#140F0B] rounded-3xl border-2 border-[#D4AF37]/50 p-6 sm:p-8 space-y-6 shadow-2xl shadow-black/80 text-center animate-in zoom-in-95 duration-300">
+                        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#D4AF37] flex items-center justify-center mx-auto shadow-lg">
+                            <Calendar className="w-8 h-8 text-[#D4AF37]" />
+                        </div>
+                        <div className="space-y-2">
+                            <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+                                Dine-In Pre-Booking Paused
+                            </span>
+                            <h2 className="font-serif text-2xl sm:text-3xl font-black text-white">
+                                Online Delivery &amp; Takeaway Active
+                            </h2>
+                            <p className="text-amber-300/80 text-xs sm:text-sm font-medium">
+                                ముందస్తు టేబుల్ బుకింగ్ ప్రస్తుతం అందుబాటులో లేదు
+                            </p>
+                            <p className="text-xs sm:text-sm text-[#C5B39A] leading-relaxed pt-2">
+                                We are currently operating exclusively via fast <strong className="text-white">Online Doorstep Delivery &amp; Counter Takeaway</strong> across Kadiri town. Order your favorite authentic biryanis, gravies, and starters now!
+                            </p>
+                        </div>
+
+                        {/* Perks */}
+                        <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-[#1A140F] border border-white/5 text-left text-xs">
+                            <div className="flex items-center gap-2 text-white">
+                                <Sparkles className="w-4 h-4 text-[#D4AF37] shrink-0" />
+                                <span>₹0 Delivery Fee in Kadiri</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-white">
+                                <Clock className="w-4 h-4 text-emerald-400 shrink-0" />
+                                <span>Fast 30-40 Min Dispatch</span>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="space-y-3 pt-2">
+                            <Link
+                                href="/delivery"
+                                className="w-full py-3.5 rounded-full font-black text-xs uppercase tracking-wider text-black bg-gradient-to-r from-[#D4AF37] via-[#E5C058] to-[#C59B27] hover:brightness-110 flex items-center justify-center gap-2 shadow-lg shadow-[#D4AF37]/25 transition active:scale-95"
+                            >
+                                <Bike className="w-4 h-4 text-black" />
+                                <span>ORDER ONLINE NOW (FREE DELIVERY)</span>
+                            </Link>
+
+                            <a
+                                href="tel:+919880358634"
+                                className="w-full py-3 rounded-full font-bold text-xs text-white/90 border border-white/20 hover:border-[#D4AF37] hover:text-[#D4AF37] bg-white/5 flex items-center justify-center gap-2 transition"
+                            >
+                                <Phone className="w-3.5 h-3.5" />
+                                <span>Call for Parcel Pickup: 098803 58634</span>
+                            </a>
+
+                            <Link
+                                href="/"
+                                className="block text-center text-xs text-white/50 hover:text-white pt-1 transition"
+                            >
+                                &larr; Return to Restaurant Home
+                            </Link>
+                        </div>
+                    </div>
+                ) : confirmedReservation ? (
                     /* ══════════════════════════════════════════════════════════
                        CONFIRMATION PASS CARD
                        ══════════════════════════════════════════════════════════ */
