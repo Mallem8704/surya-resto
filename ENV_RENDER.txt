@@ -1,0 +1,45 @@
+# ==============================================================================
+# RENDER ENVIRONMENT VARIABLES (Backend - FastAPI / Python)
+# Copy & Paste these into: Render Dashboard -> Web Service (surya-resto-backend) -> Environment
+# ==============================================================================
+
+# Application Environment Mode
+ENVIRONMENT=production
+PYTHON_VERSION=3.12
+PORT=8000
+
+# Cryptographic JWT Secret Key (256-bit secure key)
+SECRET_KEY=77195425c31ee934beb41847fea72610c5c6f94ff173cc896ae81871e7115837
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+
+# PostgreSQL Database Connection
+# Option A: Supabase Cloud Postgres (Recommended for persistent cloud storage)
+# Format: postgresql+psycopg2://postgres:[YOUR-PASSWORD]@db.poexygwbosuxbezeastc.supabase.co:5432/postgres?sslmode=require
+# Option B: Render Managed PostgreSQL Internal Connection String
+DATABASE_URL=postgresql+psycopg2://postgres:YOUR_POSTGRES_PASSWORD@db.poexygwbosuxbezeastc.supabase.co:5432/postgres?sslmode=require
+
+# Database Connection Pool Settings
+DB_POOL_SIZE=10
+DB_MAX_OVERFLOW=5
+DB_POOL_RECYCLE=300
+
+# CORS Whitelist (Include both your custom domain and Vercel preview domain)
+ALLOWED_ORIGINS=https://suryafamilyrestaurant.com,https://www.suryafamilyrestaurant.com,https://surya-resto.vercel.app,http://localhost:3000
+FRONTEND_URL=https://suryafamilyrestaurant.com
+
+# Direct NPCI Merchant UPI Configuration (Zero Gateway Fees)
+UPI_MERCHANT_VPA=9880358634@upi
+UPI_MERCHANT_NAME=Surya Family Restaurant
+DEFAULT_UPI_VPA=9880358634@upi
+MERCHANT_NAME=Surya Family Restaurant Kadiri
+MERCHANT_PHONE=+919880358634
+MERCHANT_CITY=Kadiri
+MERCHANT_STATE=Andhra Pradesh
+MERCHANT_PINCODE=515591
+
+# Supabase Cloud Project Configuration
+SUPABASE_URL=https://poexygwbosuxbezeastc.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_gmrvTKp0DnRvIbZ6JMTamg_EJjxcMjz
+SUPABASE_SECRET_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_JWKS_URL=https://poexygwbosuxbezeastc.supabase.co/auth/v1/.well-known/jwks.json

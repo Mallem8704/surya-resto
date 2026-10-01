@@ -1,0 +1,25 @@
+# ==============================================================================
+# VERCEL ENVIRONMENT VARIABLES (Frontend - Next.js)
+# Copy & Paste these into: Vercel Dashboard -> Project -> Settings -> Environment Variables
+# ==============================================================================
+
+# Backend API URL (Replace with your actual Render service URL if different)
+NEXT_PUBLIC_API_URL=https://surya-resto-backend.onrender.com
+
+# Backend WebSocket URL for live real-time kitchen & order updates
+NEXT_PUBLIC_WS_URL=wss://surya-resto-backend.onrender.com/ws
+
+# Internal server rewrite URL for Next.js API proxying
+BACKEND_URL=https://surya-resto-backend.onrender.com
+
+# Production Website Domain (Canonical URL for metadata, SEO & social sharing)
+NEXT_PUBLIC_SITE_URL=https://suryafamilyrestaurant.com
+
+# Supabase Authentication & Realtime Cloud Keys
+NEXT_PUBLIC_SUPABASE_URL=https://poexygwbosuxbezeastc.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_gmrvTKp0DnRvIbZ6JMTamg_EJjxcMjz
+
+# Ordering Channel Feature Flags (Default: Online Delivery Active, Table Booking/QR Paused)
+NEXT_PUBLIC_ENABLE_ONLINE_ORDERING=true
+NEXT_PUBLIC_ENABLE_TABLE_BOOKING=false
+NEXT_PUBLIC_ENABLE_TABLE_ORDERING=false
