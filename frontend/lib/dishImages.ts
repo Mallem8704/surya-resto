@@ -89,17 +89,16 @@ export const DISH_IMAGE_MAP: Record<string, string> = {
 
 
 export const CATEGORY_DEFAULT_IMAGES: Record<number, string> = {
-    1: "/dishes/3d_tiffin.jpg",
-    2: "/dishes/3d_dosa.jpg",
-    3: "/dishes/3d_snacks.jpg",
-    4: "/dishes/3d_veg_starters.jpg",
-    5: "/dishes/3d_veg_starters.jpg",
-    6: "/dishes/3d_nonveg_starters.jpg",
-    7: "/dishes/3d_curries.jpg",
-    8: "/dishes/3d_biryani.jpg",
-    9: "/dishes/3d_curries.jpg",
-    10: "/dishes/3d_mandi.jpg",
-    11: "/dishes/3d_beverages.jpg",
+    1: "/dishes/cat_biryani.jpg",
+    2: "/dishes/cat_curries.jpg",
+    3: "/dishes/cat_tandoori.jpg",
+    4: "/dishes/cat_nonveg_starters.jpg",
+    5: "/dishes/cat_veg_starters.jpg",
+    6: "/dishes/cat_breads.jpg",
+    7: "/dishes/cat_chinese.jpg",
+    8: "/dishes/cat_soups.jpg",
+    9: "/dishes/cat_south_rice.jpg",
+    10: "/dishes/cat_desserts.jpg",
 };
 
 export function getDishImage(item: { name?: string; image_url?: string | null; category_id?: number }): string {
@@ -115,12 +114,12 @@ export function getDishImage(item: { name?: string; image_url?: string | null; c
     // 2. Custom or uploaded image from item data (if not a generic multi-dish cluster)
     if (
         item.image_url &&
-        !item.image_url.includes("3d_snacks") &&
-        !item.image_url.includes("3d_sweets")
+        !item.image_url.includes("3d_") &&
+        !item.image_url.includes("placeholder")
     ) {
         return item.image_url;
     }
 
     // 3. Fallback category image
-    return (item.category_id && CATEGORY_DEFAULT_IMAGES[item.category_id]) || "/dishes/3d_biryani.jpg";
+    return (item.category_id && CATEGORY_DEFAULT_IMAGES[item.category_id]) || "/dishes/cat_biryani.jpg";
 }

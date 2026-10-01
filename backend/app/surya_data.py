@@ -12,7 +12,7 @@ CATEGORIES = [
         "icon": "Flame",
         "sort_order": 1,
         "is_active": True,
-        "image_url": "/dishes/3d_biryani.jpg",
+        "image_url": "/dishes/cat_biryani.jpg",
     },
     {
         "id": 2,
@@ -21,7 +21,7 @@ CATEGORIES = [
         "icon": "UtensilsCrossed",
         "sort_order": 2,
         "is_active": True,
-        "image_url": "/dishes/3d_curries.jpg",
+        "image_url": "/dishes/cat_curries.jpg",
     },
     {
         "id": 3,
@@ -30,7 +30,7 @@ CATEGORIES = [
         "icon": "Flame",
         "sort_order": 3,
         "is_active": True,
-        "image_url": "/dishes/3d_nonveg_starters.jpg",
+        "image_url": "/dishes/cat_tandoori.jpg",
     },
     {
         "id": 4,
@@ -39,7 +39,7 @@ CATEGORIES = [
         "icon": "Flame",
         "sort_order": 4,
         "is_active": True,
-        "image_url": "/dishes/chicken_lollipop.jpg",
+        "image_url": "/dishes/cat_nonveg_starters.jpg",
     },
     {
         "id": 5,
@@ -48,7 +48,7 @@ CATEGORIES = [
         "icon": "Salad",
         "sort_order": 5,
         "is_active": True,
-        "image_url": "/dishes/3d_veg_starters.jpg",
+        "image_url": "/dishes/cat_veg_starters.jpg",
     },
     {
         "id": 6,
@@ -57,7 +57,7 @@ CATEGORIES = [
         "icon": "CircleDot",
         "sort_order": 6,
         "is_active": True,
-        "image_url": "/dishes/3d_curries.jpg",
+        "image_url": "/dishes/cat_breads.jpg",
     },
     {
         "id": 7,
@@ -66,7 +66,7 @@ CATEGORIES = [
         "icon": "Utensils",
         "sort_order": 7,
         "is_active": True,
-        "image_url": "/dishes/3d_biryani.jpg",
+        "image_url": "/dishes/cat_chinese.jpg",
     },
     {
         "id": 8,
@@ -75,7 +75,7 @@ CATEGORIES = [
         "icon": "Soup",
         "sort_order": 8,
         "is_active": True,
-        "image_url": "/dishes/mutton_maraq_soup.jpg",
+        "image_url": "/dishes/cat_soups.jpg",
     },
     {
         "id": 9,
@@ -84,7 +84,7 @@ CATEGORIES = [
         "icon": "Utensils",
         "sort_order": 9,
         "is_active": True,
-        "image_url": "/dishes/curd.jpg",
+        "image_url": "/dishes/cat_south_rice.jpg",
     },
     {
         "id": 10,
@@ -93,7 +93,7 @@ CATEGORIES = [
         "icon": "Wine",
         "sort_order": 10,
         "is_active": True,
-        "image_url": "/dishes/kunafa.jpg",
+        "image_url": "/dishes/cat_desserts.jpg",
     },
 ]
 
@@ -106,7 +106,7 @@ ITEMS = [
         "price": 260,
         "veg": False,
         "desc": "Long-grain fragrant basmati rice slow-cooked with tender spiced chicken, saffron, and aromatic spices. Served with mirchi ka salan & raita.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/hyderabadi_chicken_dum_biryani.jpg",
         "is_best_seller": True,
         "variants": [
             {"name": "Single (Regular)", "name_te": "సింగిల్", "price": 190, "is_default": False},
@@ -127,7 +127,7 @@ ITEMS = [
         "price": 280,
         "veg": False,
         "desc": "Aromatic biryani rice layered with crispy Andhra-style roasted chicken fry pieces and caramelized onions.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/chicken_fry_piece_biryani.jpg",
         "is_best_seller": True,
         "variants": [
             {"name": "Single", "name_te": "సింగిల్", "price": 200, "is_default": False},
@@ -142,7 +142,7 @@ ITEMS = [
         "price": 360,
         "veg": False,
         "desc": "Juicy tender pieces of baby lamb marinated in authentic spices and dum-cooked with aged basmati rice.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/special_mutton_dum_biryani.jpg",
         "is_best_seller": True,
         "variants": [
             {"name": "Full", "name_te": "ఫుల్", "price": 360, "is_default": True},
@@ -156,7 +156,7 @@ ITEMS = [
         "price": 250,
         "veg": True,
         "desc": "Fragrant dum biryani rice tossed with roasted whole cashews (kaju) and soft malai paneer cubes.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/kaju_paneer_biryani.jpg",
         "variants": [
             {"name": "Regular", "name_te": "రెగ్యులర్", "price": 250, "is_default": True},
             {"name": "Family Pack", "name_te": "ఫ్యామిలీ ప్యాక్", "price": 520, "is_default": False},
@@ -169,7 +169,7 @@ ITEMS = [
         "price": 210,
         "veg": True,
         "desc": "Farm-fresh vegetables, green peas, and paneer cooked on dum with aromatic whole spices and saffron rice.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/veg_dum_biryani.jpg",
     },
     {
         "cat": 1,
@@ -178,7 +178,7 @@ ITEMS = [
         "price": 220,
         "veg": False,
         "desc": "Golden shallow-fried boiled eggs spiced with masala, layered over aromatic Hyderabadi biryani rice.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/egg_dum_biryani.jpg",
     },
 
     # 2. Punjabi & North Indian Curries (Celebrated in Reviews!)
@@ -189,7 +189,7 @@ ITEMS = [
         "price": 260,
         "veg": False,
         "desc": "Traditional North Indian Dhaba-style chicken simmered with freshly ground coriander, tomatoes, ginger, and desi ghee. Pairs perfectly with Butter Naan!",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/punjabi_chicken_curry.jpg",
         "is_best_seller": True,
     },
     {
@@ -199,7 +199,7 @@ ITEMS = [
         "price": 270,
         "veg": False,
         "desc": "Smoky char-grilled tandoori chicken cooked in a velvety tomato, cashew cream, and rich butter gravy.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/butter_chicken_makhani.jpg",
         "is_best_seller": True,
     },
     {
@@ -209,7 +209,7 @@ ITEMS = [
         "price": 250,
         "veg": False,
         "desc": "Tender chicken cooked with crunchy bell peppers, onions, and freshly roasted kadai spices.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/kadai_chicken.jpg",
     },
     {
         "cat": 2,
@@ -218,7 +218,7 @@ ITEMS = [
         "price": 240,
         "veg": False,
         "desc": "Fiery Rayalaseema/Andhra style chicken curry with local red chillies, poppy seeds, and roasted coconut gravy.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/andhra_chicken_curry.jpg",
     },
     {
         "cat": 2,
@@ -227,7 +227,7 @@ ITEMS = [
         "price": 230,
         "veg": True,
         "desc": "Rich and creamy cottage cheese cubes bathed in smooth butter and cashew tomato gravy with kasuri methi.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/paneer_butter_masala.jpg",
         "is_best_seller": True,
     },
     {
@@ -237,7 +237,7 @@ ITEMS = [
         "price": 230,
         "veg": True,
         "desc": "Cottage cheese cubes tossed with capsicum, diced onions, and freshly crushed spices in a rich gravy.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/kadai_paneer.jpg",
     },
     {
         "cat": 2,
@@ -246,7 +246,7 @@ ITEMS = [
         "price": 250,
         "veg": True,
         "desc": "Crispy whole cashews cooked in a flavorful rich sweet-and-tangy tomato gravy.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/kaju_tomato_curry.jpg",
     },
     {
         "cat": 2,
@@ -255,7 +255,7 @@ ITEMS = [
         "price": 160,
         "veg": True,
         "desc": "Yellow toor dal tempered with cumin, garlic, red chillies, and aromatic pure desi ghee.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/dal_tadka.jpg",
     },
     {
         "cat": 2,
@@ -264,7 +264,7 @@ ITEMS = [
         "price": 220,
         "veg": True,
         "desc": "Button mushrooms cooked in an onion-tomato spicy masala with whole aromatic herbs.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/mushroom_masala.jpg",
     },
 
     # 3. Tandoori & Kebabs
@@ -275,7 +275,7 @@ ITEMS = [
         "price": 260,
         "veg": False,
         "desc": "Whole chicken marinated overnight in Kashmiri chilli, spiced hung curd, and roasted over clay charcoal tandoor.",
-        "img": "/dishes/3d_nonveg_starters.jpg",
+        "img": "/dishes/tandoori_chicken.jpg",
         "is_best_seller": True,
         "variants": [
             {"name": "Half (2 Pcs)", "name_te": "హాఫ్ (2 ముక్కలు)", "price": 260, "is_default": True},
@@ -289,7 +289,7 @@ ITEMS = [
         "price": 250,
         "veg": False,
         "desc": "Boneless chicken chunks marinated in mustard oil, ajwain, and tandoori spices, char-grilled to perfection.",
-        "img": "/dishes/3d_nonveg_starters.jpg",
+        "img": "/dishes/chicken_tikka.jpg",
     },
     {
         "cat": 3,
@@ -298,7 +298,7 @@ ITEMS = [
         "price": 260,
         "veg": False,
         "desc": "Chicken drumsticks stuffed with cheese and spices, roasted golden in charcoal tandoor.",
-        "img": "/dishes/3d_nonveg_starters.jpg",
+        "img": "/dishes/tangdi_kebab.jpg",
     },
     {
         "cat": 3,
@@ -307,7 +307,7 @@ ITEMS = [
         "price": 220,
         "veg": True,
         "desc": "Juicy chunks of malai paneer and crunchy peppers marinated in tandoori masala and grilled on skewers.",
-        "img": "/dishes/3d_veg_starters.jpg",
+        "img": "/dishes/paneer_tikka.jpg",
     },
 
     # 4. Non-Veg Starters & Andhra Specials
@@ -328,7 +328,7 @@ ITEMS = [
         "price": 240,
         "veg": False,
         "desc": "Crispy boneless chicken tossed with green chillies, onions, garlic, and dark soy sauce.",
-        "img": "/dishes/3d_nonveg_starters.jpg",
+        "img": "/dishes/chilly_chicken_dry.jpg",
     },
     {
         "cat": 4,
@@ -337,7 +337,7 @@ ITEMS = [
         "price": 250,
         "veg": False,
         "desc": "Crispy chicken strips tossed in spicy sweet chili sauce, roasted cashews, and sesame seeds.",
-        "img": "/dishes/3d_nonveg_starters.jpg",
+        "img": "/dishes/dragon_chicken.jpg",
     },
     {
         "cat": 4,
@@ -346,7 +346,7 @@ ITEMS = [
         "price": 280,
         "veg": False,
         "desc": "Hyderabadi style boneless fish fillets spiced with curry leaves, yogurt, green chillies, and spices.",
-        "img": "/dishes/3d_nonveg_starters.jpg",
+        "img": "/dishes/apollo_fish.jpg",
     },
     {
         "cat": 4,
@@ -355,7 +355,7 @@ ITEMS = [
         "price": 250,
         "veg": False,
         "desc": "Traditional spicy dry roasted chicken infused with Guntur red chillies and curry leaves.",
-        "img": "/dishes/3d_nonveg_starters.jpg",
+        "img": "/dishes/guntur_chicken_dry.jpg",
     },
 
     # 5. Veg Starters & Crispies
@@ -366,7 +366,7 @@ ITEMS = [
         "price": 180,
         "veg": True,
         "desc": "Golden fried American sweet corn tossed with freshly cracked black pepper, capsicum, and spring onions.",
-        "img": "/dishes/3d_veg_starters.jpg",
+        "img": "/dishes/crispy_corn.jpg",
         "is_best_seller": True,
     },
     {
@@ -376,7 +376,7 @@ ITEMS = [
         "price": 170,
         "veg": True,
         "desc": "Crispy vegetable dumplings tossed with ginger, garlic, chopped onions, and Indo-Chinese sauces.",
-        "img": "/dishes/3d_veg_starters.jpg",
+        "img": "/dishes/veg_manchurian.jpg",
     },
     {
         "cat": 5,
@@ -385,7 +385,7 @@ ITEMS = [
         "price": 210,
         "veg": True,
         "desc": "Batter-fried paneer cubes wok-tossed with capsicum, garlic, spring onions, and green chillies.",
-        "img": "/dishes/3d_veg_starters.jpg",
+        "img": "/dishes/chilly_paneer.jpg",
     },
     {
         "cat": 5,
@@ -394,7 +394,7 @@ ITEMS = [
         "price": 160,
         "veg": True,
         "desc": "Crispy spiced cauliflower florets tossed with curry leaves, crushed pepper, and lemon juice.",
-        "img": "/dishes/3d_veg_starters.jpg",
+        "img": "/dishes/gobi_65.jpg",
     },
 
     # 6. Indian Breads & Naans (Loved with Curries!)
@@ -405,7 +405,7 @@ ITEMS = [
         "price": 50,
         "veg": True,
         "desc": "Soft, fluffy clay-oven leavened bread brushed generously with melting butter.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/butter_naan.jpg",
         "is_best_seller": True,
     },
     {
@@ -415,7 +415,7 @@ ITEMS = [
         "price": 65,
         "veg": True,
         "desc": "Tandoori naan topped with roasted garlic flakes, fresh coriander, and melted butter.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/garlic_butter_naan.jpg",
         "is_best_seller": True,
     },
     {
@@ -425,7 +425,7 @@ ITEMS = [
         "price": 30,
         "veg": True,
         "desc": "Whole wheat bread baked in clay tandoor and brushed with fresh butter.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/tandoori_roti_butter.jpg",
     },
     {
         "cat": 6,
@@ -434,7 +434,7 @@ ITEMS = [
         "price": 25,
         "veg": True,
         "desc": "Crisp and healthy traditional whole wheat roti baked in charcoal tandoor.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/tandoori_roti_plain.jpg",
     },
     {
         "cat": 6,
@@ -443,7 +443,7 @@ ITEMS = [
         "price": 35,
         "veg": True,
         "desc": "Hand-tossed ultra-thin, soft handkerchief-style Indian bread.",
-        "img": "/dishes/3d_curries.jpg",
+        "img": "/dishes/rumali_roti.jpg",
     },
 
     # 7. Chinese, Fried Rice & Noodles
@@ -454,7 +454,7 @@ ITEMS = [
         "price": 210,
         "veg": False,
         "desc": "Wok-tossed basmati rice with shredded chicken, scramble egg, crunchy veggies, and chef's special seasoning.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/chicken_fried_rice.jpg",
     },
     {
         "cat": 7,
@@ -463,7 +463,7 @@ ITEMS = [
         "price": 220,
         "veg": False,
         "desc": "Spicy wok-fried rice tossed with fiery Schezwan sauce, chicken, and spring onions.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/schezwan_chicken_fried_rice.jpg",
     },
     {
         "cat": 7,
@@ -472,7 +472,7 @@ ITEMS = [
         "price": 170,
         "veg": True,
         "desc": "Classic wok-tossed rice with finely chopped carrots, beans, cabbage, and light soy sauce.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/veg_fried_rice.jpg",
     },
     {
         "cat": 7,
@@ -481,7 +481,7 @@ ITEMS = [
         "price": 210,
         "veg": False,
         "desc": "Stir-fried noodles with shredded chicken, crisp cabbage, capsicum, and oriental spices.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/chicken_hakka_noodles.jpg",
     },
     {
         "cat": 7,
@@ -490,7 +490,7 @@ ITEMS = [
         "price": 170,
         "veg": True,
         "desc": "Street-style stir-fried wheat noodles with garden fresh vegetables and mild spices.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/veg_hakka_noodles.jpg",
     },
 
     # 8. Soups & Shorba
@@ -501,7 +501,7 @@ ITEMS = [
         "price": 130,
         "veg": False,
         "desc": "Hearty Indo-Chinese spiced soup with chicken and egg, topped with crispy fried noodles.",
-        "img": "/dishes/mutton_maraq_soup.jpg",
+        "img": "/dishes/chicken_manchow_soup.jpg",
     },
     {
         "cat": 8,
@@ -510,7 +510,7 @@ ITEMS = [
         "price": 130,
         "veg": False,
         "desc": "Comforting creamy sweet corn soup with tender chicken shreds and egg drops.",
-        "img": "/dishes/mutton_maraq_soup.jpg",
+        "img": "/dishes/chicken_sweet_corn_soup.jpg",
     },
     {
         "cat": 8,
@@ -519,7 +519,7 @@ ITEMS = [
         "price": 110,
         "veg": True,
         "desc": "Silky smooth ripe tomato soup with butter, herbs, and crispy golden croutons.",
-        "img": "/dishes/mutton_maraq_soup.jpg",
+        "img": "/dishes/cream_of_tomato_soup.jpg",
     },
 
     # 9. Rice & South Indian Specials
@@ -530,7 +530,7 @@ ITEMS = [
         "price": 100,
         "veg": True,
         "desc": "Cooling and creamy tempered homemade curd rice with mustard, ginger, green chillies, and pomegranate.",
-        "img": "/dishes/curd.jpg",
+        "img": "/dishes/curd_rice_bagala_bath.jpg",
         "is_best_seller": True,
     },
     {
@@ -540,7 +540,7 @@ ITEMS = [
         "price": 140,
         "veg": True,
         "desc": "Fragrant long-grain basmati rice tempered with roasted cumin seeds and fresh coriander in pure ghee.",
-        "img": "/dishes/3d_biryani.jpg",
+        "img": "/dishes/jeera_rice.jpg",
     },
 
     # 10. Coolers, Beverages & Desserts
@@ -551,7 +551,7 @@ ITEMS = [
         "price": 50,
         "veg": True,
         "desc": "Refreshing fizzy soda infused with freshly squeezed Kadiri lemon juice and mint.",
-        "img": "/dishes/kunafa.jpg",
+        "img": "/dishes/fresh_lime_soda.jpg",
     },
     {
         "cat": 10,
@@ -560,7 +560,7 @@ ITEMS = [
         "price": 60,
         "veg": True,
         "desc": "Thick whipped sweet yogurt lassi topped with malai and cardamom essence.",
-        "img": "/dishes/kunafa.jpg",
+        "img": "/dishes/sweet_lassi.jpg",
     },
     {
         "cat": 10,
@@ -569,7 +569,7 @@ ITEMS = [
         "price": 90,
         "veg": True,
         "desc": "Warm, melt-in-the-mouth mawa gulab jamuns served alongside a scoop of rich vanilla ice cream.",
-        "img": "/dishes/kunafa.jpg",
+        "img": "/dishes/gulab_jamun_icecream.jpg",
         "is_best_seller": True,
     },
     {
@@ -579,7 +579,7 @@ ITEMS = [
         "price": 120,
         "veg": True,
         "desc": "Rich layered dessert made of stewed Turkish apricots, sponge cake, and thick fresh cream.",
-        "img": "/dishes/kunafa.jpg",
+        "img": "/dishes/apricot_delight.jpg",
         "is_best_seller": True,
     },
     {
@@ -589,6 +589,6 @@ ITEMS = [
         "price": 45,
         "veg": True,
         "desc": "Chilled beverage bottle.",
-        "img": "/dishes/kunafa.jpg",
+        "img": "/dishes/thums_up_beverage.jpg",
     },
 ]

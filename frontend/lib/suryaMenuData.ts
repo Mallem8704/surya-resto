@@ -59,7 +59,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "బిర్యానీ & పులావ్ స్పెషల్స్",
         icon: "Flame",
         sort_order: 1,
-        image_url: "/dishes/3d_biryani.jpg",
+        image_url: "/dishes/cat_biryani.jpg",
     },
     {
         id: 2,
@@ -67,7 +67,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "పంజాబీ & నార్త్ ఇండియన్ కూరలు",
         icon: "UtensilsCrossed",
         sort_order: 2,
-        image_url: "/dishes/3d_curries.jpg",
+        image_url: "/dishes/cat_curries.jpg",
     },
     {
         id: 3,
@@ -75,7 +75,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "తందూరి & కబాబ్స్",
         icon: "Flame",
         sort_order: 3,
-        image_url: "/dishes/3d_nonveg_starters.jpg",
+        image_url: "/dishes/cat_tandoori.jpg",
     },
     {
         id: 4,
@@ -83,7 +83,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "నాన్-వెజ్ స్టార్టర్స్ & ఆంధ్రా స్పెషల్స్",
         icon: "Flame",
         sort_order: 4,
-        image_url: "/dishes/chicken_lollipop.jpg",
+        image_url: "/dishes/cat_nonveg_starters.jpg",
     },
     {
         id: 5,
@@ -91,7 +91,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "వెజ్ స్టార్టర్స్ & క్రిస్పీస్",
         icon: "Salad",
         sort_order: 5,
-        image_url: "/dishes/3d_veg_starters.jpg",
+        image_url: "/dishes/cat_veg_starters.jpg",
     },
     {
         id: 6,
@@ -99,7 +99,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "రొట్టెలు, నాన్స్ & కుల్చా",
         icon: "CircleDot",
         sort_order: 6,
-        image_url: "/dishes/3d_curries.jpg",
+        image_url: "/dishes/cat_breads.jpg",
     },
     {
         id: 7,
@@ -107,7 +107,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "చైనీస్, ఫ్రైడ్ రైస్ & నూడుల్స్",
         icon: "Utensils",
         sort_order: 7,
-        image_url: "/dishes/3d_biryani.jpg",
+        image_url: "/dishes/cat_chinese.jpg",
     },
     {
         id: 8,
@@ -115,7 +115,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "సూప్స్ & షోర్బా",
         icon: "Soup",
         sort_order: 8,
-        image_url: "/dishes/mutton_maraq_soup.jpg",
+        image_url: "/dishes/cat_soups.jpg",
     },
     {
         id: 9,
@@ -123,7 +123,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "రైస్ & సౌత్ ఇండియన్ స్పెషల్స్",
         icon: "Utensils",
         sort_order: 9,
-        image_url: "/dishes/curd.jpg",
+        image_url: "/dishes/cat_south_rice.jpg",
     },
     {
         id: 10,
@@ -131,7 +131,7 @@ export const SURYA_CATEGORIES: StaticCategory[] = [
         name_te: "కూలర్స్, పానీయాలు & స్వీట్స్",
         icon: "Wine",
         sort_order: 10,
-        image_url: "/dishes/kunafa.jpg",
+        image_url: "/dishes/cat_desserts.jpg",
     },
 ];
 
