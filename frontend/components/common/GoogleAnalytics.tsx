@@ -18,24 +18,24 @@ function AnalyticsTracker() {
 }
 
 export function GoogleAnalytics() {
-  const measurementId = GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  const measurementId = GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-RCL3EYXKT2";
 
   useEffect(() => {
-    if (!measurementId) {
-      if (process.env.NODE_ENV === "development") {
-        console.info("[GA4] NEXT_PUBLIC_GA_MEASUREMENT_ID not configured. Analytics tracking dormant.");
-      }
-      return;
-    }
+    if (!measurementId) return;
+
+    // Check if gtag is already loaded
+    if (document.getElementById("gtag-js")) return;
 
     // Load gtag.js script
     const script = document.createElement("script");
+    script.id = "gtag-js";
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
     document.head.appendChild(script);
 
     // Initialize gtag
     const initScript = document.createElement("script");
+    initScript.id = "gtag-init";
     initScript.textContent = `
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}

@@ -3,7 +3,7 @@
  * Safe for SSR and client-side execution.
  */
 
-export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "";
+export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-RCL3EYXKT2";
 
 declare global {
   interface Window {

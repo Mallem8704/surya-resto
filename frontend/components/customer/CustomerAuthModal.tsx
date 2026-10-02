@@ -125,7 +125,7 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
       <div className="relative w-full max-w-md bg-stone-900 border border-white/20 rounded-3xl p-6 sm:p-8 text-white shadow-2xl overflow-hidden">
         {/* Ambient Top Glow */}
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
