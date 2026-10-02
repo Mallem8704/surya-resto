@@ -466,13 +466,19 @@ def generate_dynamic_upi_qr(
     clean_order_no = str(order_number or "").strip()
 
     # NPCI tn (Transaction Note): URL-encoded string up to 80 chars
-    tn_text = f"Order #{clean_order_no}" if clean_order_no else "Surya Restaurant"
+    tn_text = clean_order_no if clean_order_no else "Surya Restaurant"
     encoded_tn = urllib.parse.quote(tn_text[:80])
+
+    # NPCI tr (Transaction Reference ID): URL-safe string up to 35 chars
+    clean_tr = re.sub(r"[^a-zA-Z0-9_-]", "", clean_order_no)[:35]
+    if not clean_tr:
+        clean_tr = f"SURYA{int(datetime.datetime.utcnow().timestamp())}"
+    encoded_tr = urllib.parse.quote(clean_tr)
 
     # Amount: strictly non-negative float formatted with 2 decimal places per NPCI
     safe_amount = max(0.0, float(amount_rupees))
 
-    return f"upi://pay?pa={clean_vpa}&pn={encoded_name}&am={safe_amount:.2f}&cu=INR&tn={encoded_tn}"
+    return f"upi://pay?pa={clean_vpa}&pn={encoded_name}&am={safe_amount:.2f}&cu=INR&tn={encoded_tn}&tr={encoded_tr}"
 
 
 @router.get("/{order_id}/dynamic-upi", response_model=DynamicUpiQrResponse)
