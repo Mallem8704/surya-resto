@@ -33,9 +33,20 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
     }
   }, [isOpen]);
 
+  // Helper to extract clean 10-digit Indian phone
+  const get10DigitPhone = (raw: string) => {
+    let clean = raw.replace(/\D/g, "");
+    if (clean.length === 12 && clean.startsWith("91")) {
+      clean = clean.slice(2);
+    } else if (clean.length === 11 && clean.startsWith("0")) {
+      clean = clean.slice(1);
+    }
+    return clean;
+  };
+
   // Check phone when 10 digits are reached
   useEffect(() => {
-    const cleanPhone = phone.replace(/\D/g, "");
+    const cleanPhone = get10DigitPhone(phone);
     if (cleanPhone.length === 10) {
       api.checkCustomerPhone(cleanPhone)
         .then((res) => {
@@ -60,13 +71,13 @@ export function CustomerAuthModal({ isOpen, onClose, onSuccess }: CustomerAuthMo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanPhone = phone.replace(/\D/g, "");
-    if (cleanPhone.length !== 10) {
-      toast.error("Please enter a valid 10-digit mobile number");
+    const cleanPhone = get10DigitPhone(phone);
+    if (cleanPhone.length !== 10 || !/^[6-9]\d{9}$/.test(cleanPhone)) {
+      toast.error("Please enter a valid 10-digit Indian mobile number");
       return;
     }
 
-    if (!password || password.length < 4) {
+    if (!password || password.trim().length < 4) {
       toast.error("Password must be at least 4 characters long");
       return;
     }

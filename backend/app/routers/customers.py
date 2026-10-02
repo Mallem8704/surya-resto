@@ -47,26 +47,33 @@ def register_customer(req: CustomerRegisterReq, request: Request, db: Session = 
             detail="An account with this mobile number already exists. Please sign in."
         )
 
-    if not customer:
-        customer = Customer(
-            phone=phone,
-            name=req.name.strip() if req.name else None,
-            email=req.email.strip() if req.email else None,
-            hashed_password=get_password_hash(req.password),
-            created_at=now,
+    try:
+        if not customer:
+            customer = Customer(
+                phone=phone,
+                name=req.name.strip() if req.name else None,
+                email=req.email.strip() if req.email else None,
+                hashed_password=get_password_hash(req.password),
+                created_at=now,
+            )
+            db.add(customer)
+            db.commit()
+            db.refresh(customer)
+        else:
+            # Existing walk-in customer setting their password for the first time
+            if req.name and req.name.strip():
+                customer.name = req.name.strip()
+            if req.email and req.email.strip():
+                customer.email = req.email.strip()
+            customer.hashed_password = get_password_hash(req.password)
+            db.commit()
+            db.refresh(customer)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to register account. Please verify your details or sign in."
         )
-        db.add(customer)
-        db.commit()
-        db.refresh(customer)
-    else:
-        # Existing walk-in customer setting their password for the first time
-        if req.name and req.name.strip():
-            customer.name = req.name.strip()
-        if req.email and req.email.strip():
-            customer.email = req.email.strip()
-        customer.hashed_password = get_password_hash(req.password)
-        db.commit()
-        db.refresh(customer)
 
     token = create_customer_token(customer.id, customer.phone)
 

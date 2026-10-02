@@ -442,6 +442,7 @@ else:
         "https://suryafamilyrestaurant.in",
         "https://www.suryafamilyrestaurant.in",
         "https://surya-resto.vercel.app",
+        "https://frontend-lake-iota-65.vercel.app",
         *env_origins,
     ]
     origins = list(dict.fromkeys(dev_origins))

@@ -7,16 +7,12 @@ export function getApiBase(): string {
     if (process.env.NEXT_PUBLIC_API_URL) {
         return process.env.NEXT_PUBLIC_API_URL;
     }
-    // 2. Server-side (SSR / Server Actions / Route Handlers): use Vercel service binding
-    if (typeof window === "undefined") {
-        return process.env.BACKEND_URL || "http://127.0.0.1:8000";
-    }
-    // 3. Client-side on localhost (standalone local dev): point to local backend
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    // 2. Client-side on localhost (standalone local dev): point to local backend
+    if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
         return "http://127.0.0.1:8000";
     }
-    // 4. Client-side in production (Vercel multi-service): use same-origin relative path
-    return "";
+    // 3. Server-side or client-side production: use live Render backend
+    return process.env.BACKEND_URL || "https://surya-resto-backend.onrender.com";
 }
 
 export const API_BASE = getApiBase();
@@ -96,7 +92,11 @@ export async function apiFetch<T = any>(endpoint: string, options: FetchOptions 
             const errorData = await response.json();
             errorMessage = errorData.detail || errorData.message || errorMessage;
         } catch {
-            // Keep default message if body is not JSON
+            if (response.status === 500) {
+                errorMessage = "Server is waking up or temporarily busy. Please retry in a moment.";
+            } else if (response.status === 502 || response.status === 503 || response.status === 504) {
+                errorMessage = "Backend service temporarily unavailable. Please retry shortly.";
+            }
         }
         const error: any = new Error(errorMessage);
         error.status = response.status;

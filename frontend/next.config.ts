@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   // Enable standalone mode for Docker, but disable on Vercel to prevent .nft.json ENOENT errors
   output: process.env.VERCEL ? undefined : "standalone",
   async rewrites() {
-    const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "https://surya-resto-backend.onrender.com";
     return [
       {
         source: "/uploads/:path*",
