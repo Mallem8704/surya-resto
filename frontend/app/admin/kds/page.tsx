@@ -125,13 +125,13 @@ export default function KitchenDisplaySystemPage() {
     const { isConnected: wsConnected } = useAdminSocket(outlet?.id || 1, (event) => {
         if (event.event === "new_order" && event.data) {
             if (soundEnabled) {
-                soundManager.playNewOrderChime();
+                soundManager.playOrderVoiceAlert(event.data);
             }
             setOrders((prev) => [event.data, ...prev.filter((o) => o.id !== event.data.id)]);
             toast.success(`New Kitchen Ticket #${event.data.order_number} for Table ${event.data.table_label || event.data.table_id || "Counter"}`);
         } else if (event.event === "running_kot_added" && event.data) {
             if (soundEnabled) {
-                soundManager.playNewOrderChime();
+                soundManager.playRunningKotVoiceAlert(event.data.table_label || event.data.table_id || "Table");
             }
             setOrders((prev) => {
                 const exists = prev.some((o) => o.id === event.data.id);
@@ -155,7 +155,7 @@ export default function KitchenDisplaySystemPage() {
             toast.info(`Ticket #${event.data.order_number} moved to Table ${event.data.table_label}`);
         } else if (event.event === "service_call" && event.data) {
             if (soundEnabled) {
-                soundManager.playServiceCallAlert();
+                soundManager.playServiceCallVoiceAlert(event.data);
             }
             setPendingServiceCalls((prev) => {
                 if (prev.some((c) => c.id === event.data.id)) return prev;

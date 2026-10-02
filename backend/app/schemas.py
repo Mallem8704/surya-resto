@@ -659,6 +659,19 @@ class CouponOut(BaseModel):
     created_at: datetime.datetime
 
 
+class CouponPublic(BaseModel):
+    """Public-facing coupon info for customers — hides internal fields."""
+    model_config = ConfigDict(from_attributes=True)
+
+    code: str
+    description: Optional[str] = None
+    discount_type: str
+    discount_value: int
+    min_order_paise: int
+    max_discount_paise: Optional[int] = None
+
+
+
 class CouponValidateReq(BaseModel):
     code: str
     subtotal_paise: int

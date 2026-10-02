@@ -85,6 +85,27 @@ export default function SettingsPage() {
         }
     };
 
+    const handleToggleCoupon = async (id: number, code: string, currentActive: boolean) => {
+        try {
+            await api.toggleCoupon(id);
+            toast.success(`Coupon ${code} ${currentActive ? "deactivated" : "activated"}!`);
+            fetchCoupons();
+        } catch (err: any) {
+            toast.error(err.message || "Failed to update coupon status");
+        }
+    };
+
+    const handlePermanentDeleteCoupon = async (id: number, code: string) => {
+        if (!confirm(`Permanently delete coupon "${code}"? This cannot be undone.`)) return;
+        try {
+            await api.deleteCouponPermanent(id);
+            toast.success(`Coupon ${code} permanently deleted.`);
+            fetchCoupons();
+        } catch (err: any) {
+            toast.error(err.message || "Failed to delete coupon");
+        }
+    };
+
     const handleDeleteCoupon = async (id: number, code: string) => {
         if (!confirm(`Are you sure you want to deactivate coupon ${code}?`)) return;
         try {
@@ -598,15 +619,24 @@ export default function SettingsPage() {
                                                     key={c.id}
                                                     className={`p-4 rounded-2xl border flex flex-col justify-between transition ${
                                                         c.is_active
-                                                            ? "bg-amber-50/50 border-amber-200"
-                                                            : "bg-gray-50 border-gray-200 opacity-60"
+                                                            ? "bg-amber-50/50 border-amber-300 shadow-2xs"
+                                                            : "bg-gray-100/70 border-gray-300 opacity-75"
                                                     }`}
                                                 >
                                                     <div>
                                                         <div className="flex items-center justify-between mb-2">
-                                                            <span className="px-2.5 py-1 rounded-lg bg-amber-500 text-black font-mono font-black text-sm tracking-wider">
-                                                                {c.code}
-                                                            </span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="px-2.5 py-1 rounded-lg bg-amber-500 text-black font-mono font-black text-sm tracking-wider">
+                                                                    {c.code}
+                                                                </span>
+                                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                                                    c.is_active 
+                                                                        ? "bg-emerald-100 text-emerald-800" 
+                                                                        : "bg-gray-200 text-gray-700"
+                                                                }`}>
+                                                                    {c.is_active ? "● ACTIVE" : "○ INACTIVE"}
+                                                                </span>
+                                                            </div>
                                                             <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
                                                                 {c.discount_type === "percent" ? `${c.discount_value}% OFF` : `₹${(c.discount_value/100).toFixed(0)} FLAT OFF`}
                                                             </span>
@@ -619,15 +649,27 @@ export default function SettingsPage() {
                                                         </div>
                                                     </div>
 
-                                                    {isOwner && c.is_active && (
-                                                        <div className="pt-3 mt-3 border-t border-amber-200/60 flex justify-end">
+                                                    {isOwner && (
+                                                        <div className="pt-3 mt-3 border-t border-espresso-100 flex items-center justify-between">
                                                             <button
                                                                 type="button"
-                                                                onClick={() => handleDeleteCoupon(c.id, c.code)}
-                                                                className="text-xs text-red-600 font-bold hover:text-red-800 flex items-center gap-1 cursor-pointer"
+                                                                onClick={() => handleToggleCoupon(c.id, c.code, c.is_active)}
+                                                                className={`text-xs font-bold px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                                                                    c.is_active
+                                                                        ? "text-amber-900 bg-amber-200/70 hover:bg-amber-300"
+                                                                        : "text-emerald-900 bg-emerald-200/70 hover:bg-emerald-300"
+                                                                }`}
+                                                            >
+                                                                {c.is_active ? "Deactivate" : "Activate"}
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handlePermanentDeleteCoupon(c.id, c.code)}
+                                                                title="Delete coupon"
+                                                                className="text-xs text-red-500 hover:text-red-700 p-1 rounded-md hover:bg-red-50 transition cursor-pointer"
                                                             >
                                                                 <Trash2 className="w-3.5 h-3.5" />
-                                                                <span>Deactivate</span>
                                                             </button>
                                                         </div>
                                                     )}

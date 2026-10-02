@@ -8,6 +8,7 @@ from app.models import Coupon, User, AuditLog
 from app.schemas import (
     CouponCreate,
     CouponOut,
+    CouponPublic,
     CouponValidateReq,
     CouponValidateResponse,
 )
@@ -15,6 +16,14 @@ from app.routers.auth import require_owner, require_staff_or_owner
 from app.routers.outlets import get_effective_outlet_id
 
 router = APIRouter()
+
+
+@router.get("/active", response_model=List[CouponPublic])
+def list_active_coupons(db: Session = Depends(get_db)):
+    """Public endpoint — returns active coupons for customer-facing promo chips."""
+    coupons = db.query(Coupon).filter(Coupon.is_active == True).order_by(Coupon.created_at.desc()).all()
+    # Filter out coupons that have exhausted their usage limit
+    return [c for c in coupons if not c.usage_limit or c.times_used < c.usage_limit]
 
 
 @router.post("/validate", response_model=CouponValidateResponse)
@@ -163,3 +172,48 @@ def delete_coupon(
         details={"code": coupon.code, "is_active": False}
     )
     db.commit()
+
+
+@router.patch("/{coupon_id}/toggle", response_model=CouponOut)
+def toggle_coupon(
+    coupon_id: int,
+    current_user: User = Depends(require_owner),
+    db: Session = Depends(get_db),
+):
+    """Owner-only endpoint to toggle active status of a coupon (Activate / Deactivate)."""
+    coupon = db.query(Coupon).filter(Coupon.id == coupon_id).first()
+    if not coupon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coupon not found")
+
+    coupon.is_active = not coupon.is_active
+
+    from app.audit_utils import log_audit
+    eff_outlet_id = get_effective_outlet_id(coupon.outlet_id or current_user.outlet_id, db)
+    log_audit(
+        db=db,
+        outlet_id=eff_outlet_id,
+        user_id=current_user.id,
+        action="toggle_coupon",
+        entity_type="coupon",
+        entity_id=coupon.id,
+        details={"code": coupon.code, "is_active": coupon.is_active}
+    )
+    db.commit()
+    db.refresh(coupon)
+    return coupon
+
+
+@router.delete("/{coupon_id}/permanent", status_code=status.HTTP_204_NO_CONTENT)
+def permanent_delete_coupon(
+    coupon_id: int,
+    current_user: User = Depends(require_owner),
+    db: Session = Depends(get_db),
+):
+    """Owner-only endpoint to permanently delete a promo coupon."""
+    coupon = db.query(Coupon).filter(Coupon.id == coupon_id).first()
+    if not coupon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coupon not found")
+
+    db.delete(coupon)
+    db.commit()
+

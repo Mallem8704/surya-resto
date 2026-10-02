@@ -142,10 +142,24 @@ export default function CashierPOSTerminalPage() {
 
     // WebSocket sync
     const handleWsEvent = useCallback((event: SocketEvent) => {
-        if (event.event === "new_order" || event.event === "order_status_updated" || event.event === "payment_success") {
+        if (
+            event.event === "new_order" ||
+            event.event === "order_status_updated" ||
+            event.event === "order_updated" ||
+            event.event === "payment_success" ||
+            event.event === "payment_updated" ||
+            event.event === "running_kot_added"
+        ) {
             loadPOSData();
-            if (event.event === "new_order") {
-                soundManager.playNewOrderChime();
+            if (event.event === "new_order" && event.data) {
+                soundManager.playOrderVoiceAlert(event.data);
+            } else if (event.event === "running_kot_added" && event.data) {
+                soundManager.playRunningKotVoiceAlert(event.data.table_label || event.data.table_id || "Table");
+            } else if ((event.event === "payment_success" || event.event === "payment_updated") && event.data) {
+                const amount = Number(event.data.total_amount_paise || event.data.final_total_paise || event.data.amount_paise || event.data.total_paise || 0) / 100;
+                if (amount > 0) {
+                    soundManager.playPaymentSoundbox(Math.round(amount), event.data.payment_method?.toUpperCase() || "UPI", event.data.table_label);
+                }
             }
         }
     }, [loadPOSData]);

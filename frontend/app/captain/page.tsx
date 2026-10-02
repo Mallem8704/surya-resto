@@ -52,6 +52,7 @@ import { useAdminSocket, SocketEvent } from "@/hooks/useSockets";
 import { printKOT, printRunningKOT, printPOSReceipt } from "@/lib/thermalPrint";
 import { soundManager } from "@/lib/sound";
 import { PaymentSettlementModal } from "@/components/admin/PaymentSettlementModal";
+import { AudioUnlockBanner } from "@/components/admin/AudioUnlockBanner";
 
 interface CafeTableData {
     id: number;
@@ -255,10 +256,16 @@ export default function CaptainWaiterPage() {
                 event.event === "table_updated"
             ) {
                 loadFloorData();
-                soundManager.playNewOrderChime();
+                if (event.event === "new_order" && event.data) {
+                    soundManager.playOrderVoiceAlert(event.data);
+                } else if (event.event === "running_kot_added" && event.data) {
+                    soundManager.playRunningKotVoiceAlert(event.data.table_label || event.data.table_id || "Table");
+                } else {
+                    soundManager.playNewOrderChime();
+                }
             } else if (event.event === "service_call") {
                 loadFloorData();
-                soundManager.playServiceCallAlert();
+                soundManager.playServiceCallVoiceAlert(event.data);
                 const callType = event.data?.call_type ? event.data.call_type.toUpperCase() : "SERVICE";
                 toast.info(`Service Call: ${callType} requested from Table #${event.data?.table_id || "N/A"}`);
             } else if (event.event === "service_call_attended") {
@@ -696,6 +703,9 @@ export default function CaptainWaiterPage() {
                     </button>
                 </div>
             </header>
+
+            {/* RESTAURANT SOUNDBOX & AUDIO UNLOCK BANNER */}
+            <AudioUnlockBanner />
 
             {/* PENDING SERVICE CALLS ALERT BANNER */}
             {serviceCalls.length > 0 && (

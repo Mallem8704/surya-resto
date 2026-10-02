@@ -315,41 +315,269 @@ class SoundManager {
     }
 
     /**
-     * Built-in Voice "Soundbox" Audio Engine.
-     * Plays a pleasant dual-tone cash register chime, followed by crystal-clear speech synthesis!
+     * Get preferred voice announcement language ('en' or 'te')
      */
-    playPaymentSoundbox(amountRs: number, method: string = "UPI", tableLabel?: string, language: "en" | "te" = "en") {
-        // 1. Play Cash Register Chime
-        this.playOrderPlacedSuccess();
+    public getVoiceLanguage(): "en" | "te" {
+        if (typeof window === "undefined") return "en";
+        try {
+            const saved = localStorage.getItem("surya_voice_lang");
+            if (saved === "te" || saved === "en") return saved;
+            const appLang = localStorage.getItem("surya_language");
+            if (appLang === "te") return "te";
+        } catch (e) {}
+        return "en";
+    }
+
+    /**
+     * Set preferred voice announcement language ('en' or 'te')
+     */
+    public setVoiceLanguage(lang: "en" | "te") {
+        if (typeof window === "undefined") return;
+        try {
+            localStorage.setItem("surya_voice_lang", lang);
+        } catch (e) {}
+    }
+
+    /**
+     * Get sound mode: 'voice_and_chime' | 'chime_only' | 'mute'
+     */
+    public getSoundMode(): "voice_and_chime" | "chime_only" | "mute" {
+        if (typeof window === "undefined") return "voice_and_chime";
+        try {
+            const saved = localStorage.getItem("surya_sound_mode");
+            if (saved === "chime_only" || saved === "mute" || saved === "voice_and_chime") return saved;
+        } catch (e) {}
+        return "voice_and_chime";
+    }
+
+    /**
+     * Set sound mode: 'voice_and_chime' | 'chime_only' | 'mute'
+     */
+    public setSoundMode(mode: "voice_and_chime" | "chime_only" | "mute") {
+        if (typeof window === "undefined") return;
+        try {
+            localStorage.setItem("surya_sound_mode", mode);
+        } catch (e) {}
+    }
+
+    /**
+     * Helper to synthesize speech safely with Indian English (en-IN) / Telugu (te-IN) fallbacks
+     */
+    private speakText(text: string, lang: "en" | "te" = "en") {
+        if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+        try {
+            window.speechSynthesis.cancel(); // Cancel any ongoing speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.05;
+            utterance.pitch = 1.05;
+            utterance.lang = lang === "te" ? "te-IN" : "en-IN";
+
+            // Attempt to assign native Indian voices if available
+            const voices = window.speechSynthesis.getVoices();
+            if (voices && voices.length > 0) {
+                const targetCode = lang === "te" ? "te" : "en-IN";
+                const matched = voices.find(
+                    (v) => v.lang.toLowerCase().includes(targetCode.toLowerCase()) || v.name.includes("India")
+                );
+                if (matched) {
+                    utterance.voice = matched;
+                }
+            }
+
+            window.speechSynthesis.speak(utterance);
+        } catch (err) {
+            console.warn("SpeechSynthesis error:", err);
+        }
+    }
+
+    /**
+     * Universal Voice & Chime Alert for New Orders (Dine-In Table, Delivery, Takeaway).
+     * Plays high-penetration bell chime first, followed by clear voice announcement!
+     */
+    playOrderVoiceAlert(
+        order: {
+            order_type?: string;
+            table_label?: string;
+            total_paise?: number;
+            order_number?: string;
+            customer_name?: string;
+            items?: any[];
+        },
+        preferredLang?: "en" | "te"
+    ) {
+        const mode = this.getSoundMode();
+        if (mode === "mute") return;
+
+        // 1. Play high-penetration bell chime first
+        this.playNewOrderChime();
+
+        if (mode === "chime_only") return;
 
         // 2. Synthesize Voice Announcement
-        if (typeof window !== "undefined" && "speechSynthesis" in window) {
-            try {
-                window.speechSynthesis.cancel(); // Cancel any ongoing speech
-                const cleanAmount = Math.round(amountRs);
-                const tableText = tableLabel ? ` for Table ${tableLabel}` : "";
-                
-                let textToSpeak = `Payment of rupees ${cleanAmount} received on ${method}${tableText}.`;
-                if (language === "te") {
-                    textToSpeak = tableLabel 
-                        ? `టేబుల్ ${tableLabel} కోసం ${cleanAmount} రూపాయల పేమెంట్ అందింది.`
-                        : `${cleanAmount} రూపాయల పేమెంట్ విజయవంతంగా అందింది.`;
-                }
+        const lang = preferredLang || this.getVoiceLanguage();
+        const totalRs = order.total_paise ? Math.round(order.total_paise / 100) : 0;
+        const rawType = (order.order_type || "dine_in").toLowerCase();
 
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.rate = 1.05;
-                utterance.pitch = 1.1;
-                utterance.lang = language === "te" ? "te-IN" : "en-IN";
-                
-                // Small delay so the initial chime plays cleanly first
-                setTimeout(() => {
-                    window.speechSynthesis.speak(utterance);
-                }, 350);
-            } catch (e) {
-                console.warn("Speech synthesis error", e);
-            }
+        let speechText = "";
+
+        if (rawType === "delivery") {
+            const amountStr = totalRs > 0 ? ` of rupees ${totalRs}` : "";
+            speechText =
+                lang === "te"
+                    ? `కొత్త డెలివరీ ఆర్డర్ వచ్చింది! ${totalRs > 0 ? `మొత్తం ${totalRs} రూపాయలు.` : ""}`
+                    : `New delivery order received${amountStr}!`;
+        } else if (rawType === "takeaway" || rawType === "parcel") {
+            const amountStr = totalRs > 0 ? ` of rupees ${totalRs}` : "";
+            speechText =
+                lang === "te"
+                    ? `కొత్త టేక్‌అవే పార్శిల్ ఆర్డర్ వచ్చింది! ${totalRs > 0 ? `మొత్తం ${totalRs} రూపాయలు.` : ""}`
+                    : `New takeaway parcel order received${amountStr}!`;
+        } else {
+            // Dine-in Table Order
+            const tableStr = order.table_label ? order.table_label : "Table";
+            const amountStr = totalRs > 0 ? `, rupees ${totalRs}` : "";
+            speechText =
+                lang === "te"
+                    ? `టేబుల్ ${tableStr} కోసం కొత్త ఆర్డర్ వచ్చింది! ${totalRs > 0 ? `మొత్తం ${totalRs} రూపాయలు.` : ""}`
+                    : `New order for Table ${tableStr}${amountStr}!`;
+        }
+
+        setTimeout(() => {
+            this.speakText(speechText, lang);
+        }, 380);
+    }
+
+    /**
+     * Voice alert when additional running items are added to an existing table
+     */
+    playRunningKotVoiceAlert(tableLabel: string, preferredLang?: "en" | "te") {
+        const mode = this.getSoundMode();
+        if (mode === "mute") return;
+
+        this.playNewOrderChime();
+        if (mode === "chime_only") return;
+
+        const lang = preferredLang || this.getVoiceLanguage();
+        const speechText =
+            lang === "te"
+                ? `టేబుల్ ${tableLabel} కి అదనపు ఆర్డర్ వచ్చింది!`
+                : `Additional items added to Table ${tableLabel}!`;
+
+        setTimeout(() => {
+            this.speakText(speechText, lang);
+        }, 380);
+    }
+
+    /**
+     * Voice alert for digital waiter service calls (Water, Bill, Waiter, Clean)
+     */
+    playServiceCallVoiceAlert(
+        service: { table_label?: string; table_id?: number; call_type?: string },
+        preferredLang?: "en" | "te"
+    ) {
+        const mode = this.getSoundMode();
+        if (mode === "mute") return;
+
+        this.playServiceCallAlert();
+        if (mode === "chime_only") return;
+
+        const lang = preferredLang || this.getVoiceLanguage();
+        const tableStr = service.table_label || (service.table_id ? `T${service.table_id}` : "Table");
+        const callType = (service.call_type || "service").toLowerCase();
+
+        let speechText = "";
+        if (lang === "te") {
+            const reason =
+                callType === "water"
+                    ? "నీళ్లు"
+                    : callType === "bill"
+                    ? "బిల్లు"
+                    : callType === "clean"
+                    ? "టేబుల్ క్లీన్"
+                    : "సహాయం";
+            speechText = `టేబుల్ ${tableStr} నుండి ${reason} పిలుపు వచ్చింది!`;
+        } else {
+            speechText = `Service alert! Table ${tableStr} requested ${callType}.`;
+        }
+
+        setTimeout(() => {
+            this.speakText(speechText, lang);
+        }, 400);
+    }
+
+    /**
+     * Voice alert for table pre-booking & reservations
+     */
+    playReservationVoiceAlert(
+        reservation: { party_size?: number; customer_name?: string; reservation_date?: string },
+        preferredLang?: "en" | "te"
+    ) {
+        const mode = this.getSoundMode();
+        if (mode === "mute") return;
+
+        this.playNewOrderChime();
+        if (mode === "chime_only") return;
+
+        const lang = preferredLang || this.getVoiceLanguage();
+        const partySize = reservation.party_size || 2;
+        const speechText =
+            lang === "te"
+                ? `${partySize} మంది కోసం కొత్త టేబుల్ రిజర్వేషన్ నమోదయింది!`
+                : `New table reservation for ${partySize} guests!`;
+
+        setTimeout(() => {
+            this.speakText(speechText, lang);
+        }, 380);
+    }
+
+    /**
+     * Built-in Voice "Soundbox" Audio Engine for Payment Receipts.
+     * Plays cash register celebratory chime followed by speech synthesis.
+     */
+    playPaymentSoundbox(amountRs: number, method: string = "UPI", tableLabel?: string, language?: "en" | "te") {
+        const mode = this.getSoundMode();
+        if (mode === "mute") return;
+
+        // 1. Play Cash Register Chime
+        this.playOrderPlacedSuccess();
+        if (mode === "chime_only") return;
+
+        // 2. Synthesize Voice Announcement
+        const lang = language || this.getVoiceLanguage();
+        const cleanAmount = Math.round(amountRs);
+        const tableText = tableLabel ? ` for Table ${tableLabel}` : "";
+
+        let textToSpeak = `Payment of rupees ${cleanAmount} received on ${method}${tableText}.`;
+        if (lang === "te") {
+            textToSpeak = tableLabel
+                ? `టేబుల్ ${tableLabel} కోసం ${cleanAmount} రూపాయల పేమెంట్ అందింది.`
+                : `${cleanAmount} రూపాయల పేమెంట్ విజయవంతంగా అందింది.`;
+        }
+
+        setTimeout(() => {
+            this.speakText(textToSpeak, lang);
+        }, 380);
+    }
+
+    /**
+     * Test voice engine function for staff onboarding & sound check
+     */
+    testVoice(type: "table" | "delivery" | "payment" | "service" = "table", lang?: "en" | "te") {
+        const l = lang || this.getVoiceLanguage();
+        if (type === "delivery") {
+            this.playOrderVoiceAlert({ order_type: "delivery", total_paise: 55000 }, l);
+        } else if (type === "payment") {
+            this.playPaymentSoundbox(650, "UPI", "T3", l);
+        } else if (type === "service") {
+            this.playServiceCallVoiceAlert({ table_label: "T5", call_type: "water" }, l);
+        } else {
+            this.playOrderVoiceAlert({ order_type: "dine_in", table_label: "T3", total_paise: 48000 }, l);
         }
     }
 }
 
+export type SoundMode = "voice_and_chime" | "chime_only" | "mute";
+export type VoiceLanguage = "en" | "te" | "en-IN";
+
 export const soundManager = new SoundManager();
+

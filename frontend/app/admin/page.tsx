@@ -43,6 +43,7 @@ import { dispatchCustomerWhatsApp, dispatchPostDiningReview } from "@/lib/whatsa
 import { useAdminSocket } from "@/hooks/useSockets";
 import { formatRupees, formatRelativeTime, formatTimeOnly } from "@/lib/formatters";
 import { soundManager } from "@/lib/sound";
+import { AudioUnlockBanner } from "@/components/admin/AudioUnlockBanner";
 import { api } from "@/lib/api";
 import { useOutlet } from "@/context/OutletContext";
 
@@ -116,7 +117,7 @@ export default function AdminLiveOrdersKanbanPage() {
         if (process.env.NODE_ENV === "development") console.log("[AdminKanban] Received event:", event);
 
         if (event.event === "new_order" && event.data) {
-            soundManager.playNewOrderChime();
+            soundManager.playOrderVoiceAlert(event.data);
             setOrders((prev) => [event.data, ...prev.filter((o) => o.id !== event.data.id)]);
             setAnimatingOrderId(event.data.id);
             if (event.data.order_type === "delivery") {
@@ -126,15 +127,29 @@ export default function AdminLiveOrdersKanbanPage() {
             }
             setTimeout(() => setAnimatingOrderId(null), 4000);
         } else if (event.event === "new_reservation" && event.data) {
-            soundManager.playNewOrderChime();
+            soundManager.playReservationVoiceAlert(event.data);
             setTodayReservationsCount((prev) => prev + 1);
             toast.success(`New Table Pre-Booking #${event.data.reservation_number}: ${event.data.customer_name} (${event.data.party_size} Guests)!`);
+        } else if (event.event === "running_kot_added" && event.data) {
+            soundManager.playRunningKotVoiceAlert(event.data.table_label || event.data.table_id || "Table");
+            setOrders((prev) => {
+                const exists = prev.some((o) => o.id === event.data.id);
+                if (exists) {
+                    return prev.map((o) => (o.id === event.data.id ? event.data : o));
+                }
+                return [event.data, ...prev];
+            });
+            toast.info(`Running KOT appended to Table ${event.data.table_label || event.data.table_id} (#${event.data.order_number})`);
         } else if ((event.event === "order_status_updated" || event.event === "order_updated") && event.data) {
+            if (event.data.payment_status === "paid" && event.data.total_paise) {
+                const totalRs = Math.round(event.data.total_paise / 100);
+                soundManager.playPaymentSoundbox(totalRs, event.data.payment_method?.toUpperCase() || "UPI", event.data.table_label);
+            }
             setOrders((prev) =>
                 prev.map((o) => (o.id === event.data.id ? { ...o, status: event.data.status, payment_status: event.data.payment_status || o.payment_status } : o))
             );
         } else if (event.event === "service_call" && event.data) {
-            soundManager.playServiceCallAlert();
+            soundManager.playServiceCallVoiceAlert(event.data);
             setPendingServiceCalls((prev) => [event.data, ...prev.filter((c) => c.id !== event.data.id)]);
             toast.info(`Table Alert: Table ${event.data.table_label} requested ${event.data.call_type.toUpperCase()}`);
         } else if (event.event === "service_call_attended" && event.data) {
@@ -213,6 +228,9 @@ export default function AdminLiveOrdersKanbanPage() {
                     pendingServiceCalls={pendingServiceCalls}
                     onAttendServiceCall={handleAttendServiceCall}
                 />
+
+                {/* RESTAURANT SOUNDBOX BANNER */}
+                <AudioUnlockBanner />
 
                 {/* PENDING SERVICE CALLS BANNER */}
                 {pendingServiceCalls.length > 0 && (

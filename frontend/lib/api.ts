@@ -346,7 +346,7 @@ export const api = {
                 logo_url: "/logo.png",
                 gstin: "37SURYA0000A1Z5",
                 fssai_license_number: "10124999000586",
-                upi_vpa: "9880358634@upi",
+                upi_vpa: "SBIBHIM.INSTANT26821939387985481@sbipay",
             };
         }
     },
@@ -369,7 +369,7 @@ export const api = {
                 logo_url: "/logo.png",
                 gstin: "37SURYA0000A1Z5",
                 fssai_license_number: "10124999000586",
-                upi_vpa: "9880358634@upi",
+                upi_vpa: "SBIBHIM.INSTANT26821939387985481@sbipay",
             }];
         }
     },
@@ -411,12 +411,18 @@ export const api = {
     // Promo Codes & Coupons
     validateCoupon: (data: { code: string; subtotal_paise: number; outlet_id?: number }) =>
         apiFetch("/api/coupons/validate", { method: "POST", body: JSON.stringify(data) }),
+    getActiveCoupons: () =>
+        apiFetch("/api/coupons/active"),
     getCoupons: (outletId?: number) =>
         apiFetch("/api/coupons", { params: outletId ? { outlet_id: outletId } : undefined }),
     createCoupon: (data: any) =>
         apiFetch("/api/coupons", { method: "POST", body: JSON.stringify(data) }),
     deleteCoupon: (id: number) =>
         apiFetch(`/api/coupons/${id}`, { method: "DELETE" }),
+    toggleCoupon: (id: number) =>
+        apiFetch(`/api/coupons/${id}/toggle`, { method: "PATCH" }),
+    deleteCouponPermanent: (id: number) =>
+        apiFetch(`/api/coupons/${id}/permanent`, { method: "DELETE" }),
 
     // Zero-Cost Hybrid Cloud Sync
     getHybridSyncStatus: () =>

@@ -46,7 +46,7 @@ export function formatWhatsAppOrderMessage(order: WhatsAppOrderPayload, outletNa
         `🍽️ Dine-In (Table ${order.tableNumber || "1"})`;
 
     const paymentLabel = 
-        order.paymentPreference === "upi" ? "⚡ UPI Online (GPay / PhonePe / Paytm to 9880358634@upi)" :
+        order.paymentPreference === "upi" ? "⚡ UPI Online (GPay / PhonePe / Paytm to SBIBHIM.INSTANT26821939387985481@sbipay)" :
         order.paymentPreference === "cod" ? "💵 Cash on Delivery (COD)" :
         "🍽️ Pay at Counter";
 

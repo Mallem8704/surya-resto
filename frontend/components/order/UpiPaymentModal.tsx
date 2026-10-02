@@ -68,10 +68,10 @@ export function UpiPaymentModal({
                 setTimeLeft(300);
             })
             .catch(() => {
-                // Fallback default VPA conforming to NPCI specification
-                const fallbackVpa = "9880358634@upi";
+                // Fallback default VPA conforming to universal NPCI specification
+                const fallbackVpa = "SBIBHIM.INSTANT26821939387985481@sbipay";
                 const cleanOrderNo = encodeURIComponent(orderNumber || "SURYA");
-                const uri = `upi://pay?pa=${fallbackVpa}&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=Order%20%23${cleanOrderNo}&tr=${cleanOrderNo}&mc=5812&mode=02`;
+                const uri = `upi://pay?pa=${fallbackVpa}&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=Order%20%23${cleanOrderNo}`;
                 setUpiData({
                     upi_uri: uri,
                     amount_rs: amountRs,
@@ -148,8 +148,8 @@ export function UpiPaymentModal({
 
     const upiUri =
         upiData?.upi_uri ||
-        `upi://pay?pa=9880358634@upi&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=Order%20%23${encodeURIComponent(orderNumber)}&tr=${encodeURIComponent(orderNumber)}&mc=5812&mode=02`;
-    const vpa = upiData?.upi_vpa || "9880358634@upi";
+        `upi://pay?pa=SBIBHIM.INSTANT26821939387985481@sbipay&pn=Surya%20Family%20Restaurant&am=${amountRs.toFixed(2)}&cu=INR&tn=Order%20%23${encodeURIComponent(orderNumber)}`;
+    const vpa = upiData?.upi_vpa || "SBIBHIM.INSTANT26821939387985481@sbipay";
 
     // Countdown formatting
     const minutes = Math.floor(timeLeft / 60);
@@ -309,7 +309,7 @@ export function UpiPaymentModal({
                         <div className="grid grid-cols-2 gap-2">
                             {/* Google Pay */}
                             <a
-                                href={upiUri.replace(/^upi:\/\/pay/, "gpay://upi/pay")}
+                                href={upiUri}
                                 className="p-2.5 rounded-xl bg-white/5 hover:bg-[#D4AF37]/15 border border-white/10 hover:border-[#D4AF37] text-xs font-bold text-white flex items-center justify-center gap-2 transition cursor-pointer"
                             >
                                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
@@ -318,7 +318,7 @@ export function UpiPaymentModal({
 
                             {/* PhonePe */}
                             <a
-                                href={upiUri.replace(/^upi:\/\//, "phonepe://")}
+                                href={upiUri}
                                 className="p-2.5 rounded-xl bg-purple-950/30 hover:bg-purple-900/40 border border-purple-500/30 hover:border-purple-400 text-xs font-bold text-purple-200 flex items-center justify-center gap-2 transition cursor-pointer"
                             >
                                 <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
@@ -327,7 +327,7 @@ export function UpiPaymentModal({
 
                             {/* Paytm */}
                             <a
-                                href={upiUri.replace(/^upi:\/\//, "paytmmp://")}
+                                href={upiUri}
                                 className="p-2.5 rounded-xl bg-sky-950/30 hover:bg-sky-900/40 border border-sky-500/30 hover:border-sky-400 text-xs font-bold text-sky-200 flex items-center justify-center gap-2 transition cursor-pointer"
                             >
                                 <span className="w-2.5 h-2.5 rounded-full bg-sky-500" />

@@ -203,10 +203,11 @@ def on_startup():
                 db.add(Coupon(**c_data))
         db.commit()
 
-        # Sync accurate branch phone numbers
+        # Sync accurate branch phone numbers and active UPI VPA
         outlets = db.query(Outlet).order_by(Outlet.id.asc()).all()
-        if len(outlets) >= 1:
-            outlets[0].phone = "+91 98803 58634"
+        for o in outlets:
+            o.phone = "+91 98803 58634"
+            o.upi_vpa = "SBIBHIM.INSTANT26821939387985481@sbipay"
         db.commit()
         db.close()
     except Exception as c_err:

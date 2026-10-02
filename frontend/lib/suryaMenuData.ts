@@ -1,7 +1,7 @@
 /**
  * Surya Family Restaurant Kadiri — Authentic Menu Dataset
  * Dhandubatu Street, Bypass Road, Opp. RTC Bus Stand, Kadiri, Andhra Pradesh
- * Phone: +91 98803 58634 | Google Rating: 4.8 ★ | UPI: 9880358634@upi
+ * Phone: +91 98803 58634 | Google Rating: 4.8 ★ | UPI: SBIBHIM.INSTANT26821939387985481@sbipay
  * Synchronized with Official Database Schema and Seed Data
  */
 

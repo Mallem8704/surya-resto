@@ -36,7 +36,7 @@ logger = logging.getLogger("surya_payments")
 
 router = APIRouter(prefix="", tags=["Payments & Cashier"])
 
-DEFAULT_MERCHANT_VPA = os.getenv("UPI_MERCHANT_VPA", "9880358634@upi")
+DEFAULT_MERCHANT_VPA = os.getenv("UPI_MERCHANT_VPA", "SBIBHIM.INSTANT26821939387985481@sbipay")
 DEFAULT_MERCHANT_NAME = os.getenv("UPI_MERCHANT_NAME", "Surya Family Restaurant")
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_direct_merchant_upi")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
@@ -454,10 +454,11 @@ def generate_dynamic_upi_qr(
     payee_name: str = DEFAULT_MERCHANT_NAME,
     amount_rupees: float = 0.0,
     order_number: str = "",
-    mc: str = "5812",
+    mc: Optional[str] = None,
 ) -> str:
-    """Generate official NPCI Dynamic UPI Intent URI strictly conforming to NPCI standard:
-    upi://pay?pa={upi_vpa}&pn={payee_name}&am={amount_rupees}&cu=INR&tn={order_number}&tr={order_number}&mc={mc}&mode=02
+    """Generate universal NPCI UPI Intent URI compatible with all Indian UPI apps (GPay, PhonePe, Paytm, BHIM):
+    upi://pay?pa={upi_vpa}&pn={payee_name}&am={amount_rupees}&cu=INR&tn={order_number}
+    Omits mc and mode=02 so that bank PSPs accept payments seamlessly without rejecting non-POS accounts.
     """
     clean_vpa = (upi_vpa or DEFAULT_MERCHANT_VPA).strip()
     clean_name = (payee_name or DEFAULT_MERCHANT_NAME).replace("&", "and").strip()
@@ -465,19 +466,13 @@ def generate_dynamic_upi_qr(
     clean_order_no = str(order_number or "").strip()
 
     # NPCI tn (Transaction Note): URL-encoded string up to 80 chars
-    tn_text = clean_order_no if clean_order_no else "Surya Kadiri"
+    tn_text = f"Order #{clean_order_no}" if clean_order_no else "Surya Restaurant"
     encoded_tn = urllib.parse.quote(tn_text[:80])
-
-    # NPCI tr (Transaction Reference ID): URL-safe string up to 35 chars
-    clean_tr = re.sub(r"[^a-zA-Z0-9_-]", "", clean_order_no)[:35]
-    if not clean_tr:
-        clean_tr = f"SURYA{int(datetime.datetime.utcnow().timestamp())}"
 
     # Amount: strictly non-negative float formatted with 2 decimal places per NPCI
     safe_amount = max(0.0, float(amount_rupees))
-    clean_mc = (mc or "5812").strip()
 
-    return f"upi://pay?pa={clean_vpa}&pn={encoded_name}&am={safe_amount:.2f}&cu=INR&tn={encoded_tn}&tr={clean_tr}&mc={clean_mc}&mode=02"
+    return f"upi://pay?pa={clean_vpa}&pn={encoded_name}&am={safe_amount:.2f}&cu=INR&tn={encoded_tn}"
 
 
 @router.get("/{order_id}/dynamic-upi", response_model=DynamicUpiQrResponse)

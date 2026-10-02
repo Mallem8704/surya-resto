@@ -109,30 +109,24 @@ export function getCategoryIcon(catId: number | string, className: string = "w-3
     }
 }
 
-export const AVAILABLE_PROMOS = [
-    {
-        code: "WELCOME50",
-        label: "Flat ₹50 OFF",
-        description: "On Kadiri Deliveries above ₹250",
-        minPaise: 25000,
-        discountPaise: 5000,
-    },
-    {
-        code: "BIRYANI10",
-        label: "10% OFF",
-        description: "On Biryani & Pulao Orders (above ₹300)",
-        minPaise: 30000,
-        percent: 10,
-        maxDiscountPaise: 10000,
-    },
-    {
-        code: "SURYA100",
-        label: "Flat ₹100 OFF",
-        description: "On Surya Family Feasts above ₹600",
-        minPaise: 60000,
-        discountPaise: 10000,
-    },
-];
+// Promo info type for dynamically fetched active coupons
+interface PromoInfo {
+    code: string;
+    description: string | null;
+    discount_type: string; // "flat" or "percent"
+    discount_value: number; // paise for flat, percentage for percent
+    min_order_paise: number;
+    max_discount_paise: number | null;
+}
+
+// Helper to build display label from coupon data
+function promoLabel(p: PromoInfo): string {
+    if (p.discount_type === "percent") {
+        const cap = p.max_discount_paise ? ` (Up to ${formatRupees(p.max_discount_paise)})` : "";
+        return `${p.discount_value}% OFF${cap}`;
+    }
+    return `Flat ${formatRupees(p.discount_value)} OFF`;
+}
 
 interface MenuItemData extends CustomizerItemData {
     category_id: number;
@@ -515,6 +509,7 @@ function DeliveryOrderContent() {
     const [couponCodeInput, setCouponCodeInput] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount_paise: number; message: string } | null>(null);
     const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+    const [availablePromos, setAvailablePromos] = useState<PromoInfo[]>([]);
     const [customerPhone, setCustomerPhone] = useState("");
     const [deliveryAddress, setDeliveryAddress] = useState("");
     const [landmark, setLandmark] = useState("");
@@ -599,6 +594,20 @@ function DeliveryOrderContent() {
         setSelectedCategory("all");
     }, [fetchMenu]);
 
+    // Fetch active coupons from backend on mount
+    useEffect(() => {
+        (async () => {
+            try {
+                const coupons = await api.getActiveCoupons();
+                if (Array.isArray(coupons)) {
+                    setAvailablePromos(coupons);
+                }
+            } catch (err) {
+                console.warn("Could not fetch active coupons:", err);
+            }
+        })();
+    }, []);
+
     // WebSocket real-time delivery tracking
     useOrderSocket(activeOrder?.id, (updatedData) => {
         if (process.env.NODE_ENV === "development") console.log("[DeliverySocket] Order updated:", updatedData);
@@ -658,33 +667,33 @@ function DeliveryOrderContent() {
                     return;
                 }
             } catch {
-                // Offline fallback against known authentic promo list
-                const localPromo = AVAILABLE_PROMOS.find((p) => p.code === rawCode);
+                // Offline fallback against fetched active promos list
+                const localPromo = availablePromos.find((p) => p.code === rawCode);
                 if (!localPromo) {
-                    toast.error("Invalid promo code. Try WELCOME50, BIRYANI10, or SURYA100");
+                    toast.error(`Invalid promo code "${rawCode}".`);
                     setIsValidatingCoupon(false);
                     return;
                 }
 
-                if (subtotalPaise < localPromo.minPaise) {
+                if (subtotalPaise < localPromo.min_order_paise) {
                     toast.error(
-                        `Code ${localPromo.code} requires minimum order of ${formatRupees(localPromo.minPaise)}`
+                        `Code ${localPromo.code} requires minimum order of ${formatRupees(localPromo.min_order_paise)}`
                     );
                     setIsValidatingCoupon(false);
                     return;
                 }
 
                 let calcDisc = 0;
-                if (localPromo.discountPaise) {
-                    calcDisc = localPromo.discountPaise;
-                } else if (localPromo.percent) {
-                    calcDisc = Math.round((subtotalPaise * localPromo.percent) / 100);
-                    if (localPromo.maxDiscountPaise) {
-                        calcDisc = Math.min(calcDisc, localPromo.maxDiscountPaise);
+                if (localPromo.discount_type === "flat") {
+                    calcDisc = Math.min(localPromo.discount_value, subtotalPaise);
+                } else if (localPromo.discount_type === "percent") {
+                    calcDisc = Math.round((subtotalPaise * localPromo.discount_value) / 100);
+                    if (localPromo.max_discount_paise) {
+                        calcDisc = Math.min(calcDisc, localPromo.max_discount_paise);
                     }
                 }
                 validatedDiscountPaise = calcDisc;
-                validatedMessage = `${localPromo.label} applied!`;
+                validatedMessage = `${promoLabel(localPromo)} applied!`;
             }
 
             if (validatedDiscountPaise > 0) {
@@ -713,16 +722,16 @@ function DeliveryOrderContent() {
     // Auto re-validate / adjust coupon discount if cart items change
     useEffect(() => {
         if (!appliedCoupon) return;
-        const promo = AVAILABLE_PROMOS.find((p) => p.code === appliedCoupon.code);
-        if (promo && subtotalPaise < promo.minPaise) {
+        const promo = availablePromos.find((p) => p.code === appliedCoupon.code);
+        if (promo && subtotalPaise < promo.min_order_paise) {
             setAppliedCoupon(null);
-            toast.warning(`Coupon ${promo.code} removed (minimum order was ${formatRupees(promo.minPaise)})`);
-        } else if (promo && promo.percent) {
-            let newDisc = Math.round((subtotalPaise * promo.percent) / 100);
-            if (promo.maxDiscountPaise) newDisc = Math.min(newDisc, promo.maxDiscountPaise);
+            toast.warning(`Coupon ${promo.code} removed (minimum order was ${formatRupees(promo.min_order_paise)})`);
+        } else if (promo && promo.discount_type === "percent") {
+            let newDisc = Math.round((subtotalPaise * promo.discount_value) / 100);
+            if (promo.max_discount_paise) newDisc = Math.min(newDisc, promo.max_discount_paise);
             setAppliedCoupon((prev) => prev ? { ...prev, discount_paise: newDisc } : null);
         }
-    }, [subtotalPaise, appliedCoupon?.code]);
+    }, [subtotalPaise, appliedCoupon?.code, availablePromos]);
 
     // Handle Add to Cart Button Click on Dish Card
     const handleDishCardClick = (item: MenuItemData) => {
@@ -1790,9 +1799,10 @@ function DeliveryOrderContent() {
                                         </div>
 
                                         {/* Quick 1-tap Promo Chips */}
+                                        {availablePromos.length > 0 && (
                                         <div className="flex flex-wrap gap-1.5 pt-0.5">
-                                            {AVAILABLE_PROMOS.map((promo) => {
-                                                const isEligible = subtotalPaise >= promo.minPaise;
+                                            {availablePromos.map((promo) => {
+                                                const isEligible = subtotalPaise >= promo.min_order_paise;
                                                 return (
                                                     <button
                                                         key={promo.code}
@@ -1809,11 +1819,12 @@ function DeliveryOrderContent() {
                                                     >
                                                         <Percent className="w-2.5 h-2.5 text-amber-600" />
                                                         <span className="font-mono font-black">{promo.code}</span>
-                                                        <span className="opacity-75">({promo.label})</span>
+                                                        <span className="opacity-75">({promoLabel(promo)})</span>
                                                     </button>
                                                 );
                                             })}
                                         </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

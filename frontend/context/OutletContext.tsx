@@ -43,7 +43,7 @@ const DEFAULT_SURYA_OUTLET: OutletInfo = {
     logo_url: "/logo.png",
     gstin: "37SURYA0000A1Z5",
     fssai_license_number: "10124999000586",
-    upi_vpa: "9880358634@upi",
+    upi_vpa: "SBIBHIM.INSTANT26821939387985481@sbipay",
     allow_table_booking: false,
     allow_table_ordering: false,
     allow_delivery: true,
