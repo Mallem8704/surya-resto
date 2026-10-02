@@ -151,6 +151,8 @@ export interface PrintOrderData {
     delivery_fee_paise?: number;
     parcel_charge_paise?: number;
     total_paise?: number;
+    token_number?: string | number;
+    daily_token?: string | number;
     customer_notes?: string | null;
     created_at?: string;
     items: PrintOrderItem[];
@@ -242,7 +244,7 @@ export function printKOT(
             <style>
                 @page { margin: 0; size: ${is58 ? "58mm" : "80mm"} auto; }
                 body {
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
                     width: ${bodyWidth};
                     margin: 0 auto;
                     padding: 0;
@@ -358,7 +360,7 @@ export function printRunningKOT(
             <style>
                 @page { margin: 0; size: ${is58 ? "58mm" : "80mm"} auto; }
                 body {
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
                     width: ${bodyWidth};
                     margin: 0 auto;
                     padding: 0;
@@ -418,7 +420,24 @@ export function printRunningKOT(
 }
 
 /**
- * 3. Print Official Tax Invoice & Cashier POS Receipt (Eco Paper-Saving & Zero-Undefined Guaranteed)
+ * Format date exactly as physical restaurant billing machine: "02 Oct 2026 06:16 PM"
+ */
+function formatThermalInvoiceDate(dateInput?: string | Date): string {
+    const d = dateInput ? new Date(dateInput) : new Date();
+    const day = String(d.getDate()).padStart(2, "0");
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+    const formattedHours = String(hours).padStart(2, "0");
+    return `${day} ${month} ${year} ${formattedHours}:${minutes} ${ampm}`;
+}
+
+/**
+ * 3. Print Official Tax Invoice & Cashier POS Receipt (Exact match to Surya physical thermal invoice)
  */
 export function printPOSReceipt(
     order: PrintOrderData,
@@ -428,62 +447,66 @@ export function printPOSReceipt(
     const paperWidth = rollWidth || getThermalPaperSize();
     const is58 = paperWidth === "58mm";
     const bodyWidth = is58 ? "48mm" : "72mm";
-    const baseFontSize = is58 ? "9.5px" : "11px";
-    const brandFontSize = is58 ? "13px" : "15px";
+    const baseFontSize = is58 ? "10px" : "12px";
+    const headerFontSize = is58 ? "13px" : "15px";
 
-    const formattedDate = order.created_at
-        ? new Date(order.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
-        : new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+    const formattedDate = formatThermalInvoiceDate(order.created_at);
+
+    // Clean Bill Number (e.g. "4026")
+    const rawOrderNo = String(order.order_number || order.id || "4026");
+    const billNo = rawOrderNo.replace(/^SURYA-/, "").replace(/^ORD-/, "").replace(/^DEL-/, "").replace(/^DINE-/, "");
+
+    // Large Center Call / Token Number (e.g. "43")
+    const tokenNumber =
+        (order as any).token_number ||
+        (order as any).daily_token ||
+        (order as any).kot_token ||
+        (rawOrderNo.match(/\d+$/) ? rawOrderNo.match(/\d+$/)![0].slice(-2) : "") ||
+        String(order.id || "43").slice(-2);
+
+    // Order type label
+    let orderTypeLabel = "Take Away";
+    if (order.order_type === "delivery") {
+        orderTypeLabel = "Home Delivery";
+    } else if (order.order_type === "dine_in" || order.table_label) {
+        orderTypeLabel = order.table_label ? `Dine In (Table ${order.table_label})` : "Dine In";
+    }
 
     const rawItems = order.items || (order as any).order_items || [];
     let calculatedSubtotal = 0;
 
     let itemsRows = "";
-    rawItems.forEach((it: any, idx: number) => {
+    rawItems.forEach((it: any) => {
         const qty = Number(it.qty ?? it.quantity ?? 1) || 1;
         const unitPricePaise = Number(it.unit_price_paise ?? it.price_paise ?? 0) || 0;
         const lineTotalPaise = Number(it.total_price_paise) || (unitPricePaise * qty);
         calculatedSubtotal += lineTotalPaise;
 
-        const itemName = it.item_name || it.menu_item?.name || `Item #${it.item_id || idx + 1}`;
+        const itemName = it.item_name || it.menu_item?.name || "Dish";
         const addons = parseAddons(it.selected_addons_json);
-
-        const itemUnitPriceRs = (unitPricePaise / 100).toFixed(2);
         const itemTotalPriceRs = (lineTotalPaise / 100).toFixed(2);
 
-        if (is58) {
-            // 58mm Paper-Saving 3-Column Layout: prevents right-side column truncation
-            itemsRows += `
-                <tr style="border-bottom: 1px dotted #ccc;">
-                    <td style="padding: 2px 0; vertical-align: top;">
-                        <div style="font-weight: 600; font-size: 10px; line-height: 1.15;">${idx + 1}. ${itemName}</div>
-                        ${it.variant_name ? `<div style="font-size: 8.5px; color: #444;">▶ ${it.variant_name}</div>` : ""}
-                        ${addons.length > 0 ? `<div style="font-size: 8px; color: #555;">+ ${addons.join(", ")}</div>` : ""}
-                        ${qty > 1 ? `<div style="font-size: 8.5px; color: #666; font-variant-numeric: tabular-nums;">@ ₹${itemUnitPriceRs}</div>` : ""}
-                    </td>
-                    <td style="text-align: center; vertical-align: top; font-weight: 700; font-size: 10px; font-variant-numeric: tabular-nums; padding: 2px 1px;">
-                        ${qty}
-                    </td>
-                    <td style="text-align: right; vertical-align: top; font-weight: 700; font-size: 10px; font-variant-numeric: tabular-nums; padding: 2px 0;">
-                        ₹${itemTotalPriceRs}
-                    </td>
-                </tr>
-            `;
-        } else {
-            // 80mm Full 4-Column Layout
-            itemsRows += `
-                <tr style="border-bottom: 1px dotted #ddd;">
-                    <td style="padding: 2px 0; vertical-align: top;">
-                        <div style="font-weight: 600; font-size: 11px; line-height: 1.18;">${idx + 1}. ${itemName}</div>
-                        ${it.variant_name ? `<div style="font-size: 9px; color: #555;">▶ ${it.variant_name}</div>` : ""}
-                        ${addons.length > 0 ? `<div style="font-size: 8.5px; color: #666;">+ ${addons.join(", ")}</div>` : ""}
-                    </td>
-                    <td style="text-align: center; vertical-align: top; font-weight: 700; font-size: 11px; font-variant-numeric: tabular-nums; padding: 2px 2px;">${qty}</td>
-                    <td style="text-align: right; vertical-align: top; font-size: 10.5px; font-variant-numeric: tabular-nums; color: #444; padding: 2px 2px;">₹${itemUnitPriceRs}</td>
-                    <td style="text-align: right; vertical-align: top; font-weight: 700; font-size: 11px; font-variant-numeric: tabular-nums; padding: 2px 0;">₹${itemTotalPriceRs}</td>
-                </tr>
-            `;
-        }
+        // Sub details line: e.g. "(Bone) (Juice)(6 P" or "Dum Biryani Full"
+        let subDetails: string[] = [];
+        if (it.variant_name) subDetails.push(it.variant_name);
+        if (addons.length > 0) subDetails.push(...addons);
+        if (it.notes) subDetails.push(it.notes);
+        const subText = subDetails.join(" ");
+
+        itemsRows += `
+            <tr>
+                <td style="vertical-align: top; width: 14%; text-align: left; padding: 2px 0;">
+                    ${qty}
+                </td>
+                <td style="vertical-align: top; text-align: left; padding: 2px 0; word-break: break-word;">
+                    <div>${itemName}</div>
+                    ${subText ? `<div style="font-size: ${is58 ? "8.5px" : "10px"}; padding-left: 2px; color: #111;">${subText}</div>` : ""}
+                </td>
+                <td style="vertical-align: top; width: 28%; text-align: right; padding: 2px 0; font-variant-numeric: tabular-nums;">
+                    ${itemTotalPriceRs}
+                </td>
+            </tr>
+        `;
     });
 
     const subtotalPaise = Number(order.subtotal_paise ?? (order as any).total_price_paise ?? calculatedSubtotal) || calculatedSubtotal;
@@ -491,9 +514,9 @@ export function printPOSReceipt(
     const netAfterDiscountPaise = Math.max(0, subtotalPaise - discountPaise);
     const taxRate = Number(outlet?.tax_rate_percent ?? 5) || 5;
     const taxPaise = Number(order.tax_paise ?? Math.round(netAfterDiscountPaise * (taxRate / 100))) || 0;
-    const deliveryFeePaise = Number(order.delivery_fee_paise ?? 0) || 0;
     const parcelChargePaise = Number(order.parcel_charge_paise ?? (order as any).packaging_charge_paise ?? 0) || 0;
-    const totalPaise = Number(order.total_paise ?? (order as any).total_price_paise ?? (netAfterDiscountPaise + taxPaise + deliveryFeePaise + parcelChargePaise)) || (netAfterDiscountPaise + taxPaise + deliveryFeePaise + parcelChargePaise);
+    const deliveryFeePaise = Number(order.delivery_fee_paise ?? 0) || 0;
+    const totalPaise = Number(order.total_paise ?? (order as any).total_price_paise ?? (netAfterDiscountPaise + taxPaise + parcelChargePaise + deliveryFeePaise)) || (netAfterDiscountPaise + taxPaise + parcelChargePaise + deliveryFeePaise);
 
     const subtotalRs = (subtotalPaise / 100).toFixed(2);
     const discountRs = (discountPaise / 100).toFixed(2);
@@ -501,91 +524,109 @@ export function printPOSReceipt(
     const parcelChargeRs = (parcelChargePaise / 100).toFixed(2);
     const totalRs = (totalPaise / 100).toFixed(2);
 
-    const isDelivery = order.order_type === "delivery";
-    const isTakeaway = order.order_type === "takeaway";
-
-    const tableHeaderHtml = is58
-        ? `
-            <thead>
-                <tr>
-                    <th style="text-align: left; font-size: 9px;">ITEM</th>
-                    <th style="text-align: center; width: 14%; font-size: 9px;">QTY</th>
-                    <th style="text-align: right; width: 32%; font-size: 9px;">AMT</th>
-                </tr>
-            </thead>
-        `
-        : `
-            <thead>
-                <tr>
-                    <th style="text-align: left;">ITEM</th>
-                    <th style="text-align: center; width: 14%;">QTY</th>
-                    <th style="text-align: right; width: 22%;">RATE</th>
-                    <th style="text-align: right; width: 24%;">AMT</th>
-                </tr>
-            </thead>
-        `;
+    const paymentMethodName = order.payment_method === "upi" ? "UPI" : order.payment_method === "card" ? "Card" : "Cash";
 
     const receiptHtml = `
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8" />
-            <title>Receipt - #${order.order_number}</title>
+            <title>Invoice #${billNo}</title>
             <style>
                 @page { margin: 0; size: ${is58 ? "58mm" : "80mm"} auto; }
+                * { box-sizing: border-box; }
                 body {
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
                     width: ${bodyWidth};
                     margin: 0 auto;
-                    padding: 0;
+                    padding: 4px 2px 20px 2px;
                     color: #000;
                     background: #fff;
                     font-size: ${baseFontSize};
-                    line-height: 1.16;
-                    -webkit-font-smoothing: antialiased;
+                    line-height: 1.25;
+                    font-weight: 600;
+                    -webkit-font-smoothing: none;
                 }
                 .text-center { text-align: center; }
                 .text-right { text-align: right; }
                 .bold { font-weight: 700; }
-                .divider { border-top: 1px solid #000; margin: 2.5px 0; }
-                .dashed-divider { border-top: 1px dashed #666; margin: 2px 0; }
-                table { width: 100%; border-collapse: collapse; font-size: ${baseFontSize}; }
-                th { border-bottom: 1px solid #000; padding: 1.5px 0; font-size: ${is58 ? "8.5px" : "9.5px"}; font-weight: 700; text-transform: uppercase; }
+                .dashed-divider {
+                    border-top: 1px dashed #000;
+                    margin: 4px 0;
+                    width: 100%;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-family: inherit;
+                    font-size: inherit;
+                }
+                th {
+                    font-weight: 700;
+                    padding: 2px 0;
+                    font-size: inherit;
+                }
                 @media print {
-                    html, body { margin: 0 !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    html, body {
+                        margin: 0 !important;
+                        padding: 2px !important;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
                 }
             </style>
         </head>
         <body>
-            <div class="text-center" style="font-size: ${brandFontSize}; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;">
-                ${outlet?.name || "SURYA FAMILY RESTAURANT"}
+            <!-- Store Header -->
+            <div class="text-center" style="font-size: ${headerFontSize}; font-weight: 700; line-height: 1.2;">
+                Surya Family Restaurent
             </div>
-            <div class="text-center" style="font-size: ${is58 ? "8.5px" : "9px"}; color: #444; margin-top: 1px;">
-                ${outlet?.address || "Kadiri, Andhra Pradesh"}
+            <div class="text-center" style="font-size: ${is58 ? "9px" : "11px"}; margin-top: 1px;">
+                Opp RTC Bus stand,Kadiri
             </div>
-            ${outlet?.phone ? `<div class="text-center" style="font-size: ${is58 ? "8.5px" : "9px"}; color: #222;">Ph: ${outlet.phone}</div>` : ""}
-            ${outlet?.gstin ? `<div class="text-center" style="font-size: ${is58 ? "8px" : "8.5px"}; color: #555;">GSTIN: ${outlet.gstin}</div>` : ""}
-            
-            <div class="divider"></div>
-            <div class="text-center" style="font-size: ${is58 ? "9.5px" : "10.5px"}; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">
-                TAX INVOICE / CASH BILL
+            <div class="text-center" style="font-size: ${is58 ? "9.5px" : "11.5px"}; margin-top: 2px;">
+                Tell No:890
             </div>
+
             <div class="dashed-divider"></div>
 
-            <div style="font-size: ${is58 ? "8.5px" : "9.5px"}; color: #222;">
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Bill: <strong>#${order.order_number}</strong></span>
-                    <span>Type: <strong>${isDelivery ? "Delivery" : isTakeaway ? "Takeaway" : `Table ${order.table_label || "1"}`}</strong></span>
-                </div>
-                <div style="color: #444;">Date: ${formattedDate}</div>
-                ${order.customer_name ? `<div>Guest: <strong>${order.customer_name}</strong> ${order.customer_phone ? `(${order.customer_phone})` : ""}</div>` : ""}
-                ${isDelivery && order.delivery_address ? `<div style="font-size: 8.5px;">Address: ${order.delivery_address}</div>` : ""}
+            <!-- INVOICE TITLE -->
+            <div class="text-center bold" style="letter-spacing: 2px; font-size: ${is58 ? "11px" : "13px"}; padding: 1px 0;">
+                INVOICE
             </div>
 
-            <div class="divider"></div>
+            <div class="dashed-divider"></div>
 
+            <!-- Bill Details -->
+            <div style="font-size: inherit; line-height: 1.3;">
+                <div>Bill No: ${billNo}</div>
+                <div>Date:${formattedDate}</div>
+                <div>Crew:Surya Family Restaurant</div>
+                <div>${orderTypeLabel}</div>
+            </div>
+
+            <!-- BIG CENTERED TOKEN NUMBER -->
+            <div class="text-center bold" style="font-size: ${is58 ? "20px" : "24px"}; margin: 4px 0; letter-spacing: 1px;">
+                ${tokenNumber}
+            </div>
+
+            <div class="dashed-divider"></div>
+
+            <!-- Table Header -->
             <table>
-                ${tableHeaderHtml}
+                <thead>
+                    <tr>
+                        <th style="width: 14%; text-align: left;">QTY</th>
+                        <th style="text-align: left;">ITEM NAME</th>
+                        <th style="width: 28%; text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+            </table>
+
+            <div class="dashed-divider"></div>
+
+            <!-- Items Rows -->
+            <table>
                 <tbody>
                     ${itemsRows}
                 </tbody>
@@ -593,46 +634,50 @@ export function printPOSReceipt(
 
             <div class="dashed-divider"></div>
 
-            <table style="font-size: ${baseFontSize};">
+            <!-- Totals & Tender -->
+            <table style="width: 100%;">
                 <tr>
-                    <td style="padding: 1px 0;">Item Subtotal:</td>
-                    <td class="text-right" style="font-variant-numeric: tabular-nums; padding: 1px 0;">₹${subtotalRs}</td>
+                    <td style="text-align: right; padding: 1px 0;">SubTotal:</td>
+                    <td style="text-align: right; width: 30%; padding: 1px 0; font-variant-numeric: tabular-nums;">${subtotalRs}</td>
                 </tr>
                 ${discountPaise > 0 ? `
                 <tr>
-                    <td style="padding: 1px 0;">Discount (${order.coupon_code || "Special"}):</td>
-                    <td class="text-right" style="font-variant-numeric: tabular-nums; padding: 1px 0;">-₹${discountRs}</td>
+                    <td style="text-align: right; padding: 1px 0;">Discount:</td>
+                    <td style="text-align: right; width: 30%; padding: 1px 0; font-variant-numeric: tabular-nums;">-${discountRs}</td>
                 </tr>
                 ` : ""}
                 ${parcelChargePaise > 0 ? `
                 <tr>
-                    <td style="padding: 1px 0;">Packaging / Parcel:</td>
-                    <td class="text-right" style="font-variant-numeric: tabular-nums; padding: 1px 0;">₹${parcelChargeRs}</td>
+                    <td style="text-align: right; padding: 1px 0;">Packaging:</td>
+                    <td style="text-align: right; width: 30%; padding: 1px 0; font-variant-numeric: tabular-nums;">${parcelChargeRs}</td>
+                </tr>
+                ` : ""}
+                ${taxPaise > 0 ? `
+                <tr>
+                    <td style="text-align: right; padding: 1px 0;">Tax/GST:</td>
+                    <td style="text-align: right; width: 30%; padding: 1px 0; font-variant-numeric: tabular-nums;">${taxRs}</td>
                 </tr>
                 ` : ""}
                 <tr>
-                    <td style="padding: 1px 0;">GST / Tax (${taxRate}%):</td>
-                    <td class="text-right" style="font-variant-numeric: tabular-nums; padding: 1px 0;">₹${taxRs}</td>
+                    <td style="text-align: right; padding: 1px 0;">Net Amt:</td>
+                    <td style="text-align: right; width: 30%; padding: 1px 0; font-variant-numeric: tabular-nums;">${totalRs}</td>
                 </tr>
-                ${isDelivery ? `
                 <tr>
-                    <td style="padding: 1px 0;">Delivery:</td>
-                    <td class="text-right" style="padding: 1px 0; color: green;">FREE</td>
+                    <td colspan="2" style="height: 6px;"></td>
                 </tr>
-                ` : ""}
-                <tr style="font-size: ${is58 ? "12px" : "13.5px"}; font-weight: 800; border-top: 1px solid #000; border-bottom: 1px solid #000;">
-                    <td style="padding: 2px 0;">NET PAYABLE:</td>
-                    <td class="text-right" style="padding: 2px 0; font-variant-numeric: tabular-nums;">₹${totalRs}</td>
+                <tr>
+                    <td style="text-align: right; padding: 1px 0;">${paymentMethodName}:</td>
+                    <td style="text-align: right; width: 30%; padding: 1px 0; font-variant-numeric: tabular-nums;">${totalRs}</td>
                 </tr>
             </table>
 
-            <div style="margin-top: 2.5px; font-size: ${is58 ? "8.5px" : "9.5px"}; display: flex; justify-content: space-between; color: #333;">
-                <span>Payment: ${(order.payment_method || "CASH").toUpperCase()}</span>
-                <span>Status: ${(order.payment_status || "PAID").toUpperCase()}</span>
+            <div class="dashed-divider"></div>
+
+            <!-- Footer -->
+            <div class="text-center bold" style="margin-top: 6px; font-size: inherit;">
+                Thank You! Visit Again
             </div>
-            <div class="text-center" style="margin-top: 3px; font-size: ${is58 ? "8px" : "8.5px"}; color: #666;">
-                Thank you! Visit again.
-            </div>
+            <div style="height: 14px;"></div>
         </body>
         </html>
     `;
@@ -646,23 +691,22 @@ export function printPOSReceipt(
 export function printTestReceipt(outlet?: PrintOutletData | null, rollWidth?: ThermalPaperWidth) {
     const paperWidth = rollWidth || getThermalPaperSize();
     const sampleOrder: PrintOrderData = {
-        id: 9999,
-        order_number: "TEST-01",
-        order_type: "dine_in",
-        table_label: "T1",
-        customer_name: "Test Customer",
-        customer_phone: "9959159515",
-        subtotal_paise: 50000,
+        id: 4026,
+        order_number: "4026",
+        order_type: "takeaway",
+        token_number: "43",
+        customer_name: "Walk-in Guest",
+        customer_phone: "9880358634",
+        subtotal_paise: 49000,
         discount_paise: 0,
-        tax_paise: 2500,
-        total_paise: 52500,
-        payment_method: "CASH",
+        tax_paise: 0,
+        total_paise: 49000,
+        payment_method: "cash",
         payment_status: "paid",
         created_at: new Date().toISOString(),
         items: [
-            { item_name: "Arabian Chicken Mandi (Full)", qty: 1, unit_price_paise: 38000, total_price_paise: 38000 },
-            { item_name: "Irani Special Dum Chai", qty: 4, unit_price_paise: 2500, total_price_paise: 10000 },
-            { item_name: "Osmania Biscuits (Plate)", qty: 1, unit_price_paise: 2000, total_price_paise: 2000 },
+            { item_name: "Chicken Lollipop", variant_name: "(Bone) (Juice)(6 P", qty: 1, unit_price_paise: 27000, total_price_paise: 27000 },
+            { item_name: "Hyderabadi Chicken", variant_name: "Dum Biryani Full", qty: 1, unit_price_paise: 22000, total_price_paise: 22000 },
         ],
     };
 
@@ -682,7 +726,7 @@ export function printEODZReport(report: any, outlet?: PrintOutletData | null, ro
 
     const outletName = (report.outlet?.name || outlet?.name || "SURYA FAMILY RESTAURANT").toUpperCase();
     const outletAddress = report.outlet?.address || outlet?.address || "Kadiri, Andhra Pradesh";
-    const outletPhone = report.outlet?.phone || outlet?.phone || "+91 99591 59515";
+    const outletPhone = report.outlet?.phone || outlet?.phone || "+91 98803 58634";
 
     const s = report.sales_summary || {};
     const pm = report.payment_methods || {};
@@ -700,7 +744,7 @@ export function printEODZReport(report: any, outlet?: PrintOutletData | null, ro
             margin: 0;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
             width: ${bodyWidth};
             margin: 0 auto;
             padding: 1px 0;
