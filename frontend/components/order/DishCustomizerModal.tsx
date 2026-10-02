@@ -135,7 +135,8 @@ export function DishCustomizerModal({
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-300"
             onClick={onClose}
         >
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @keyframes springUp {
                     0% { transform: translateY(100%); }
                     60% { transform: translateY(-4px); }
@@ -144,7 +145,7 @@ export function DishCustomizerModal({
                 .sheet-spring {
                     animation: springUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 }
-            `}</style>
+            `}} />
 
             <div
                 className="sheet-spring relative w-full max-w-lg max-h-[92vh] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-terracotta-100"

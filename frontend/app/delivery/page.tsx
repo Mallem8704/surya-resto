@@ -69,6 +69,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { VegBadge, SpecialBadge } from "@/components/ui/Badge";
 import { soundManager } from "@/lib/sound";
 import { useOrderSocket } from "@/hooks/useSockets";
+import { trackOrderPlaced, trackAddToCart } from "@/lib/analytics";
 import {
     DishCustomizerModal,
     CustomizerItemData,
@@ -936,6 +937,20 @@ function DeliveryOrderContent() {
                 soundManager.playOrderPlacedSuccess();
                 toast.success(`Delivery Order #${createdOrder.order_number} Placed Successfully!`);
             }
+
+            trackOrderPlaced({
+                orderNumber: createdOrder.order_number,
+                orderType: "delivery",
+                totalRupees: (createdOrder.total_paise || totalPaise) / 100,
+                customerPhone: phoneClean,
+                paymentMethod: paymentMethod,
+                items: cart.map((ci) => ({
+                    name: ci.item.name,
+                    priceRupees: ci.unitPricePaise / 100,
+                    qty: ci.qty,
+                    variant: ci.variant?.name,
+                })),
+            });
 
             // Auto-login & persist customer profile and address (Zero OTP / Zero Cost)
             safeStorage.setItem("surya_cust_name", customerName.trim());

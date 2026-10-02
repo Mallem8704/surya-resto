@@ -255,15 +255,15 @@ export default function SuryaLandingPage() {
 
                             return n.href.startsWith("#") ? (
                                 <button key={n.label} onClick={() => goto(n.href)} style={linkStyle} className={linkClasses}
-                                    onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "#fff"; }}
-                                    onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,.82)"; }}>
+                                    onMouseEnter={(e: React.MouseEvent<HTMLElement>) => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "#fff"; }}
+                                    onMouseLeave={(e: React.MouseEvent<HTMLElement>) => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,.82)"; }}>
                                     {n.label}
                                     {underline}
                                 </button>
                             ) : (
                                 <Link key={n.label} href={n.href} style={linkStyle} className={linkClasses}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#fff"; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,.82)"; }}>
+                                    onMouseEnter={(e: React.MouseEvent<HTMLElement>) => { (e.currentTarget as HTMLElement).style.color = "#fff"; }}
+                                    onMouseLeave={(e: React.MouseEvent<HTMLElement>) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,.82)"; }}>
                                     {n.label}
                                     {underline}
                                 </Link>

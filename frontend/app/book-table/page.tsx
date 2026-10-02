@@ -34,6 +34,7 @@ import { isTableBookingEnabled } from "@/lib/features";
 import { soundManager } from "@/lib/sound";
 import { SuryaSunLogo } from "@/components/SuryaSunLogo";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { trackTableReservation } from "@/lib/analytics";
 
 const BRANCHES = [
     {
@@ -152,6 +153,13 @@ function BookTableContent() {
             };
 
             const result = await api.createReservation(payload);
+            trackTableReservation({
+                reservationNumber: result.reservation_number,
+                partySize: partySize,
+                date: reservationDate,
+                time: reservationTime,
+                occasion: occasion,
+            });
             soundManager.playOrderPlacedSuccess();
             toast.success(`Table Pre-Booked Successfully! Reservation #${result.reservation_number}`);
             setConfirmedReservation(result);

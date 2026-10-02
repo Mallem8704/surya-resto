@@ -8,6 +8,7 @@ import { OfflineProvider } from "@/context/OfflineContext";
 import { CustomerProvider } from "@/context/CustomerContext";
 import { OfflineBanner } from "@/components/offline/OfflineBanner";
 import { PWAInstallPrompt } from "@/components/common/PWAInstallPrompt";
+import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
 
 export const viewport: Viewport = {
   themeColor: "#f97316",
@@ -85,10 +86,8 @@ export const metadata: Metadata = {
     follow: true,
   },
   manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Surya Restaurant",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
   },
 };
 
@@ -201,6 +200,7 @@ export default function RootLayout({
                     {children}
                     <OfflineBanner />
                     <PWAInstallPrompt />
+                    <GoogleAnalytics />
                   </OfflineProvider>
                 </ToastProvider>
               </LanguageProvider>

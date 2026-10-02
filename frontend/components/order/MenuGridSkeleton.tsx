@@ -5,7 +5,8 @@ import React from "react";
 export function MenuGridSkeleton({ count = 8 }: { count?: number }) {
     return (
         <div className="space-y-6 animate-pulse">
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @keyframes shimmerSweep {
                     0% { background-position: -200% 0; }
                     100% { background-position: 200% 0; }
@@ -15,7 +16,7 @@ export function MenuGridSkeleton({ count = 8 }: { count?: number }) {
                     background-size: 200% 100%;
                     animation: shimmerSweep 1.8s infinite linear;
                 }
-            `}</style>
+            `}} />
 
             {/* Category Filter Pills Shimmer */}
             <div className="flex gap-2.5 overflow-hidden py-2">

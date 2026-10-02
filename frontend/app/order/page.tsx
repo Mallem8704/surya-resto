@@ -47,6 +47,7 @@ import { api } from "@/lib/api";
 import { useOutlet } from "@/context/OutletContext";
 import { isTableOrderingEnabled } from "@/lib/features";
 import { safeStorage } from "@/lib/safeStorage";
+import { trackAddToCart, trackOrderPlaced, trackCallWaiter } from "@/lib/analytics";
 import type { MenuItemData } from "@/components/order/MenuItemCard";
 import {
     DishCustomizerModal,
@@ -136,6 +137,7 @@ function CustomerOrderContent() {
         setIsCallingWaiter(true);
         try {
             await api.createServiceCall(tableId, callType);
+            trackCallWaiter(tableLabel, callType);
             toast.success(
                 language === "te"
                     ? `టేబుల్ ${tableLabel} కోసం సిబ్బందికి సమాచారం పంపబడింది!`
@@ -376,6 +378,12 @@ function CustomerOrderContent() {
                 ];
             });
             toast.success(`${language === "te" && item.name_te ? item.name_te : item.name} ${t("added")}`);
+            trackAddToCart({
+                id: item.id,
+                name: item.name,
+                priceRupees: item.price_paise / 100,
+                qty: 1,
+            });
         }
     };
 
@@ -416,6 +424,13 @@ function CustomerOrderContent() {
         toast.success(
             `${language === "te" && customized.item.name_te ? customized.item.name_te : customized.item.name} ${customized.variant ? `(${customized.variant.name})` : ""} ${t("added")}`
         );
+        trackAddToCart({
+            id: customized.item.id,
+            name: customized.item.name,
+            priceRupees: unitPaise / 100,
+            qty: customized.qty,
+            variant: customized.variant?.name,
+        });
     };
 
     const handleRemoveFromCart = (itemId: number, cartKey?: string) => {
@@ -545,6 +560,20 @@ function CustomerOrderContent() {
             }
 
             // Clear Cart and Switch to Tracker
+            trackOrderPlaced({
+                orderNumber: createdOrder.order_number,
+                orderType: "dine_in",
+                totalRupees: (createdOrder.total_paise || cartTotalPaise) / 100,
+                tableLabel: tableLabel,
+                customerPhone: customer?.phone || undefined,
+                paymentMethod: paymentMethod,
+                items: cart.map((i) => ({
+                    name: i.name,
+                    priceRupees: i.price_paise / 100,
+                    qty: i.qty,
+                    variant: i.variant_name || undefined,
+                })),
+            });
             setCart([]);
             setIsCartOpen(false);
             setActiveOrder(createdOrder);
