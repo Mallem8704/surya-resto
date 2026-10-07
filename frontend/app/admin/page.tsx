@@ -11,6 +11,7 @@ import {
     UtensilsCrossed,
     XCircle,
     Bell,
+    BellRing,
     Banknote,
     CreditCard,
     ArrowRight,
@@ -69,6 +70,15 @@ export default function AdminLiveOrdersKanbanPage() {
     const [animatingOrderId, setAnimatingOrderId] = useState<number | null>(null);
     const [orderTypeFilter, setOrderTypeFilter] = useState<"all" | "dine_in" | "delivery">("all");
     const [mobileColumnFilter, setMobileColumnFilter] = useState<string>("all");
+    const [alarmOrder, setAlarmOrder] = useState<any>(null);
+
+    // Subscribe to continuous repeating order alarm
+    useEffect(() => {
+        const unsub = soundManager.subscribeAlarm((isRinging, order) => {
+            setAlarmOrder(isRinging ? order : null);
+        });
+        return unsub;
+    }, []);
 
     // Auth Route Guard
     useEffect(() => {
@@ -89,7 +99,20 @@ export default function AdminLiveOrdersKanbanPage() {
             ]);
 
             if (ordersResult.status === "fulfilled" && Array.isArray(ordersResult.value)) {
-                setOrders(ordersResult.value);
+                setOrders((prev) => {
+                    // Safety net check: if there is any unaccepted order (status === "placed")
+                    // that arrived while disconnected, ensure alarm rings!
+                    if (prev.length > 0) {
+                        const prevIds = new Set(prev.map((o) => o.id));
+                        const unacceptedIncoming = ordersResult.value.filter(
+                            (o: any) => !prevIds.has(o.id) && (o.status === "placed" || o.status === "pending")
+                        );
+                        if (unacceptedIncoming.length > 0) {
+                            soundManager.startContinuousOrderAlarm(unacceptedIncoming[0]);
+                        }
+                    }
+                    return ordersResult.value;
+                });
             }
             if (callsResult.status === "fulfilled" && Array.isArray(callsResult.value)) {
                 setPendingServiceCalls(callsResult.value);
@@ -106,24 +129,31 @@ export default function AdminLiveOrdersKanbanPage() {
         }
     }, [outlet?.id]);
 
+    // Initial load + 8-second resilient polling safety net (dual-channel sync with WebSockets)
     useEffect(() => {
-        if (isAuthenticated) {
+        if (!isAuthenticated) return;
+        fetchOrders();
+        soundManager.requestNotificationPermission();
+
+        const pollInterval = setInterval(() => {
             fetchOrders();
-        }
+        }, 8000);
+
+        return () => clearInterval(pollInterval);
     }, [isAuthenticated, fetchOrders]);
 
-    // Real-Time WebSocket Hook with Audio Chimes
+    // Real-Time WebSocket Hook with Audio Chimes & Continuous Alarm
     const { isConnected: wsConnected } = useAdminSocket(outlet?.id || 1, (event) => {
         if (process.env.NODE_ENV === "development") console.log("[AdminKanban] Received event:", event);
 
         if (event.event === "new_order" && event.data) {
-            soundManager.playOrderVoiceAlert(event.data);
+            soundManager.startContinuousOrderAlarm(event.data);
             setOrders((prev) => [event.data, ...prev.filter((o) => o.id !== event.data.id)]);
             setAnimatingOrderId(event.data.id);
             if (event.data.order_type === "delivery") {
-                toast.success(`New Delivery Order #${event.data.order_number} (${event.data.customer_name || "Customer"})!`);
+                toast.success(`🚨 New Delivery Order #${event.data.order_number} (${event.data.customer_name || "Customer"})!`);
             } else {
-                toast.success(`New Table Order #${event.data.order_number} at Table ${event.data.table_label}!`);
+                toast.success(`🚨 New Table Order #${event.data.order_number} at Table ${event.data.table_label}!`);
             }
             setTimeout(() => setAnimatingOrderId(null), 4000);
         } else if (event.event === "new_reservation" && event.data) {
@@ -159,6 +189,7 @@ export default function AdminLiveOrdersKanbanPage() {
 
     // Advance Status Handler
     const handleAdvanceStatus = async (orderId: number, nextStatus: string) => {
+        soundManager.stopContinuousOrderAlarm();
         try {
             const updated = await api.updateOrderStatus(orderId, nextStatus);
             setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: updated.status } : o)));
@@ -231,6 +262,44 @@ export default function AdminLiveOrdersKanbanPage() {
 
                 {/* RESTAURANT SOUNDBOX BANNER */}
                 <AudioUnlockBanner />
+
+                {/* URGENT UNACCEPTED ORDER ALARM BANNER */}
+                {alarmOrder && (
+                    <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl border-b-4 border-yellow-400 animate-pulse shrink-0">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30">
+                                <BellRing className="w-7 h-7 text-yellow-300 animate-bounce" />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-base sm:text-lg uppercase tracking-wider flex items-center gap-2">
+                                    <span>🚨 NEW {alarmOrder.order_type === "delivery" ? "DELIVERY" : alarmOrder.order_type === "takeaway" ? "TAKEAWAY" : "TABLE"} ORDER #{alarmOrder.order_number || alarmOrder.id}!</span>
+                                </h3>
+                                <p className="text-xs sm:text-sm text-red-100 font-medium mt-0.5">
+                                    Amount: <strong>₹{Math.round((alarmOrder.total_paise || 0) / 100)}</strong> • Customer: <strong>{alarmOrder.customer_name || "Guest"}</strong> {alarmOrder.customer_phone ? `(${alarmOrder.customer_phone})` : ""} • Placed from Website
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    handleAdvanceStatus(alarmOrder.id, "accepted");
+                                    soundManager.stopContinuousOrderAlarm();
+                                }}
+                                className="flex-1 sm:flex-none px-6 py-3 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs sm:text-sm rounded-xl uppercase tracking-wider transition shadow-xl cursor-pointer"
+                            >
+                                ✓ ACCEPT ORDER & SILENCE ALARM
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => soundManager.stopContinuousOrderAlarm()}
+                                className="px-3.5 py-3 bg-black/40 hover:bg-black/60 text-white font-bold text-xs rounded-xl transition cursor-pointer"
+                            >
+                                Silence Audio
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* PENDING SERVICE CALLS BANNER */}
                 {pendingServiceCalls.length > 0 && (

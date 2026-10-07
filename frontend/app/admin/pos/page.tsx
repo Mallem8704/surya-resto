@@ -22,6 +22,7 @@ import {
     Shield,
     FileText,
     Calendar,
+    BellRing,
     Settings,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -100,6 +101,15 @@ export default function CashierPOSTerminalPage() {
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+    const [alarmOrder, setAlarmOrder] = useState<any>(null);
+
+    // Subscribe to continuous repeating order alarm
+    useEffect(() => {
+        const unsub = soundManager.subscribeAlarm((isRinging, order) => {
+            setAlarmOrder(isRinging ? order : null);
+        });
+        return unsub;
+    }, []);
 
     // Load Data
     const loadPOSData = useCallback(async () => {
@@ -119,7 +129,20 @@ export default function CashierPOSTerminalPage() {
             }
 
             if (ordersRes.status === "fulfilled" && Array.isArray(ordersRes.value)) {
-                setActiveOrders(ordersRes.value);
+                setActiveOrders((prev) => {
+                    // Safety net check: if there is any unaccepted order (status === "placed")
+                    // that arrived while disconnected, ensure alarm rings!
+                    if (prev.length > 0) {
+                        const prevIds = new Set(prev.map((o) => o.id));
+                        const unacceptedIncoming = ordersRes.value.filter(
+                            (o: any) => !prevIds.has(o.id) && (o.status === "placed" || o.status === "pending")
+                        );
+                        if (unacceptedIncoming.length > 0) {
+                            soundManager.startContinuousOrderAlarm(unacceptedIncoming[0]);
+                        }
+                    }
+                    return ordersRes.value;
+                });
             }
 
             if (catsRes.status === "fulfilled" && Array.isArray(catsRes.value)) {
@@ -136,11 +159,19 @@ export default function CashierPOSTerminalPage() {
         }
     }, [selectedOutletId]);
 
+    // Initial load + 8-second resilient polling safety net (dual-channel sync with WebSockets)
     useEffect(() => {
         loadPOSData();
+        soundManager.requestNotificationPermission();
+
+        const pollInterval = setInterval(() => {
+            loadPOSData();
+        }, 8000);
+
+        return () => clearInterval(pollInterval);
     }, [loadPOSData]);
 
-    // WebSocket sync
+    // WebSocket sync with Continuous Alarm
     const handleWsEvent = useCallback((event: SocketEvent) => {
         if (
             event.event === "new_order" ||
@@ -152,7 +183,7 @@ export default function CashierPOSTerminalPage() {
         ) {
             loadPOSData();
             if (event.event === "new_order" && event.data) {
-                soundManager.playOrderVoiceAlert(event.data);
+                soundManager.startContinuousOrderAlarm(event.data);
             } else if (event.event === "running_kot_added" && event.data) {
                 soundManager.playRunningKotVoiceAlert(event.data.table_label || event.data.table_id || "Table");
             } else if ((event.event === "payment_success" || event.event === "payment_updated") && event.data) {
@@ -706,6 +737,41 @@ export default function CashierPOSTerminalPage() {
                     </button>
                 </div>
             </header>
+
+            {/* URGENT UNACCEPTED ORDER ALARM BANNER IN POS */}
+            {alarmOrder && (
+                <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xl border-b-4 border-yellow-400 animate-pulse shrink-0 z-30">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30">
+                            <BellRing className="w-6 h-6 text-yellow-300 animate-bounce" />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-2">
+                                <span>🚨 NEW {alarmOrder.order_type === "delivery" ? "DELIVERY" : alarmOrder.order_type === "takeaway" ? "TAKEAWAY" : "TABLE"} ORDER #{alarmOrder.order_number || alarmOrder.id}!</span>
+                            </h3>
+                            <p className="text-xs text-red-100 font-medium">
+                                Amount: <strong>₹{Math.round((alarmOrder.total_paise || 0) / 100)}</strong> • Customer: <strong>{alarmOrder.customer_name || "Guest"}</strong> {alarmOrder.customer_phone ? `(${alarmOrder.customer_phone})` : ""} • Placed Online
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                        <Link
+                            href="/admin"
+                            onClick={() => soundManager.stopContinuousOrderAlarm()}
+                            className="flex-1 sm:flex-none px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs rounded-xl uppercase tracking-wider transition shadow-xl text-center"
+                        >
+                            Open Orders Kanban
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={() => soundManager.stopContinuousOrderAlarm()}
+                            className="px-3.5 py-2.5 bg-black/40 hover:bg-black/60 text-white font-bold text-xs rounded-xl transition cursor-pointer"
+                        >
+                            Silence Alarm
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* ══════════════════════════════════════════════════════════════
                 MAIN 2-COLUMN POS LAYOUT (65% MENU GRID | 35% BILLING TICKET)

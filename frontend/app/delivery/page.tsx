@@ -1,7 +1,6 @@
 "use client";
 
-import { printPOSReceipt } from "@/lib/thermalPrint";
-import { dispatchCustomerWhatsApp } from "@/lib/whatsapp";
+import { dispatchCustomerWhatsApp, getWhatsAppOrderLink } from "@/lib/whatsapp";
 
 
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from "react";
@@ -1052,6 +1051,49 @@ function DeliveryOrderContent() {
                 </header>
 
                 <main className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6">
+                    {/* Instant WhatsApp Notification to Restaurant Counter (Ensures Kitchen Never Misses Order) */}
+                    <div className="bg-emerald-50 border-2 border-emerald-400 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow">
+                                <PhoneCall className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h4 className="font-serif font-black text-sm sm:text-base text-emerald-950 flex items-center gap-2">
+                                    <span>Instant WhatsApp Order Confirmation</span>
+                                    <span className="text-[10px] bg-emerald-200 text-emerald-900 font-bold px-2 py-0.5 rounded-full uppercase">Priority Kitchen Alert</span>
+                                </h4>
+                                <p className="text-xs text-emerald-800 mt-0.5">
+                                    Send order details directly to Surya Restaurant WhatsApp (<strong>098803 58634</strong>) to ensure immediate kitchen preparation.
+                                </p>
+                            </div>
+                        </div>
+                        <a
+                            href={getWhatsAppOrderLink({
+                                orderId: activeOrder.order_number,
+                                orderType: "delivery",
+                                customerName: activeOrder.customer_name || "Valued Customer",
+                                customerPhone: activeOrder.customer_phone || "",
+                                deliveryAddress: activeOrder.delivery_address || "",
+                                items: (activeOrder.items || []).map((it: any) => ({
+                                    name: it.item_name || it.menu_item?.name || "Dish",
+                                    qty: it.qty || 1,
+                                    price_paise: it.unit_price_paise || it.total_price_paise || 0,
+                                    variant_name: it.variant_name,
+                                    notes: it.notes,
+                                })),
+                                subtotalPaise: activeOrder.subtotal_paise || activeOrder.total_paise || 0,
+                                totalPaise: activeOrder.total_paise || 0,
+                                paymentPreference: activeOrder.payment_method === "upi" ? "upi" : "cod",
+                            }, "919880358634")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition cursor-pointer shrink-0"
+                        >
+                            <PhoneCall className="w-4 h-4" />
+                            <span>Notify Kitchen on WhatsApp</span>
+                        </a>
+                    </div>
+
                     {/* Live Tracker Status Card */}
                     <div className="bg-gradient-to-br from-espresso-950 via-espresso-900 to-terracotta-950 text-white rounded-3xl p-4 sm:p-8 shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-44 h-44 rounded-full bg-saffron-500/10 blur-2xl pointer-events-none" />

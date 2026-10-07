@@ -560,6 +560,118 @@ class SoundManager {
     }
 
     /**
+     * Continuous Repeating Order Alarm Engine (Swiggy / Zomato merchant style)
+     * Rings loud alert every 3.5s until acknowledged/silenced by cashier.
+     */
+    private alarmTimer: any = null;
+    private activeAlarmOrder: any = null;
+    private alarmListeners: Set<(isRinging: boolean, order: any) => void> = new Set();
+
+    public subscribeAlarm(listener: (isRinging: boolean, order: any) => void): () => void {
+        this.alarmListeners.add(listener);
+        listener(this.isAlarmRinging(), this.activeAlarmOrder);
+        return () => {
+            this.alarmListeners.delete(listener);
+        };
+    }
+
+    private notifyAlarmListeners() {
+        const ringing = this.isAlarmRinging();
+        this.alarmListeners.forEach((fn) => {
+            try { fn(ringing, this.activeAlarmOrder); } catch {}
+        });
+    }
+
+    public isAlarmRinging(): boolean {
+        return this.alarmTimer !== null;
+    }
+
+    public getActiveAlarmOrder(): any {
+        return this.activeAlarmOrder;
+    }
+
+    public startContinuousOrderAlarm(order: any) {
+        if (this.getSoundMode() === "mute") return;
+
+        // Save active order and notify listeners
+        this.activeAlarmOrder = order;
+
+        // Play first alert immediately
+        this.playOrderVoiceAlert(order);
+        this.notifyAlarmListeners();
+
+        // Also trigger native OS desktop notification
+        this.showDesktopNotification(
+            `🚨 NEW ${order.order_type === "delivery" ? "DELIVERY" : "TAKEAWAY"} ORDER #${order.order_number || order.id}!`,
+            `Total: ₹${order.total_paise ? Math.round(order.total_paise / 100) : "0"} • Customer: ${order.customer_name || "Guest"} • Tap to open and accept!`
+        );
+
+        // If alarm is already running, update order info without duplicating intervals
+        if (this.alarmTimer) return;
+
+        // Ring repeatedly every 3.5 seconds like commercial merchant terminals
+        this.alarmTimer = setInterval(() => {
+            if (this.activeAlarmOrder) {
+                // Play loud dual-tone chime
+                this.playNewOrderChime();
+            }
+        }, 3500);
+    }
+
+    public stopContinuousOrderAlarm() {
+        if (this.alarmTimer) {
+            clearInterval(this.alarmTimer);
+            this.alarmTimer = null;
+        }
+        this.activeAlarmOrder = null;
+        this.notifyAlarmListeners();
+    }
+
+    /**
+     * Request HTML5 Desktop Push Notification Permission
+     */
+    public async requestNotificationPermission(): Promise<boolean> {
+        if (typeof window === "undefined" || !("Notification" in window)) return false;
+        try {
+            if (Notification.permission === "granted") return true;
+            if (Notification.permission !== "denied") {
+                const res = await Notification.requestPermission();
+                return res === "granted";
+            }
+        } catch {}
+        return false;
+    }
+
+    /**
+     * Show high-priority native OS desktop notification (even when Chrome is minimized or in background)
+     */
+    public showDesktopNotification(title: string, body: string, onClick?: () => void) {
+        if (typeof window === "undefined" || !("Notification" in window)) return;
+        if (Notification.permission !== "granted") {
+            this.requestNotificationPermission();
+            return;
+        }
+
+        try {
+            const notif = new Notification(title, {
+                body,
+                icon: "/icon.png",
+                badge: "/icon.png",
+                tag: "surya-new-order",
+                requireInteraction: true, // Keep notification on screen until user clicks
+            });
+
+            notif.onclick = () => {
+                window.focus();
+                if (onClick) onClick();
+                notif.close();
+            };
+        } catch (e) {
+            console.warn("Desktop notification error:", e);
+        }
+    }
+
+    /**
      * Test voice engine function for staff onboarding & sound check
      */
     testVoice(type: "table" | "delivery" | "payment" | "service" = "table", lang?: "en" | "te") {
