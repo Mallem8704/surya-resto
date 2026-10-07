@@ -209,6 +209,27 @@ def on_startup():
             o.phone = "+91 98803 58634"
             o.upi_vpa = "SBIBHIM.INSTANT26821939387985481@sbipay"
         db.commit()
+
+        # Ensure all official and default admin user accounts exist in database
+        from app.auth_utils import get_password_hash
+        default_users = [
+            {"email": "owner@suryarestaurant.com", "name": "Surya Restaurant Manager", "password": "admin123", "role": "owner"},
+            {"email": "staff@suryarestaurant.com", "name": "Surya Floor Staff", "password": "staff123", "role": "staff"},
+            {"email": "owner@suryafamilyrestaurant.in", "name": "Surya Managing Director", "password": "surya_admin_2026", "role": "owner"},
+            {"email": "staff@suryafamilyrestaurant.in", "name": "Surya Cashier & Floor Staff", "password": "surya_staff_2026", "role": "staff"},
+            {"email": "admin@surya.com", "name": "Surya Admin", "password": "admin123", "role": "owner"},
+        ]
+        for u_data in default_users:
+            existing_user = db.query(User).filter(User.email == u_data["email"]).first()
+            if not existing_user:
+                db.add(User(
+                    outlet_id=1,
+                    name=u_data["name"],
+                    email=u_data["email"],
+                    password_hash=get_password_hash(u_data["password"]),
+                    role=u_data["role"]
+                ))
+        db.commit()
         db.close()
     except Exception as c_err:
         import logging; logging.getLogger("surya.startup").warning(f"Startup seed note: {c_err}")

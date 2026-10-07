@@ -72,7 +72,7 @@ function AdminLoginContent() {
                         <div className="grid grid-cols-2 gap-2">
                             <button
                                 type="button"
-                                onClick={() => handleQuickFill("owner@suryafamilyrestaurant.in", "surya_admin_2026")}
+                                onClick={() => handleQuickFill("owner@suryarestaurant.com", "admin123")}
                                 className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold transition shadow-sm cursor-pointer text-left flex items-center gap-1.5"
                             >
                                 <Crown className="w-3.5 h-3.5 text-amber-600 shrink-0" />
@@ -80,7 +80,7 @@ function AdminLoginContent() {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => handleQuickFill("staff@suryafamilyrestaurant.in", "surya_staff_2026")}
+                                onClick={() => handleQuickFill("staff@suryarestaurant.com", "staff123")}
                                 className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold transition shadow-sm cursor-pointer text-left flex items-center gap-1.5"
                             >
                                 <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
