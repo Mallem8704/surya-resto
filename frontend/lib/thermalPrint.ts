@@ -579,13 +579,13 @@ export function printPOSReceipt(
         <body>
             <!-- Store Header -->
             <div class="text-center" style="font-size: ${headerFontSize}; font-weight: 700; line-height: 1.2;">
-                Surya Family Restaurent
+                ${outlet?.name || "Surya Family Restaurent"}
             </div>
             <div class="text-center" style="font-size: ${is58 ? "9px" : "11px"}; margin-top: 1px;">
-                Opp RTC Bus stand,Kadiri
+                ${outlet?.address || "Opp RTC Bus stand,Kadiri"}
             </div>
             <div class="text-center" style="font-size: ${is58 ? "9.5px" : "11.5px"}; margin-top: 2px;">
-                Tell No:890
+                ${outlet?.phone ? `Tell No:${outlet.phone}` : "Tell No:890"}
             </div>
 
             <div class="dashed-divider"></div>
@@ -612,21 +612,20 @@ export function printPOSReceipt(
 
             <div class="dashed-divider"></div>
 
-            <!-- Table Header -->
+            <!-- Table Header & Items -->
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 14%; text-align: left;">QTY</th>
-                        <th style="text-align: left;">ITEM NAME</th>
-                        <th style="width: 28%; text-align: right;">Amount</th>
+                        <th style="width: 14%; text-align: left; padding: 2px 0;">QTY</th>
+                        <th style="text-align: left; padding: 2px 0;">ITEM NAME</th>
+                        <th style="width: 28%; text-align: right; padding: 2px 0;">Amount</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" style="padding: 0; font-weight: normal;">
+                            <div class="dashed-divider" style="margin: 2px 0;"></div>
+                        </th>
                     </tr>
                 </thead>
-            </table>
-
-            <div class="dashed-divider"></div>
-
-            <!-- Items Rows -->
-            <table>
                 <tbody>
                     ${itemsRows}
                 </tbody>
@@ -928,8 +927,9 @@ function triggerBrowserPrint(htmlContent: string) {
         printFrame.style.position = "fixed";
         printFrame.style.right = "0";
         printFrame.style.bottom = "0";
-        printFrame.style.width = "0";
-        printFrame.style.height = "0";
+        printFrame.style.width = "1px";
+        printFrame.style.height = "1px";
+        printFrame.style.opacity = "0.01";
         printFrame.style.border = "0";
         document.body.appendChild(printFrame);
 

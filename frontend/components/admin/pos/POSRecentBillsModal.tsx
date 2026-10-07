@@ -131,6 +131,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
             coupon_code: order.coupon_code,
             tax_paise: order.tax_paise,
             total_paise: order.total_paise,
+            token_number: order.token_number || order.daily_token || order.kot_token,
             created_at: order.created_at,
             items: (order.items || []).map((it: any) => ({
                 item_name: it.item_name || it.menu_item?.name || "Item",
