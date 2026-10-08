@@ -11,14 +11,14 @@ BASE_URL = "http://127.0.0.1:8000"
 
 def test_auth():
     print("\n" + "=" * 70)
-    print("🧪 TESTING AUTHENTICATION & RBAC ENDPOINTS")
+    print("🧪 TESTING AUTHENTICATION & RBAC ENDPOINTS (SURYA RESTAURANT)")
     print("=" * 70)
 
     # 1. Test Owner Login
-    print("\n[TEST 1] Owner Login (owner@teatime.com / admin123)...")
+    print("\n[TEST 1] Owner Login (owner@suryarestaurant.com / admin123)...")
     resp = requests.post(
         f"{BASE_URL}/api/auth/login",
-        json={"email": "owner@teatime.com", "password": "admin123"},
+        json={"email": "owner@suryarestaurant.com", "password": "admin123"},
     )
     assert resp.status_code == 200, f"Owner login failed: {resp.text}"
     owner_data = resp.json()
@@ -28,10 +28,10 @@ def test_auth():
     print(f"✓ Success (HTTP 200): Got JWT token (Role: {owner_data['role']}, User: {owner_data['name']})")
 
     # 2. Test Staff Login
-    print("\n[TEST 2] Staff Login (staff@teatime.com / staff123)...")
+    print("\n[TEST 2] Staff Login (staff@suryarestaurant.com / staff123)...")
     resp = requests.post(
         f"{BASE_URL}/api/auth/login",
-        json={"email": "staff@teatime.com", "password": "staff123"},
+        json={"email": "staff@suryarestaurant.com", "password": "staff123"},
     )
     assert resp.status_code == 200, f"Staff login failed: {resp.text}"
     staff_data = resp.json()
@@ -40,10 +40,10 @@ def test_auth():
     print(f"✓ Success (HTTP 200): Got JWT token (Role: {staff_data['role']}, User: {staff_data['name']})")
 
     # 3. Test Invalid Password Login
-    print("\n[TEST 3] Invalid Password (owner@teatime.com / wrongpassword)...")
+    print("\n[TEST 3] Invalid Password (owner@suryarestaurant.com / wrongpassword)...")
     resp = requests.post(
         f"{BASE_URL}/api/auth/login",
-        json={"email": "owner@teatime.com", "password": "wrongpassword"},
+        json={"email": "owner@suryarestaurant.com", "password": "wrongpassword"},
     )
     assert resp.status_code == 401, f"Expected 401, got {resp.status_code}"
     print(f"✓ Success (HTTP 401): Correctly rejected bad credentials ({resp.json()['detail']})")
@@ -58,8 +58,19 @@ def test_auth():
     me = resp.json()
     print(f"✓ Success (HTTP 200): Verified profile for {me['name']} (Email: {me['email']}, Role: {me['role']})")
 
-    # 5. Test Owner-only endpoint with Owner Token
-    print("\n[TEST 5] Accessing Owner-only endpoint with Owner Token...")
+    # 5. Test POST /refresh Token Extension
+    print("\n[TEST 5] POST /api/auth/refresh using Active Token...")
+    resp = requests.post(
+        f"{BASE_URL}/api/auth/refresh",
+        headers={"Authorization": f"Bearer {owner_token}"},
+    )
+    assert resp.status_code == 200, f"POST /refresh failed: {resp.text}"
+    refreshed_data = resp.json()
+    assert "access_token" in refreshed_data
+    print(f"✓ Success (HTTP 200): Refreshed active token successfully")
+
+    # 6. Test Owner-only endpoint with Owner Token
+    print("\n[TEST 6] Accessing Owner-only endpoint with Owner Token...")
     resp = requests.get(
         f"{BASE_URL}/api/auth/owner-check",
         headers={"Authorization": f"Bearer {owner_token}"},
@@ -67,8 +78,8 @@ def test_auth():
     assert resp.status_code == 200, f"Owner check failed: {resp.text}"
     print(f"✓ Success (HTTP 200): Owner authorized -> {resp.json()['message']}")
 
-    # 6. Test Owner-only endpoint with Staff Token (Expect 403 Forbidden)
-    print("\n[TEST 6] Accessing Owner-only endpoint with Staff Token (RBAC check)...")
+    # 7. Test Owner-only endpoint with Staff Token (Expect 403 Forbidden)
+    print("\n[TEST 7] Accessing Owner-only endpoint with Staff Token (RBAC check)...")
     resp = requests.get(
         f"{BASE_URL}/api/auth/owner-check",
         headers={"Authorization": f"Bearer {staff_token}"},
@@ -76,14 +87,14 @@ def test_auth():
     assert resp.status_code == 403, f"Expected 403 Forbidden, got {resp.status_code}"
     print(f"✓ Success (HTTP 403): Staff correctly forbidden from owner-only route ({resp.json()['detail']})")
 
-    # 7. Test unauthenticated request
-    print("\n[TEST 7] Accessing protected endpoint without token...")
+    # 8. Test unauthenticated request
+    print("\n[TEST 8] Accessing protected endpoint without token...")
     resp = requests.get(f"{BASE_URL}/api/auth/me")
     assert resp.status_code == 401, f"Expected 401, got {resp.status_code}"
     print(f"✓ Success (HTTP 401): Request without token rejected ({resp.json()['detail']})")
 
     print("\n" + "=" * 70)
-    print("🎉 ALL 7 AUTHENTICATION & RBAC TESTS PASSED SUCCESSFULLY!")
+    print("🎉 ALL 8 AUTHENTICATION & RBAC TESTS PASSED SUCCESSFULLY!")
     print("=" * 70 + "\n")
 
 

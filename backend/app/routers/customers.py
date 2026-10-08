@@ -25,7 +25,7 @@ from app.schemas import (
     AdminCustomersSummary,
     AdminCustomersResponse,
 )
-from app.auth_utils import SECRET_KEY, ALGORITHM, verify_password, get_password_hash
+from app.auth_utils import SECRET_KEY, ALGORITHM, verify_password, get_password_hash, decode_access_token
 from app.routers.auth import require_staff_or_owner
 from app.rate_limiter import customer_login_limiter, customer_register_limiter
 
@@ -180,7 +180,8 @@ def normalize_phone(phone: str) -> str:
 
 def create_customer_token(customer_id: int, phone: str) -> str:
     # 90-Day Long-Lived Token to keep customer login session active across visits
-    expire = datetime.datetime.utcnow() + datetime.timedelta(days=90)
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    expire = now_utc + datetime.timedelta(days=90)
     to_encode = {
         "sub": str(customer_id),
         "phone": phone,
@@ -209,16 +210,21 @@ def get_current_customer(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Customer authentication required. Please sign in with your mobile number and password."
         )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        customer_id: str = payload.get("sub")
-        role: str = payload.get("role")
-        if customer_id is None or role != "customer":
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid customer credentials")
-    except JWTError:
+    payload = decode_access_token(token)
+    if not payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Customer session expired, please re-login")
 
-    customer = db.query(Customer).filter(Customer.id == int(customer_id)).first()
+    customer_id: str = payload.get("sub")
+    role: str = payload.get("role")
+    if customer_id is None or role != "customer":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid customer credentials")
+
+    try:
+        cust_id_int = int(customer_id)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid customer ID in token")
+
+    customer = db.query(Customer).filter(Customer.id == cust_id_int).first()
     if customer is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
     return customer
@@ -232,14 +238,16 @@ def get_current_customer_optional(
     token = extract_customer_token(authorization, x_customer_token)
     if not token:
         return None
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        customer_id: str = payload.get("sub")
-        role: str = payload.get("role")
-        if customer_id and role == "customer":
-            return db.query(Customer).filter(Customer.id == int(customer_id)).first()
-    except Exception:
+    payload = decode_access_token(token)
+    if not payload:
         return None
+    customer_id = payload.get("sub")
+    role = payload.get("role")
+    if customer_id and role == "customer":
+        try:
+            return db.query(Customer).filter(Customer.id == int(customer_id)).first()
+        except Exception:
+            return None
     return None
 
 

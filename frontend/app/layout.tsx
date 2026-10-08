@@ -9,6 +9,7 @@ import { CustomerProvider } from "@/context/CustomerContext";
 import { OfflineBanner } from "@/components/offline/OfflineBanner";
 import { PWAInstallPrompt } from "@/components/common/PWAInstallPrompt";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const viewport: Viewport = {
   themeColor: "#f97316",
@@ -197,7 +198,9 @@ export default function RootLayout({
               <LanguageProvider>
                 <ToastProvider>
                   <OfflineProvider>
-                    {children}
+                    <ErrorBoundary section="app-root">
+                      {children}
+                    </ErrorBoundary>
                     <OfflineBanner />
                     <PWAInstallPrompt />
                     <GoogleAnalytics />

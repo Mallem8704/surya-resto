@@ -16,6 +16,14 @@ function AdminLoginContent() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    // Show session-expired warning if redirected from auto-logout
+    useEffect(() => {
+        const reason = searchParams.get("reason");
+        if (reason === "session_expired") {
+            toast.warning("Your session has expired. Please log in again.");
+        }
+    }, [searchParams, toast]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email || !password) {

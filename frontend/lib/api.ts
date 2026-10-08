@@ -84,7 +84,19 @@ export async function apiFetch<T = any>(endpoint: string, options: FetchOptions 
         },
     };
 
-    const response = await fetch(url, config);
+    let response: Response;
+    try {
+        response = await fetch(url, config);
+    } catch (networkErr: any) {
+        const error: any = new Error(
+            navigator.onLine === false
+                ? "You appear to be offline. Please check your internet connection."
+                : "Network error — cannot reach the server. Please check your connection or try again."
+        );
+        error.status = 0;
+        error.isNetworkError = true;
+        throw error;
+    }
 
     if (!response.ok) {
         let errorMessage = `Request failed with status ${response.status}`;
@@ -98,6 +110,26 @@ export async function apiFetch<T = any>(endpoint: string, options: FetchOptions 
                 errorMessage = "Backend service temporarily unavailable. Please retry shortly.";
             }
         }
+
+        // ── AUTO-LOGOUT ON INVALID/EXPIRED TOKEN ──
+        // When backend returns 401 for any authenticated endpoint (not login itself),
+        // automatically clear the stored session and redirect to login page.
+        if (response.status === 401 && typeof window !== "undefined") {
+            const isLoginEndpoint = endpoint.includes("/auth/login") || endpoint.includes("/customer/login") || endpoint.includes("/customer/quick-login");
+            if (!isLoginEndpoint) {
+                // Check if this was a staff/admin token (not a customer-only request)
+                const wasStaffRequest = !endpoint.startsWith("/api/customer") && !endpoint.startsWith("/customer");
+                if (wasStaffRequest && safeStorage.getItem("surya_token")) {
+                    safeStorage.removeItem("surya_token");
+                    safeStorage.removeItem("surya_user");
+                    // Redirect to login — only if we are on an admin page
+                    if (window.location.pathname.startsWith("/admin")) {
+                        window.location.href = "/admin/login?reason=session_expired";
+                    }
+                }
+            }
+        }
+
         const error: any = new Error(errorMessage);
         error.status = response.status;
         throw error;

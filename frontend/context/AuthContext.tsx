@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { safeStorage } from "@/lib/safeStorage";
@@ -26,36 +26,78 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Check if a stored token looks like a valid JWT (header.payload.signature).
+ * This does NOT verify the signature — it only ensures the format is correct
+ * and the token hasn't expired based on the embedded `exp` claim.
+ */
+function isTokenValid(token: string | null): boolean {
+    if (!token) return false;
+
+    // Reject fake fallback tokens from legacy cold-start workaround
+    if (token.startsWith("surya_session_")) return false;
+
+    // Basic JWT structure check: must have 3 dot-separated base64 parts
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+
+    // Check if token has expired by decoding the payload
+    try {
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload.exp) {
+            const expiresAt = payload.exp * 1000; // convert to milliseconds
+            const now = Date.now();
+            // Consider expired if less than 60 seconds of validity remaining
+            if (now >= expiresAt - 60000) return false;
+        }
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const router = useRouter();
+    const logoutCalledRef = useRef(false);
 
     const logout = useCallback(() => {
+        if (logoutCalledRef.current) return; // Prevent double-logout redirect loops
+        logoutCalledRef.current = true;
         safeStorage.removeItem("surya_token");
         safeStorage.removeItem("surya_user");
         setUser(null);
         setToken(null);
         router.push("/admin/login");
+        // Reset the guard after a short delay so future logouts can work
+        setTimeout(() => { logoutCalledRef.current = false; }, 2000);
     }, [router]);
 
     useEffect(() => {
         const storedToken = safeStorage.getItem("surya_token");
         const storedUser = safeStorage.getItem("surya_user");
 
-        if (storedToken && storedUser) {
+        // ── VALIDATE TOKEN FORMAT & EXPIRY BEFORE TRUSTING IT ──
+        if (storedToken && storedUser && isTokenValid(storedToken)) {
             try {
                 setToken(storedToken);
                 setUser(JSON.parse(storedUser));
             } catch {
                 safeStorage.removeItem("surya_user");
+                safeStorage.removeItem("surya_token");
             }
+        } else if (storedToken) {
+            // Token exists but is invalid/expired — clean up stale session
+            safeStorage.removeItem("surya_token");
+            safeStorage.removeItem("surya_user");
         }
         setIsLoading(false);
 
         // Fetch fresh profile from backend to sync any name or role updates
-        if (storedToken) {
+        // AND to validate the token is actually accepted by the server
+        if (storedToken && isTokenValid(storedToken)) {
             api.getMe()
                 .then((freshUser) => {
                     if (freshUser && freshUser.name) {
@@ -70,57 +112,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         safeStorage.setItem("surya_user", JSON.stringify(updated));
                     }
                 })
-                .catch(() => {});
+                .catch((err: any) => {
+                    // If backend rejects the token (401), force logout immediately
+                    if (err?.status === 401) {
+                        safeStorage.removeItem("surya_token");
+                        safeStorage.removeItem("surya_user");
+                        setUser(null);
+                        setToken(null);
+                    }
+                    // Other errors (network, 500) — keep the session alive,
+                    // the user can still work with cached data
+                });
         }
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const login = async (email: string, password: string) => {
-        try {
-            const res = await api.login({ email, password });
-            const authToken = res.access_token;
-            const authUser: AuthUser = {
-                id: res.user_id ?? res.user?.id ?? (res.sub ? Number(res.sub) : 1),
-                email: res.email ?? res.user?.email ?? email,
-                name: res.name ?? res.user?.name ?? "Staff Member",
-                role: (res.role ?? res.user?.role ?? "staff") as "owner" | "staff",
-                outlet_id: res.outlet_id ?? res.user?.outlet_id ?? 1,
-            };
+        const res = await api.login({ email, password });
+        const authToken = res.access_token;
 
-            setToken(authToken);
-            setUser(authUser);
-
-            safeStorage.setItem("surya_token", authToken);
-            safeStorage.setItem("surya_user", JSON.stringify(authUser));
-
-            router.push("/admin");
-        } catch (err: any) {
-            // Resilient fallback for cold-starting / sleeping Render backend:
-            const isKnownOwner = email.toLowerCase() === "owner@suryarestaurant.com" && password === "admin123";
-            const isKnownStaff = email.toLowerCase() === "staff@suryarestaurant.com" && password === "staff123";
-
-            if (isKnownOwner || isKnownStaff) {
-                const isOwner = isKnownOwner;
-                const fallbackUser: AuthUser = {
-                    id: isOwner ? 1 : 2,
-                    email,
-                    name: isOwner ? "Surya Restaurant Manager" : "Surya Floor Staff",
-                    role: isOwner ? "owner" : "staff",
-                    outlet_id: 1,
-                };
-                const fallbackToken = "surya_session_" + Date.now();
-
-                setToken(fallbackToken);
-                setUser(fallbackUser);
-
-                safeStorage.setItem("surya_token", fallbackToken);
-                safeStorage.setItem("surya_user", JSON.stringify(fallbackUser));
-
-                router.push("/admin");
-                return;
-            }
-
-            throw err;
+        // ── VALIDATE THE TOKEN FROM SERVER ──
+        if (!authToken || !isTokenValid(authToken)) {
+            throw new Error("Server returned an invalid authentication token. Please try again.");
         }
+
+        const authUser: AuthUser = {
+            id: res.user_id ?? res.user?.id ?? (res.sub ? Number(res.sub) : 1),
+            email: res.email ?? res.user?.email ?? email,
+            name: res.name ?? res.user?.name ?? "Staff Member",
+            role: (res.role ?? res.user?.role ?? "staff") as "owner" | "staff",
+            outlet_id: res.outlet_id ?? res.user?.outlet_id ?? 1,
+        };
+
+        setToken(authToken);
+        setUser(authUser);
+
+        safeStorage.setItem("surya_token", authToken);
+        safeStorage.setItem("surya_user", JSON.stringify(authUser));
+
+        router.push("/admin");
     };
 
     const updateAuthSession = (authToken: string, authUser: AuthUser) => {

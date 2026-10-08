@@ -8,6 +8,13 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./surya_restaurant.db")
 
+# Resolve relative SQLite database path to absolute backend directory path
+if DATABASE_URL.startswith("sqlite:///."):
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    rel_path = DATABASE_URL.replace("sqlite:///./", "").replace("sqlite:///", "")
+    abs_db_path = os.path.abspath(os.path.join(base_dir, rel_path))
+    DATABASE_URL = f"sqlite:///{abs_db_path}"
+
 # Fix common Heroku/Render/Railway 'postgres://' or 'postgresql://' URI prefix to explicit psycopg2 driver
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)

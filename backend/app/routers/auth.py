@@ -264,6 +264,30 @@ def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
+@router.post("/refresh", response_model=TokenResponse)
+def refresh_token(current_user: User = Depends(get_current_user)):
+    """Issue a fresh JWT token for an active authenticated session."""
+    token_claims = {
+        "sub": str(current_user.id),
+        "user_id": current_user.id,
+        "email": current_user.email,
+        "role": current_user.role,
+        "name": current_user.name,
+        "outlet_id": current_user.outlet_id,
+    }
+    new_access_token = create_access_token(data=token_claims)
+    return TokenResponse(
+        access_token=new_access_token,
+        token_type="bearer",
+        role=current_user.role,
+        user_id=current_user.id,
+        name=current_user.name,
+        email=current_user.email,
+        outlet_id=current_user.outlet_id,
+        user=UserOut.model_validate(current_user),
+    )
+
+
 @router.get("/owner-check")
 def verify_owner_access(current_user: User = Depends(require_owner)):
     """Verification endpoint for administrative owner privileges."""

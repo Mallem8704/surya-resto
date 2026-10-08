@@ -161,8 +161,15 @@ export default function AdminLiveOrdersKanbanPage() {
                     reservationsResult.value.filter((r) => r.status === "confirmed" || r.status === "seated").length
                 );
             }
-        } catch {
-            // Silently handle any unexpected errors
+        } catch (err: any) {
+            // If token is expired/invalid, the apiFetch auto-logout handler will redirect.
+            // For other errors, show a non-intrusive warning on first failure only.
+            if (err?.status !== 401 && err?.status !== 0) {
+                // Only log — don't toast on every 8-second poll failure
+                if (process.env.NODE_ENV === "development") {
+                    console.warn("[Admin] Failed to fetch orders:", err.message);
+                }
+            }
         } finally {
             setIsLoadingOrders(false);
         }

@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timezone
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -35,6 +35,27 @@ app = FastAPI(
     description="Backend API for Surya Family Restaurant Kadiri QR Ordering & Operations SaaS",
     version="1.0.0",
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    if isinstance(exc, HTTPException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=getattr(exc, "headers", None),
+        )
+    import logging
+    logging.getLogger("surya.error").error(
+        f"Unhandled exception on {request.method} {request.url.path}: {exc}",
+        exc_info=True
+    )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": "Internal server error occurred. Please retry shortly.",
+            "error_type": exc.__class__.__name__,
+        },
+    )
 
 @app.on_event("startup")
 def on_startup():
@@ -444,6 +465,7 @@ if is_production:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
+        allow_origin_regex=r"https://([a-zA-Z0-9-]+\.)*vercel\.app",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

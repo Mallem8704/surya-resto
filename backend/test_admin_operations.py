@@ -15,7 +15,7 @@ def test_admin_ops():
     # 1. Login as Owner
     login_res = requests.post(
         f"{BASE_URL}/api/auth/login",
-        json={"email": "owner@teatime.com", "password": "admin123"},
+        json={"email": "owner@suryarestaurant.com", "password": "admin123"},
     )
     assert login_res.status_code == 200
     owner_token = login_res.json()["access_token"]
