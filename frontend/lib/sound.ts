@@ -4,6 +4,8 @@
  * Supports Autoplay Unlock detection and automatic gesture resumption for kitchen & cashier tablets.
  */
 
+import { safeStorage } from "@/lib/safeStorage";
+
 class SoundManager {
     private ctx: AudioContext | null = null;
     private listeners: Set<(unlocked: boolean) => void> = new Set();
@@ -318,13 +320,10 @@ class SoundManager {
      * Get preferred voice announcement language ('en' or 'te')
      */
     public getVoiceLanguage(): "en" | "te" {
-        if (typeof window === "undefined") return "en";
-        try {
-            const saved = localStorage.getItem("surya_voice_lang");
-            if (saved === "te" || saved === "en") return saved;
-            const appLang = localStorage.getItem("surya_language");
-            if (appLang === "te") return "te";
-        } catch (e) {}
+        const saved = safeStorage.getItem("surya_voice_lang");
+        if (saved === "te" || saved === "en") return saved;
+        const appLang = safeStorage.getItem("surya_language");
+        if (appLang === "te") return "te";
         return "en";
     }
 
@@ -332,21 +331,15 @@ class SoundManager {
      * Set preferred voice announcement language ('en' or 'te')
      */
     public setVoiceLanguage(lang: "en" | "te") {
-        if (typeof window === "undefined") return;
-        try {
-            localStorage.setItem("surya_voice_lang", lang);
-        } catch (e) {}
+        safeStorage.setItem("surya_voice_lang", lang);
     }
 
     /**
      * Get sound mode: 'voice_and_chime' | 'chime_only' | 'mute'
      */
     public getSoundMode(): "voice_and_chime" | "chime_only" | "mute" {
-        if (typeof window === "undefined") return "voice_and_chime";
-        try {
-            const saved = localStorage.getItem("surya_sound_mode");
-            if (saved === "chime_only" || saved === "mute" || saved === "voice_and_chime") return saved;
-        } catch (e) {}
+        const saved = safeStorage.getItem("surya_sound_mode");
+        if (saved === "chime_only" || saved === "mute" || saved === "voice_and_chime") return saved;
         return "voice_and_chime";
     }
 
@@ -354,10 +347,7 @@ class SoundManager {
      * Set sound mode: 'voice_and_chime' | 'chime_only' | 'mute'
      */
     public setSoundMode(mode: "voice_and_chime" | "chime_only" | "mute") {
-        if (typeof window === "undefined") return;
-        try {
-            localStorage.setItem("surya_sound_mode", mode);
-        } catch (e) {}
+        safeStorage.setItem("surya_sound_mode", mode);
     }
 
     /**

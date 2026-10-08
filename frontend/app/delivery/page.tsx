@@ -1001,9 +1001,9 @@ function DeliveryOrderContent() {
         const orderStatus = activeOrder.status || "placed";
         const steps = [
             { key: "placed", title: "Order Confirmed", desc: "Restaurant accepted your order", icon: CheckCircle2 },
-            { key: "preparing", title: "Kitchen Preparing", desc: "Chef is cooking your fresh Arabian dishes", icon: ChefHat },
+            { key: "preparing", title: "Kitchen Preparing", desc: "Chef is cooking your fresh authentic Biryani & Curries", icon: ChefHat },
             { key: "out_for_delivery", title: "Rider on the Way", desc: "Delivery rider dispatched across Kadiri", icon: Bike },
-            { key: "delivered", title: "Delivered", desc: "Enjoy your authentic Arabian feast!", icon: Sparkles },
+            { key: "delivered", title: "Delivered", desc: "Enjoy your authentic Surya Family Restaurant feast!", icon: Sparkles },
         ];
 
         const statusRank: Record<string, number> = {

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { API_BASE } from "@/lib/api";
+import { safeStorage } from "@/lib/safeStorage";
 
 // Derive WebSocket URL from API_BASE or window location
 function getWsBase(): string {
@@ -157,7 +158,7 @@ export function useAdminSocket(
             let url = `${getWsBase()}?client_type=admin&outlet_id=${outletId}`;
             // Attach JWT token for authenticated admin connections
             if (typeof window !== "undefined") {
-                const token = localStorage.getItem("surya_token");
+                const token = safeStorage.getItem("surya_token");
                 if (token) url += `&token=${encodeURIComponent(token)}`;
             }
             const ws = new WebSocket(url);
@@ -190,9 +191,14 @@ export function useAdminSocket(
             ws.onclose = (event: CloseEvent) => {
                 setIsConnected(false);
                 if (!isMountedRef.current) return;
-                // Terminal authorization/policy failures should not loop endlessly
+                // Terminal authorization/policy failures: clear expired session and redirect
                 if (event.code === 1008) {
                     setError(event.reason || "Unauthorized: invalid or missing admin token");
+                    if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin") && !window.location.pathname.includes("/admin/login")) {
+                        safeStorage.removeItem("surya_token");
+                        safeStorage.removeItem("surya_user");
+                        window.location.href = "/admin/login?reason=session_expired";
+                    }
                     return;
                 }
                 const baseDelay = Math.min(backoffRef.current, 30000);

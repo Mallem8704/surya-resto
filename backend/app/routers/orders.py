@@ -139,42 +139,42 @@ async def create_order(
     resolved_customer_phone = None
     resolved_customer_name = None
 
-    if not is_staff:
-        # Mandatory customer login for table diners and home delivery
-        if not customer:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Customer login is required before placing an order. Please sign in or register with your mobile number."
-            )
-        resolved_customer_id = customer.id
-        resolved_customer_phone = customer.phone
-        resolved_customer_name = customer.name or data.customer_name or "Valued Diner"
-        customer.last_order_at = datetime.datetime.utcnow()
-        if data.customer_name and (not customer.name or customer.name == "Customer"):
-            customer.name = data.customer_name.strip()
-    else:
-        # Staff POS cashier walk-in orders
+    if not customer:
         if data.customer_phone and data.customer_phone.strip():
+            # Frictionless guest ordering: auto-resolve or create customer record by phone
             try:
                 clean_phone = normalize_phone(data.customer_phone)
                 c_record = db.query(Customer).filter(Customer.phone == clean_phone).first()
                 if not c_record:
                     c_record = Customer(
                         phone=clean_phone,
-                        name=data.customer_name.strip() if data.customer_name else None,
-                        created_at=datetime.datetime.utcnow(),
+                        name=data.customer_name.strip() if data.customer_name else "Valued Diner",
+                        created_at=datetime.datetime.now(datetime.timezone.utc),
                     )
                     db.add(c_record)
                     db.flush()
-                resolved_customer_id = c_record.id
-                resolved_customer_phone = c_record.phone
-                resolved_customer_name = c_record.name or data.customer_name
-                c_record.last_order_at = datetime.datetime.utcnow()
+                customer = c_record
             except Exception:
                 resolved_customer_phone = data.customer_phone.strip()
-                resolved_customer_name = data.customer_name.strip() if data.customer_name else None
-        else:
+                resolved_customer_name = data.customer_name.strip() if data.customer_name else "Guest Diner"
+        elif is_staff:
             resolved_customer_name = data.customer_name.strip() if data.customer_name else "Walk-in Diner"
+        elif (data.order_type or "").lower() == "dine_in" and data.table_id:
+            resolved_customer_name = data.customer_name.strip() if data.customer_name else f"Table {data.table_id} Diner"
+            resolved_customer_phone = data.customer_phone.strip() if data.customer_phone else None
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mobile phone number is required to place an order. Please provide your phone number."
+            )
+
+    if customer:
+        resolved_customer_id = customer.id
+        resolved_customer_phone = customer.phone
+        resolved_customer_name = customer.name or data.customer_name or "Valued Diner"
+        customer.last_order_at = datetime.datetime.now(datetime.timezone.utc)
+        if data.customer_name and (not customer.name or customer.name == "Customer"):
+            customer.name = data.customer_name.strip()
 
     order_type = (data.order_type or "dine_in").lower()
     table = None

@@ -61,6 +61,8 @@
  * ═════════════════════════════════════════════════════════════════════════════
  */
 
+import { safeStorage } from "@/lib/safeStorage";
+
 export type ThermalPaperWidth = "80mm" | "58mm";
 
 /**
@@ -100,26 +102,16 @@ export const KIOSK_PRINTING_GUIDE = {
  * Get active paper size preference from localStorage (defaults to 80mm)
  */
 export function getThermalPaperSize(): ThermalPaperWidth {
-    if (typeof window === "undefined") return "80mm";
-    try {
-        const saved = localStorage.getItem("pos_thermal_paper_width");
-        if (saved === "58mm" || saved === "80mm") return saved;
-    } catch {
-        // Fallback on storage errors
-    }
+    const saved = safeStorage.getItem("pos_thermal_paper_width");
+    if (saved === "58mm" || saved === "80mm") return saved;
     return "80mm";
 }
 
 /**
- * Set active paper size preference in localStorage
+ * Set active paper size preference in safe storage
  */
 export function setThermalPaperSize(size: ThermalPaperWidth): void {
-    if (typeof window === "undefined") return;
-    try {
-        localStorage.setItem("pos_thermal_paper_width", size);
-    } catch {
-        // Fallback on storage errors
-    }
+    safeStorage.setItem("pos_thermal_paper_width", size);
 }
 
 export interface PrintOrderItem {

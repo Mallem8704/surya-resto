@@ -443,7 +443,12 @@ export default function CashierPOSTerminalPage() {
                 soundManager.playOrderPlacedSuccess();
 
                 // Print Final POS Receipt
-                printPOSReceipt(targetOrder, outlet);
+                const finalPaidOrder = {
+                    ...targetOrder,
+                    payment_status: "paid",
+                    payment_method: "cash",
+                };
+                printPOSReceipt(finalPaidOrder, outlet);
 
                 handleClearCart();
                 setSelectedTable(null);

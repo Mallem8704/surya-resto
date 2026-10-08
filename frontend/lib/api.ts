@@ -23,8 +23,27 @@ interface FetchOptions extends RequestInit {
     params?: Record<string, string | number | boolean | undefined>;
 }
 
+interface CacheEntry {
+    data: any;
+    expiresAt: number;
+}
+const apiMemoryCache = new Map<string, CacheEntry>();
+
+export function clearApiCatalogCache(prefix?: string) {
+    if (!prefix) {
+        apiMemoryCache.clear();
+    } else {
+        for (const key of apiMemoryCache.keys()) {
+            if (key.includes(prefix)) {
+                apiMemoryCache.delete(key);
+            }
+        }
+    }
+}
+
 export async function apiFetch<T = any>(endpoint: string, options: FetchOptions = {}): Promise<T> {
     const { params, headers, ...customConfig } = options;
+    const method = (customConfig.method || "GET").toUpperCase();
 
     const base = getApiBase();
     let url: string;
@@ -47,6 +66,23 @@ export async function apiFetch<T = any>(endpoint: string, options: FetchOptions 
         if (queryString) {
             url += `${url.includes("?") ? "&" : "?"}${queryString}`;
         }
+    }
+
+    // ── FAST IN-MEMORY CATALOG CACHE (0ms latency for repeated catalog views) ──
+    const isCacheableCatalog =
+        method === "GET" &&
+        (endpoint.includes("/categories") ||
+            endpoint.includes("/menu") ||
+            endpoint.includes("/tables") ||
+            endpoint.includes("/outlets/single") ||
+            endpoint.includes("/coupons/active"));
+
+    if (isCacheableCatalog && apiMemoryCache.has(url)) {
+        const cached = apiMemoryCache.get(url)!;
+        if (Date.now() < cached.expiresAt) {
+            return cached.data as T;
+        }
+        apiMemoryCache.delete(url);
     }
 
     const defaultHeaders: Record<string, string> = {};
@@ -146,7 +182,19 @@ export async function apiFetch<T = any>(endpoint: string, options: FetchOptions 
     }
 
     const text = await response.text();
-    return text ? (JSON.parse(text) as T) : ({} as T);
+    const parsedData = text ? (JSON.parse(text) as T) : ({} as T);
+
+    // Save in cache if catalog endpoint
+    if (isCacheableCatalog && response.ok) {
+        apiMemoryCache.set(url, { data: parsedData, expiresAt: Date.now() + 60_000 });
+    }
+
+    // Invalidate catalog cache on mutating requests
+    if (method !== "GET" && (endpoint.includes("/menu") || endpoint.includes("/categories") || endpoint.includes("/tables") || endpoint.includes("/coupons"))) {
+        clearApiCatalogCache();
+    }
+
+    return parsedData;
 }
 
 export const api = {
