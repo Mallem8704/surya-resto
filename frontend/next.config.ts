@@ -19,19 +19,20 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
+    contentDispositionType: "inline",
   },
   async headers() {
     return [
       {
-        // Immutable cache for static dishes, icons, and bundles (0ms latency from browser disk cache)
-        source: "/(dishes|icons|_next/static)/:path*",
+        // Immutable cache for static dishes, icons, images, and bundles (0ms latency from browser disk cache)
+        source: "/(dishes|icons|_next/static|.*\\.(?:jpg|jpeg|png|webp|avif|ico|svg|pdf|css|js|woff|woff2))",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
       },
       {
         // Fresh HTML for application pages & dynamic routes
-        source: "/:path((?!dishes|icons|_next/static).*)",
+        source: "/:path((?!dishes|icons|_next/static|.*\\.(?:jpg|jpeg|png|webp|avif|ico|svg|pdf|css|js|woff|woff2)).*)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
           { key: "X-Content-Type-Options", value: "nosniff" },

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { StaffPortalModal } from "@/components/home/StaffPortalModal";
 import { HowItWorksModal } from "@/components/home/HowItWorksModal";
 import { BranchSelectorModal } from "@/components/home/BranchSelectorModal";
@@ -92,19 +91,19 @@ const NAV = [
 ];
 
 const SPECIALTIES = [
-    { name: "Biryani", sub: "Lovers Favorite", img: "/dishes/3d_biryani.jpg" },
-    { name: "Butter Naan", sub: "Soft & Tasty", img: "/dishes/3d_curries.jpg" },
-    { name: "Punjabi Curry", sub: "Rich & Flavorful", img: "/dishes/3d_mandi.jpg" },
-    { name: "Veg Delights", sub: "Fresh & Healthy", img: "/dishes/3d_veg_starters.jpg" },
+    { name: "Biryani", sub: "Lovers Favorite", img: "/dishes/special_chicken_biryani.jpg" },
+    { name: "Butter Naan", sub: "Soft & Tasty", img: "/dishes/butter_naan.jpg" },
+    { name: "Punjabi Curry", sub: "Rich & Flavorful", img: "/dishes/punjabi_chicken_curry.jpg" },
+    { name: "Veg Delights", sub: "Fresh & Healthy", img: "/dishes/paneer_butter_masala.jpg" },
 ];
 
 const GALLERY = [
-    "/dishes/3d_tiffin.jpg",
-    "/dishes/3d_nonveg_starters.jpg",
-    "/dishes/3d_veg_starters.jpg",
+    "/dishes/special_chicken_biryani.jpg",
+    "/dishes/tandoori_chicken.jpg",
+    "/dishes/butter_naan.jpg",
+    "/dishes/paneer_tikka.jpg",
+    "/dishes/chicken_fry_piece_mandi.jpg",
     "/dishes/3d_curries.jpg",
-    "/dishes/3d_mandi.jpg",
-    "/dishes/3d_biryani.jpg",
 ];
 
 const REVIEWS = [
@@ -1066,7 +1065,16 @@ export default function SuryaLandingPage() {
                                 <div key={s.name} className="flex flex-col items-center gap-2">
                                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden group cursor-pointer"
                                         style={{ border: "3px solid rgba(212,175,55,.5)", boxShadow: "0 0 0 2px rgba(212,175,55,.15)" }}>
-                                        <Image src={s.img} alt={s.name} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
+                                        <img
+                                            src={s.img}
+                                            alt={s.name}
+                                            loading="lazy"
+                                            decoding="async"
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                            onError={(e) => {
+                                                (e.currentTarget as HTMLImageElement).src = "/dishes/3d_biryani.jpg";
+                                            }}
+                                        />
                                     </div>
                                     <p className="font-bold text-white text-center" style={{ fontSize: 12 }}>{s.name}</p>
                                     <p className="text-center" style={{ color: "rgba(255,255,255,.5)", fontSize: 10 }}>{s.sub}</p>
@@ -1107,7 +1115,16 @@ export default function SuryaLandingPage() {
                         <div className="grid grid-cols-3 grid-rows-2 gap-1.5 h-48 sm:h-56">
                             <div className="col-span-2 row-span-2 relative rounded-xl overflow-hidden cursor-pointer group"
                                 onClick={() => setLightbox(0)}>
-                                <Image src={GALLERY[0]} alt="Gallery 1" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                                <img
+                                    src={GALLERY[0]}
+                                    alt="Surya Family Restaurant Gallery"
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = "/dishes/3d_biryani.jpg";
+                                    }}
+                                />
                                 <div className="absolute bottom-2 right-2 rounded px-2 py-0.5 text-[10px] font-bold"
                                     style={{ background: "rgba(26,8,0,.75)", color: "#D4AF37" }}>
                                     Surya Family Restaurant
@@ -1116,7 +1133,16 @@ export default function SuryaLandingPage() {
                             {GALLERY.slice(1, 5).map((src, i) => (
                                 <div key={i} className="relative rounded-xl overflow-hidden cursor-pointer group"
                                     onClick={() => setLightbox(i + 1)}>
-                                    <Image src={src} alt={`Gallery ${i + 2}`} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    <img
+                                        src={src}
+                                        alt={`Gallery photo ${i + 2}`}
+                                        loading="lazy"
+                                        decoding="async"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        onError={(e) => {
+                                            (e.currentTarget as HTMLImageElement).src = "/dishes/3d_biryani.jpg";
+                                        }}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -1131,8 +1157,15 @@ export default function SuryaLandingPage() {
                     <button className="absolute top-4 right-4 text-white" onClick={() => setLightbox(null)}>
                         <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>
                     </button>
-                    <div className="relative w-full max-w-2xl h-[70vh]" onClick={e => e.stopPropagation()}>
-                        <Image src={GALLERY[lightbox]} alt="Gallery" fill className="object-contain rounded-xl" />
+                    <div className="relative w-full max-w-2xl h-[70vh] flex items-center justify-center" onClick={e => e.stopPropagation()}>
+                        <img
+                            src={GALLERY[lightbox]}
+                            alt="Surya Gallery Preview"
+                            className="max-w-full max-h-full object-contain rounded-xl"
+                            onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = "/dishes/3d_biryani.jpg";
+                            }}
+                        />
                     </div>
                     <div className="absolute bottom-5 flex gap-2">
                         {GALLERY.map((_, i) => (
