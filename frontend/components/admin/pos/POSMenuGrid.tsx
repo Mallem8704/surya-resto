@@ -81,24 +81,24 @@ export function POSMenuGrid({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#120E0B] border-r border-[#D4AF37]/20">
+        <div className="flex flex-col h-full bg-slate-50 border-r border-slate-200">
             {/* SEARCH & FILTERS BAR */}
-            <div className="p-3 sm:p-4 border-b border-white/10 space-y-3 bg-[#1A140F]">
+            <div className="p-3 sm:p-4 border-b border-slate-200 space-y-3 bg-white">
                 <div className="flex items-center gap-2">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D4AF37]" />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-600" />
                         <input
                             ref={searchRef}
                             type="text"
                             placeholder="Search item by name or short-code... [F2]"
                             value={searchQuery}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/50 border border-[#D4AF37]/30 text-white placeholder-white/40 text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 placeholder-white/40 text-xs sm:text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => onSearchChange("")}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-xs"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 text-xs"
                             >
                                 Clear
                             </button>
@@ -106,12 +106,12 @@ export function POSMenuGrid({
                     </div>
 
                     {/* Veg / Non-Veg Quick Switcher */}
-                    <div className="flex rounded-xl bg-black/40 border border-white/10 p-1 shrink-0">
+                    <div className="flex rounded-xl bg-slate-100 border border-slate-200 p-1 shrink-0">
                         <button
                             type="button"
                             onClick={() => setVegFilter("all")}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                                vegFilter === "all" ? "bg-[#D4AF37] text-black" : "text-white/60 hover:text-white"
+                                vegFilter === "all" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
                             }`}
                         >
                             All
@@ -146,8 +146,8 @@ export function POSMenuGrid({
                         onClick={() => onSelectCategory("all")}
                         className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
                             selectedCategory === "all"
-                                ? "bg-[#D4AF37] text-black shadow-md"
-                                : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
+                                ? "bg-blue-600 text-white shadow-xs shadow-md"
+                                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
                         }`}
                     >
                         All Categories ({items.length})
@@ -161,8 +161,8 @@ export function POSMenuGrid({
                                 onClick={() => onSelectCategory(cat.id)}
                                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
                                     selectedCategory === cat.id
-                                        ? "bg-[#D4AF37] text-black shadow-md"
-                                        : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
+                                        ? "bg-blue-600 text-white shadow-xs shadow-md"
+                                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
                                 }`}
                             >
                                 <span>{cat.name}</span>
@@ -177,14 +177,14 @@ export function POSMenuGrid({
             <div className="flex-1 overflow-y-auto p-3 sm:p-4">
                 {filteredItems.length === 0 ? (
                     <div className="h-64 flex flex-col items-center justify-center text-center p-6">
-                        <p className="text-sm text-white/50">No active menu items match your search.</p>
+                        <p className="text-sm text-slate-500">No active menu items match your search.</p>
                         <button
                             onClick={() => {
                                 onSearchChange("");
                                 onSelectCategory("all");
                                 setVegFilter("all");
                             }}
-                            className="mt-3 px-4 py-1.5 rounded-xl bg-white/10 text-xs font-bold text-[#D4AF37] hover:bg-white/20"
+                            className="mt-3 px-4 py-1.5 rounded-xl bg-slate-100 text-xs font-bold text-blue-600 hover:bg-slate-200"
                         >
                             Reset Filters
                         </button>
@@ -196,7 +196,7 @@ export function POSMenuGrid({
                                 key={it.id}
                                 type="button"
                                 onClick={() => handleItemClick(it)}
-                                className="p-3 rounded-2xl bg-[#1A140F] hover:bg-[#251D16] border border-white/10 hover:border-[#D4AF37]/60 transition-all text-left flex flex-col justify-between group cursor-pointer relative overflow-hidden shadow-sm active:scale-98 min-h-[110px]"
+                                className="p-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-600/60 transition-all text-left flex flex-col justify-between group cursor-pointer relative overflow-hidden shadow-sm active:scale-98 min-h-[110px]"
                             >
                                 {/* Top Badge & Type */}
                                 <div className="flex items-start justify-between gap-1 w-full">
@@ -214,22 +214,22 @@ export function POSMenuGrid({
 
                                 {/* Title */}
                                 <div className="my-1.5 w-full">
-                                    <h4 className="font-bold text-xs sm:text-sm text-[#F8F3EB] group-hover:text-[#D4AF37] transition-colors line-clamp-2 leading-tight">
+                                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
                                         {it.name}
                                     </h4>
                                     {it.name_te && (
-                                        <p className="text-[10px] text-white/40 font-telugu line-clamp-1 mt-0.5">
+                                        <p className="text-[10px] text-slate-400 font-telugu line-clamp-1 mt-0.5">
                                             {it.name_te}
                                         </p>
                                     )}
                                 </div>
 
                                 {/* Price & Add Icon */}
-                                <div className="flex items-center justify-between w-full pt-1.5 border-t border-white/5">
-                                    <span className="font-mono font-black text-xs sm:text-sm text-[#D4AF37]">
+                                <div className="flex items-center justify-between w-full pt-1.5 border-t border-slate-100">
+                                    <span className="font-mono font-black text-xs sm:text-sm text-blue-600">
                                         {formatRupees(it.price_paise)}
                                     </span>
-                                    <div className="w-6 h-6 rounded-lg bg-white/5 group-hover:bg-[#D4AF37] group-hover:text-black text-white/70 flex items-center justify-center transition-colors">
+                                    <div className="w-6 h-6 rounded-lg bg-white group-hover:bg-blue-600 group-hover:text-slate-900 text-slate-600 flex items-center justify-center transition-colors">
                                         <Plus className="w-3.5 h-3.5" />
                                     </div>
                                 </div>
@@ -241,20 +241,20 @@ export function POSMenuGrid({
 
             {/* VARIANT SELECTOR MODAL */}
             {variantModalItem && (
-                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="w-full max-w-md bg-[#171310] border border-[#D4AF37]/40 rounded-3xl p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-150">
-                        <div className="flex items-start justify-between border-b border-white/10 pb-3">
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-150">
+                        <div className="flex items-start justify-between border-b border-slate-200 pb-3">
                             <div>
-                                <span className="text-[10px] font-mono uppercase tracking-wider text-[#D4AF37] font-bold">
+                                <span className="text-[10px] font-mono uppercase tracking-wider text-blue-600 font-bold">
                                     Select Portion / Variant
                                 </span>
-                                <h3 className="font-serif text-lg font-black text-white mt-0.5">
+                                <h3 className="font-serif text-lg font-black text-slate-900 mt-0.5">
                                     {variantModalItem.name}
                                 </h3>
                             </div>
                             <button
                                 onClick={() => setVariantModalItem(null)}
-                                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition cursor-pointer"
+                                className="p-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -269,23 +269,23 @@ export function POSMenuGrid({
                                     onClick={() => setSelectedVariant(v)}
                                     className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition cursor-pointer ${
                                         selectedVariant?.id === v.id
-                                            ? "bg-[#2A1E14] border-[#D4AF37] ring-2 ring-[#D4AF37]/30"
-                                            : "bg-[#1A140F] border-white/10 hover:border-white/30"
+                                            ? "bg-blue-50 border-blue-600 ring-2 ring-blue-200"
+                                            : "bg-white border-slate-200 hover:border-white/30"
                                     }`}
                                 >
                                     <div className="flex items-center gap-2.5">
                                         <div
                                             className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                                                 selectedVariant?.id === v.id
-                                                    ? "border-[#D4AF37] bg-[#D4AF37] text-black"
+                                                    ? "border-blue-600 bg-blue-600 text-white shadow-xs"
                                                     : "border-white/40"
                                             }`}
                                         >
                                             {selectedVariant?.id === v.id && <Check className="w-3 h-3" />}
                                         </div>
-                                        <span className="font-bold text-sm text-white">{v.name}</span>
+                                        <span className="font-bold text-sm text-slate-900">{v.name}</span>
                                     </div>
-                                    <span className="font-mono font-black text-sm text-[#D4AF37]">
+                                    <span className="font-mono font-black text-sm text-blue-600">
                                         {formatRupees(v.price_paise)}
                                     </span>
                                 </button>
@@ -294,7 +294,7 @@ export function POSMenuGrid({
 
                         {/* Custom Item Note */}
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-white/50">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                                 Cooking Note (Optional)
                             </label>
                             <input
@@ -302,7 +302,7 @@ export function POSMenuGrid({
                                 placeholder="e.g. Less spicy, extra salan..."
                                 value={variantNote}
                                 onChange={(e) => setVariantNote(e.target.value)}
-                                className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-white text-xs focus:outline-none focus:border-[#D4AF37]"
+                                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                             />
                         </div>
 
@@ -311,14 +311,14 @@ export function POSMenuGrid({
                             <button
                                 type="button"
                                 onClick={() => setVariantModalItem(null)}
-                                className="flex-1 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition"
+                                className="flex-1 py-3 rounded-2xl bg-white hover:bg-slate-100 text-xs font-bold text-slate-900 transition"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 onClick={handleConfirmVariant}
-                                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#C59B27] text-black text-xs font-black uppercase tracking-wider shadow-lg hover:scale-102 transition"
+                                className="flex-1 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider shadow-lg hover:scale-102 transition"
                             >
                                 Add to Bill ({formatRupees(selectedVariant?.price_paise || variantModalItem.price_paise)})
                             </button>

@@ -219,7 +219,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="flex h-screen bg-cream-50 overflow-hidden">
+        <div className="flex h-screen bg-slate-50 overflow-hidden">
             <AdminSidebar />
 
             <main className="flex-1 flex flex-col h-screen overflow-hidden">
@@ -232,12 +232,12 @@ export default function SettingsPage() {
                 <div className="flex-1 overflow-auto p-6">
                     <div className="max-w-4xl mx-auto">
                         <div className="flex items-center gap-3 mb-8">
-                            <div className="w-12 h-12 bg-terracotta-100 text-terracotta-600 rounded-xl flex items-center justify-center shadow-inner">
+                            <div className="w-12 h-12 bg-terracotta-100 text-blue-600 rounded-xl flex items-center justify-center shadow-inner">
                                 <Settings className="w-6 h-6" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-espresso-900">Store Settings</h1>
-                                <p className="text-espresso-500 font-medium text-sm">Manage your cafe's core identity and operating details</p>
+                                <h1 className="text-2xl font-bold text-slate-900">Store Settings</h1>
+                                <p className="text-slate-500 font-medium text-sm">Manage your cafe's core identity and operating details</p>
                             </div>
                         </div>
 
@@ -261,12 +261,12 @@ export default function SettingsPage() {
                                 {/* Basic Info */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
                                     <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center gap-2">
-                                        <Store className="w-4 h-4 text-espresso-600" />
-                                        <h2 className="font-bold text-espresso-800">Basic Information</h2>
+                                        <Store className="w-4 h-4 text-slate-600" />
+                                        <h2 className="font-bold text-slate-800">Basic Information</h2>
                                     </div>
                                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-espresso-800">Store Name</label>
+                                            <label className="text-sm font-bold text-slate-800">Store Name</label>
                                             <input
                                                 type="text"
                                                 name="name"
@@ -278,10 +278,10 @@ export default function SettingsPage() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-espresso-800">Tagline</label>
+                                            <label className="text-sm font-bold text-slate-800">Tagline</label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <Tag className="w-4 h-4 text-espresso-400" />
+                                                    <Tag className="w-4 h-4 text-slate-400" />
                                                 </div>
                                                 <input
                                                     type="text"
@@ -299,15 +299,15 @@ export default function SettingsPage() {
                                 {/* Contact & Location */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
                                     <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center gap-2">
-                                        <MapPin className="w-4 h-4 text-espresso-600" />
-                                        <h2 className="font-bold text-espresso-800">Location & Contact</h2>
+                                        <MapPin className="w-4 h-4 text-slate-600" />
+                                        <h2 className="font-bold text-slate-800">Location & Contact</h2>
                                     </div>
                                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-espresso-800">Phone Number</label>
+                                            <label className="text-sm font-bold text-slate-800">Phone Number</label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <Phone className="w-4 h-4 text-espresso-400" />
+                                                    <Phone className="w-4 h-4 text-slate-400" />
                                                 </div>
                                                 <input
                                                     type="text"
@@ -320,10 +320,10 @@ export default function SettingsPage() {
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-espresso-800">Opening Hours</label>
+                                            <label className="text-sm font-bold text-slate-800">Opening Hours</label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                    <Clock className="w-4 h-4 text-espresso-400" />
+                                                    <Clock className="w-4 h-4 text-slate-400" />
                                                 </div>
                                                 <input
                                                     type="text"
@@ -337,7 +337,7 @@ export default function SettingsPage() {
                                             </div>
                                         </div>
                                         <div className="space-y-2 md:col-span-2">
-                                            <label className="text-sm font-bold text-espresso-800">Address</label>
+                                            <label className="text-sm font-bold text-slate-800">Address</label>
                                             <input
                                                 type="text"
                                                 name="address"
@@ -353,12 +353,12 @@ export default function SettingsPage() {
                                 {/* Financial */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
                                     <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center gap-2">
-                                        <IndianRupee className="w-4 h-4 text-espresso-600" />
-                                        <h2 className="font-bold text-espresso-800">Financial Settings</h2>
+                                        <IndianRupee className="w-4 h-4 text-slate-600" />
+                                        <h2 className="font-bold text-slate-800">Financial Settings</h2>
                                     </div>
                                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-espresso-800">Currency</label>
+                                            <label className="text-sm font-bold text-slate-800">Currency</label>
                                             <select
                                                 name="currency"
                                                 value={formData.currency}
@@ -372,7 +372,7 @@ export default function SettingsPage() {
                                             </select>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-espresso-800">Tax Rate (%)</label>
+                                            <label className="text-sm font-bold text-slate-800">Tax Rate (%)</label>
                                             <input
                                                 type="number"
                                                 name="tax_rate_percent"
@@ -390,12 +390,12 @@ export default function SettingsPage() {
                                 {/* Compliance & Payment Gateway */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
                                     <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center gap-2">
-                                        <Shield className="w-4 h-4 text-espresso-600" />
-                                        <h2 className="font-bold text-espresso-800">Compliance & Digital Payments</h2>
+                                        <Shield className="w-4 h-4 text-slate-600" />
+                                        <h2 className="font-bold text-slate-800">Compliance & Digital Payments</h2>
                                     </div>
                                     <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-espresso-800">GSTIN (GST Number)</label>
+                                            <label className="text-sm font-bold text-slate-800">GSTIN (GST Number)</label>
                                             <input
                                                 type="text"
                                                 name="gstin"
@@ -407,7 +407,7 @@ export default function SettingsPage() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-espresso-800">FSSAI License No.</label>
+                                            <label className="text-sm font-bold text-slate-800">FSSAI License No.</label>
                                             <input
                                                 type="text"
                                                 name="fssai_license_number"
@@ -420,7 +420,7 @@ export default function SettingsPage() {
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
-                                                <label className="text-sm font-bold text-espresso-800">Merchant UPI ID (VPA)</label>
+                                                <label className="text-sm font-bold text-slate-800">Merchant UPI ID (VPA)</label>
                                                 <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
                                                     0% Fee Direct Bank
                                                 </span>
@@ -432,9 +432,9 @@ export default function SettingsPage() {
                                                 onChange={handleChange}
                                                 disabled={!isOwner}
                                                 placeholder="e.g. 9880358634@upi or surya@paytm"
-                                                className="w-full px-4 py-2.5 rounded-xl border border-espresso-200 focus:outline-none focus:ring-2 focus:ring-terracotta-500 disabled:bg-gray-50 disabled:text-gray-500 transition-shadow font-mono text-xs font-bold text-espresso-950"
+                                                className="w-full px-4 py-2.5 rounded-xl border border-espresso-200 focus:outline-none focus:ring-2 focus:ring-terracotta-500 disabled:bg-gray-50 disabled:text-gray-500 transition-shadow font-mono text-xs font-bold text-slate-900"
                                             />
-                                            <p className="text-[11px] text-espresso-500">
+                                            <p className="text-[11px] text-slate-500">
                                                 Table Dynamic QRs and Thermal Bill QRs credit directly to this bank account instantly.
                                             </p>
                                         </div>
@@ -446,14 +446,14 @@ export default function SettingsPage() {
                                     <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <Sparkles className="w-4 h-4 text-amber-600" />
-                                            <h2 className="font-bold text-espresso-800">Ordering Channels & Operational Modes</h2>
+                                            <h2 className="font-bold text-slate-800">Ordering Channels & Operational Modes</h2>
                                         </div>
                                         <span className="text-[10px] font-black text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                                             Live Public Control
                                         </span>
                                     </div>
                                     <div className="p-6 space-y-5">
-                                        <p className="text-xs text-espresso-600 leading-relaxed">
+                                        <p className="text-xs text-slate-600 leading-relaxed">
                                             Toggle customer ordering channels below. When a channel is paused or disabled, the public website automatically updates and guides customers to active channels.
                                         </p>
 
@@ -470,8 +470,8 @@ export default function SettingsPage() {
                                                             <Bike className="w-4 h-4" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="font-bold text-sm text-espresso-900 leading-tight">Online Delivery</h3>
-                                                            <span className="text-[10px] text-espresso-500 font-mono">/delivery</span>
+                                                            <h3 className="font-bold text-sm text-slate-900 leading-tight">Online Delivery</h3>
+                                                            <span className="text-[10px] text-slate-500 font-mono">/delivery</span>
                                                         </div>
                                                     </div>
                                                     <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -485,7 +485,7 @@ export default function SettingsPage() {
                                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                                                     </label>
                                                 </div>
-                                                <p className="text-[11px] text-espresso-600 mb-2 leading-snug">
+                                                <p className="text-[11px] text-slate-600 mb-2 leading-snug">
                                                     Doorstep delivery and takeaway parcel pickup across Kadiri town.
                                                 </p>
                                                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
@@ -507,8 +507,8 @@ export default function SettingsPage() {
                                                             <Calendar className="w-4 h-4" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="font-bold text-sm text-espresso-900 leading-tight">Table Booking</h3>
-                                                            <span className="text-[10px] text-espresso-500 font-mono">/book-table</span>
+                                                            <h3 className="font-bold text-sm text-slate-900 leading-tight">Table Booking</h3>
+                                                            <span className="text-[10px] text-slate-500 font-mono">/book-table</span>
                                                         </div>
                                                     </div>
                                                     <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -522,7 +522,7 @@ export default function SettingsPage() {
                                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                                                     </label>
                                                 </div>
-                                                <p className="text-[11px] text-espresso-600 mb-2 leading-snug">
+                                                <p className="text-[11px] text-slate-600 mb-2 leading-snug">
                                                     VIP dine-in pre-reservations for AC dining hall and family cabins.
                                                 </p>
                                                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
@@ -544,8 +544,8 @@ export default function SettingsPage() {
                                                             <QrCode className="w-4 h-4" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="font-bold text-sm text-espresso-900 leading-tight">Table QR Order</h3>
-                                                            <span className="text-[10px] text-espresso-500 font-mono">/order?table=...</span>
+                                                            <h3 className="font-bold text-sm text-slate-900 leading-tight">Table QR Order</h3>
+                                                            <span className="text-[10px] text-slate-500 font-mono">/order?table=...</span>
                                                         </div>
                                                     </div>
                                                     <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -559,7 +559,7 @@ export default function SettingsPage() {
                                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                                     </label>
                                                 </div>
-                                                <p className="text-[11px] text-espresso-600 mb-2 leading-snug">
+                                                <p className="text-[11px] text-slate-600 mb-2 leading-snug">
                                                     Dine-in customers scanning table QR stands to place orders directly.
                                                 </p>
                                                 <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
@@ -577,7 +577,7 @@ export default function SettingsPage() {
                                         <button
                                             type="submit"
                                             disabled={isSaving}
-                                            className="flex items-center gap-2 bg-terracotta-600 hover:bg-terracotta-700 text-white px-8 py-3 rounded-xl font-bold shadow-md shadow-terracotta-600/20 transition-all active:scale-95 disabled:opacity-70 cursor-pointer"
+                                            className="flex items-center gap-2 bg-blue-600 hover:bg-terracotta-700 text-white px-8 py-3 rounded-xl font-bold shadow-md shadow-terracotta-600/20 transition-all active:scale-95 disabled:opacity-70 cursor-pointer"
                                         >
                                             {isSaving ? (
                                                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -595,13 +595,13 @@ export default function SettingsPage() {
                                 <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Tag className="w-5 h-5 text-amber-600" />
-                                        <h2 className="font-bold text-espresso-900">Promo Codes & Discount Coupons ({coupons.length})</h2>
+                                        <h2 className="font-bold text-slate-900">Promo Codes & Discount Coupons ({coupons.length})</h2>
                                     </div>
                                     {isOwner && (
                                         <button
                                             type="button"
                                             onClick={() => setShowNewCouponModal(true)}
-                                            className="px-3 py-1.5 rounded-xl bg-espresso-900 hover:bg-black text-amber-400 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                                            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-black text-amber-400 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
                                         >
                                             <Plus className="w-3.5 h-3.5" />
                                             <span>Create Coupon</span>
@@ -611,7 +611,7 @@ export default function SettingsPage() {
 
                                 <div className="p-6">
                                     {coupons.length === 0 ? (
-                                        <p className="text-sm text-espresso-400 text-center py-6">No promo codes created yet.</p>
+                                        <p className="text-sm text-slate-400 text-center py-6">No promo codes created yet.</p>
                                     ) : (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {coupons.map((c) => (
@@ -641,8 +641,8 @@ export default function SettingsPage() {
                                                                 {c.discount_type === "percent" ? `${c.discount_value}% OFF` : `₹${(c.discount_value/100).toFixed(0)} FLAT OFF`}
                                                             </span>
                                                         </div>
-                                                        <p className="text-xs font-semibold text-espresso-800 mb-1">{c.description || "Promo discount"}</p>
-                                                        <div className="text-[11px] text-espresso-500 space-y-0.5">
+                                                        <p className="text-xs font-semibold text-slate-800 mb-1">{c.description || "Promo discount"}</p>
+                                                        <div className="text-[11px] text-slate-500 space-y-0.5">
                                                             <div>Min Order: ₹{(c.min_order_paise/100).toFixed(0)}</div>
                                                             {c.max_discount_paise && <div>Max Cap: ₹{(c.max_discount_paise/100).toFixed(0)}</div>}
                                                             <div>Times Used: <strong>{c.times_used}</strong> {c.usage_limit ? `/ ${c.usage_limit}` : ""}</div>
@@ -683,21 +683,21 @@ export default function SettingsPage() {
                             {/* ══════════════════════════════════════════════════════════════
                                 3. ACCOUNT SECURITY & MASTER PASSWORD
                                ══════════════════════════════════════════════════════════════ */}
-                            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-cream-200">
-                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-cream-200">
+                            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200">
+                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
                                     <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-600">
                                         <ShieldCheck className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-black text-espresso-950">Account Security &amp; Master Credentials</h2>
-                                        <p className="text-xs text-espresso-500">Update your private master login password safely with bcrypt encryption.</p>
+                                        <h2 className="text-lg font-black text-slate-900">Account Security &amp; Master Credentials</h2>
+                                        <p className="text-xs text-slate-500">Update your private master login password safely with bcrypt encryption.</p>
                                     </div>
                                 </div>
 
                                 <form onSubmit={handlePasswordChange} className="max-w-xl space-y-4">
                                     <div>
-                                        <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1.5 flex items-center gap-1.5">
-                                            <Key className="w-3.5 h-3.5 text-espresso-400" />
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
+                                            <Key className="w-3.5 h-3.5 text-slate-400" />
                                             <span>Current Password *</span>
                                         </label>
                                         <input
@@ -706,13 +706,13 @@ export default function SettingsPage() {
                                             onChange={(e) => setCurrentPassword(e.target.value)}
                                             placeholder="Enter your existing account password"
                                             required
-                                            className="w-full px-4 py-2.5 rounded-2xl border border-cream-300 text-sm font-medium focus:outline-none focus:border-indigo-500 bg-cream-50/50"
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-medium focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                                         />
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1.5 flex items-center gap-1.5">
+                                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
                                                 <Lock className="w-3.5 h-3.5 text-indigo-500" />
                                                 <span>New Password *</span>
                                             </label>
@@ -723,12 +723,12 @@ export default function SettingsPage() {
                                                 placeholder="Min. 8 characters"
                                                 required
                                                 minLength={8}
-                                                className="w-full px-4 py-2.5 rounded-2xl border border-cream-300 text-sm font-medium focus:outline-none focus:border-indigo-500 bg-cream-50/50"
+                                                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-medium focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1.5 flex items-center gap-1.5">
+                                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
                                                 <Lock className="w-3.5 h-3.5 text-indigo-500" />
                                                 <span>Confirm New Password *</span>
                                             </label>
@@ -739,7 +739,7 @@ export default function SettingsPage() {
                                                 placeholder="Re-type new password"
                                                 required
                                                 minLength={8}
-                                                className="w-full px-4 py-2.5 rounded-2xl border border-cream-300 text-sm font-medium focus:outline-none focus:border-indigo-500 bg-cream-50/50"
+                                                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-medium focus:outline-none focus:border-indigo-500 bg-slate-50/50"
                                             />
                                         </div>
                                     </div>
@@ -773,43 +773,43 @@ export default function SettingsPage() {
                             {/* Create Coupon Modal */}
                             {showNewCouponModal && (
                                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-                                    <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-3xl p-6 shadow-2xl border border-cream-200">
-                                        <h3 className="text-lg font-black text-espresso-950 mb-4 flex items-center gap-2">
+                                    <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-3xl p-6 shadow-2xl border border-slate-200">
+                                        <h3 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
                                             <Sparkles className="w-5 h-5 text-amber-500" />
                                             <span>Create New Promo Coupon</span>
                                         </h3>
 
                                         <form onSubmit={handleCreateCoupon} className="space-y-4">
                                             <div>
-                                                <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1">Coupon Code *</label>
+                                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Coupon Code *</label>
                                                 <input
                                                     type="text"
                                                     placeholder="e.g. MANDI20, WELCOME50"
                                                     value={newCoupon.code}
                                                     onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
                                                     required
-                                                    className="w-full px-3 py-2 rounded-xl border border-cream-300 font-mono font-bold uppercase text-sm focus:outline-none focus:border-amber-500"
+                                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono font-bold uppercase text-sm focus:outline-none focus:border-amber-500"
                                                 />
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1">Description</label>
+                                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Description</label>
                                                 <input
                                                     type="text"
                                                     placeholder="e.g. Flat ₹50 OFF on Kadiri Deliveries"
                                                     value={newCoupon.description}
                                                     onChange={(e) => setNewCoupon({ ...newCoupon, description: e.target.value })}
-                                                    className="w-full px-3 py-2 rounded-xl border border-cream-300 text-xs focus:outline-none focus:border-amber-500"
+                                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-amber-500"
                                                 />
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1">Discount Type</label>
+                                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Discount Type</label>
                                                     <select
                                                         value={newCoupon.discount_type}
                                                         onChange={(e) => setNewCoupon({ ...newCoupon, discount_type: e.target.value })}
-                                                        className="w-full px-3 py-2 rounded-xl border border-cream-300 text-xs font-bold"
+                                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold"
                                                     >
                                                         <option value="flat">Flat ₹ (Rupees)</option>
                                                         <option value="percent">Percentage %</option>
@@ -817,7 +817,7 @@ export default function SettingsPage() {
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1">
+                                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                                                         {newCoupon.discount_type === "flat" ? "Discount (₹)" : "Discount (%)"}
                                                     </label>
                                                     <input
@@ -826,40 +826,40 @@ export default function SettingsPage() {
                                                         onChange={(e) => setNewCoupon({ ...newCoupon, discount_value: parseFloat(e.target.value) || 0 })}
                                                         required
                                                         min={1}
-                                                        className="w-full px-3 py-2 rounded-xl border border-cream-300 font-bold text-xs"
+                                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-xs"
                                                     />
                                                 </div>
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1">Min Order (₹)</label>
+                                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Min Order (₹)</label>
                                                     <input
                                                         type="number"
                                                         value={newCoupon.min_order}
                                                         onChange={(e) => setNewCoupon({ ...newCoupon, min_order: parseFloat(e.target.value) || 0 })}
                                                         min={0}
-                                                        className="w-full px-3 py-2 rounded-xl border border-cream-300 font-bold text-xs"
+                                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-xs"
                                                     />
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1">Usage Limit</label>
+                                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Usage Limit</label>
                                                     <input
                                                         type="number"
                                                         value={newCoupon.usage_limit}
                                                         onChange={(e) => setNewCoupon({ ...newCoupon, usage_limit: parseInt(e.target.value) || 100 })}
                                                         min={1}
-                                                        className="w-full px-3 py-2 rounded-xl border border-cream-300 font-bold text-xs"
+                                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-xs"
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-cream-200">
+                                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowNewCouponModal(false)}
-                                                    className="px-4 py-2 rounded-xl border border-cream-300 text-espresso-700 text-xs font-bold hover:bg-cream-100 cursor-pointer"
+                                                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 cursor-pointer"
                                                 >
                                                     Cancel
                                                 </button>

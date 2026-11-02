@@ -3,7 +3,7 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
 
-export type ButtonVariant = "primary" | "secondary" | "saffron" | "outline" | "ghost" | "danger";
+export type ButtonVariant = "primary" | "secondary" | "saffron" | "outline" | "ghost" | "danger" | "blue" | "red";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -30,17 +30,21 @@ export function Button({
 
     const variantStyles: Record<ButtonVariant, string> = {
         primary:
-            "bg-terracotta-500 text-white hover:bg-terracotta-600 focus:ring-terracotta-400 shadow-sm shadow-terracotta-500/20 active:bg-terracotta-700",
+            "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-400 shadow-sm shadow-blue-500/20 active:bg-blue-800",
+        blue:
+            "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-400 shadow-sm shadow-blue-500/20 active:bg-blue-800",
+        red:
+            "bg-red-600 text-white hover:bg-red-700 focus:ring-red-400 shadow-sm shadow-red-600/20 active:bg-red-800",
         secondary:
-            "bg-espresso-900 text-white hover:bg-espresso-800 focus:ring-espresso-600 shadow-sm",
+            "bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-600 shadow-sm",
         saffron:
-            "bg-saffron-500 text-espresso-950 hover:bg-saffron-400 focus:ring-saffron-300 font-bold shadow-sm shadow-saffron-500/20",
+            "bg-amber-500 text-slate-950 hover:bg-amber-400 focus:ring-amber-300 font-bold shadow-sm shadow-amber-500/20",
         outline:
-            "border border-cream-300 bg-white/80 hover:bg-cream-100 text-espresso-900 focus:ring-cream-400",
+            "border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 focus:ring-slate-300 shadow-2xs",
         ghost:
-            "bg-transparent hover:bg-cream-200/60 text-espresso-800 focus:ring-cream-300",
+            "bg-transparent hover:bg-slate-100 text-slate-700 focus:ring-slate-300",
         danger:
-            "bg-red-600 text-white hover:bg-red-700 focus:ring-red-400 shadow-sm shadow-red-600/20",
+            "bg-red-600 text-white hover:bg-red-700 focus:ring-red-400 shadow-sm shadow-red-600/20 active:bg-red-800",
     };
 
     const sizeStyles: Record<ButtonSize, string> = {

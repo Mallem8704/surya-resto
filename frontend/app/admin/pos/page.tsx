@@ -525,39 +525,39 @@ export default function CashierPOSTerminalPage() {
     };
 
     return (
-        <div className="h-screen flex flex-col bg-[#0D0A08] text-white overflow-hidden font-sans select-none">
+        <div className="h-screen flex flex-col bg-slate-50 text-slate-900 overflow-hidden font-sans select-none">
             <AudioUnlockBanner />
             {/* ══════════════════════════════════════════════════════════════
                 TOP POS COMMAND BAR (TMbill / Petpooja Style)
                ══════════════════════════════════════════════════════════════ */}
-            <header className="h-14 bg-[#171310] border-b border-[#D4AF37]/30 px-3 sm:px-4 flex items-center justify-between shrink-0 shadow-md">
+            <header className="h-14 bg-white border-b border-slate-200 px-3 sm:px-4 flex items-center justify-between shrink-0 shadow-md">
                 {/* Left: Brand & Back to Dashboard */}
                 <div className="flex items-center gap-3">
                     <Link
                         href="/admin"
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition"
+                        className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition"
                         title="Back to Admin Kanban"
                     >
-                        <LayoutDashboard className="w-4 h-4 text-[#D4AF37]" />
+                        <LayoutDashboard className="w-4 h-4 text-blue-600" />
                     </Link>
 
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className="font-serif font-black text-sm sm:text-base text-white uppercase tracking-wider leading-none">
+                            <h1 className="font-serif font-black text-sm sm:text-base text-slate-900 uppercase tracking-wider leading-none">
                                 DineOS POS
                             </h1>
-                            <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
+                            <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-slate-200 uppercase">
                                 Billing Terminal
                             </span>
                         </div>
-                        <p className="text-[10px] text-white/50 leading-tight mt-0.5">
+                        <p className="text-[10px] text-slate-500 leading-tight mt-0.5">
                             {outlet?.name || "Surya Family Restaurant"} • Cashier: {user?.name || "Admin"}
                         </p>
                     </div>
                 </div>
 
                 {/* Center: 3 ORDER MODES TABS (Dine-In / Takeaway / Delivery) */}
-                <div className="flex rounded-xl bg-black/60 p-1 border border-white/10 shadow-inner">
+                <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 shadow-inner">
                     <button
                         type="button"
                         onClick={() => {
@@ -566,8 +566,8 @@ export default function CashierPOSTerminalPage() {
                         }}
                         className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer ${
                             orderType === "dine_in"
-                                ? "bg-[#D4AF37] text-black shadow-md"
-                                : "text-white/60 hover:text-white"
+                                ? "bg-blue-600 text-white shadow-xs shadow-md"
+                                : "text-slate-600 hover:text-slate-900"
                         }`}
                     >
                         <Utensils className="w-3.5 h-3.5" />
@@ -582,8 +582,8 @@ export default function CashierPOSTerminalPage() {
                         }}
                         className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer ${
                             orderType === "takeaway"
-                                ? "bg-[#D4AF37] text-black shadow-md"
-                                : "text-white/60 hover:text-white"
+                                ? "bg-blue-600 text-white shadow-xs shadow-md"
+                                : "text-slate-600 hover:text-slate-900"
                         }`}
                     >
                         <ShoppingBag className="w-3.5 h-3.5" />
@@ -598,8 +598,8 @@ export default function CashierPOSTerminalPage() {
                         }}
                         className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer ${
                             orderType === "delivery"
-                                ? "bg-[#D4AF37] text-black shadow-md"
-                                : "text-white/60 hover:text-white"
+                                ? "bg-blue-600 text-white shadow-xs shadow-md"
+                                : "text-slate-600 hover:text-slate-900"
                         }`}
                     >
                         <Bike className="w-3.5 h-3.5" />
@@ -611,12 +611,12 @@ export default function CashierPOSTerminalPage() {
                 <div className="flex items-center gap-2">
                     {/* Branch Switcher Pill (Owners/SuperAdmin only; Staff locked to assigned branch) */}
                     {isOwner ? (
-                        <div className="flex rounded-xl bg-black/50 border border-white/10 p-0.5 text-[11px]">
+                        <div className="flex rounded-xl bg-slate-100 border border-slate-200 p-0.5 text-[11px]">
                             <button
                                 type="button"
                                 onClick={() => setSelectedOutletId(1)}
                                 className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
-                                    selectedOutletId === 1 ? "bg-amber-500 text-black" : "text-white/60 hover:text-white"
+                                    selectedOutletId === 1 ? "bg-amber-500 text-white" : "text-slate-600 hover:text-slate-900"
                                 }`}
                                 title="Switch to Surya Family Restaurant (Kadiri)"
                             >
@@ -626,7 +626,7 @@ export default function CashierPOSTerminalPage() {
                                 type="button"
                                 onClick={() => setSelectedOutletId(2)}
                                 className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
-                                    selectedOutletId === 2 ? "bg-amber-500 text-black" : "text-white/60 hover:text-white"
+                                    selectedOutletId === 2 ? "bg-amber-500 text-white" : "text-slate-600 hover:text-slate-900"
                                 }`}
                                 title="Switch to Branch 2"
                             >
@@ -634,7 +634,7 @@ export default function CashierPOSTerminalPage() {
                             </button>
                         </div>
                     ) : (
-                        <div className="px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-[11px] font-extrabold text-amber-400 flex items-center gap-1.5">
+                        <div className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-[11px] font-extrabold text-amber-400 flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                             <span>B{user?.outlet_id || 1} • Surya Family Restaurant</span>
                         </div>
@@ -644,10 +644,10 @@ export default function CashierPOSTerminalPage() {
                     <button
                         type="button"
                         onClick={() => setIsRecentBillsOpen(true)}
-                        className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white flex items-center gap-1.5 transition cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-900 flex items-center gap-1.5 transition cursor-pointer"
                         title="Search & Reprint Recent Bills (F7)"
                     >
-                        <FileText className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <FileText className="w-3.5 h-3.5 text-blue-600" />
                         <span className="hidden sm:inline">Bills [F7]</span>
                     </button>
 
@@ -655,7 +655,7 @@ export default function CashierPOSTerminalPage() {
                     <button
                         type="button"
                         onClick={() => setIsShiftModalOpen(true)}
-                        className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition cursor-pointer"
                         title="Cash Drawer & Shift Handover"
                     >
                         <Briefcase className="w-3.5 h-3.5 text-amber-400" />
@@ -664,7 +664,7 @@ export default function CashierPOSTerminalPage() {
 
                     {/* Paper Roll Size Selector (80mm / 58mm) */}
                     <div
-                        className="hidden md:flex items-center rounded-xl bg-black/50 border border-white/10 p-0.5 text-[11px]"
+                        className="hidden md:flex items-center rounded-xl bg-slate-100 border border-slate-200 p-0.5 text-[11px]"
                         title="Active Thermal Roll Width (Saved locally)"
                     >
                         <button
@@ -675,7 +675,7 @@ export default function CashierPOSTerminalPage() {
                                 toast.success("Thermal printer roll set to 80mm (Standard)");
                             }}
                             className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${
-                                paperWidth === "80mm" ? "bg-[#D4AF37] text-black" : "text-white/60 hover:text-white"
+                                paperWidth === "80mm" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
                             }`}
                         >
                             80mm
@@ -688,7 +688,7 @@ export default function CashierPOSTerminalPage() {
                                 toast.success("Thermal printer roll set to 58mm (Paper-Saver)");
                             }}
                             className={`px-2 py-1 rounded-lg font-bold transition cursor-pointer ${
-                                paperWidth === "58mm" ? "bg-[#D4AF37] text-black" : "text-white/60 hover:text-white"
+                                paperWidth === "58mm" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
                             }`}
                         >
                             58mm
@@ -699,10 +699,10 @@ export default function CashierPOSTerminalPage() {
                     <button
                         type="button"
                         onClick={() => setIsKioskModalOpen(true)}
-                        className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1 transition cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1 transition cursor-pointer"
                         title="Windows Kiosk Silent Printing Setup (--kiosk-printing)"
                     >
-                        <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <Printer className="w-3.5 h-3.5 text-blue-600" />
                         <span className="hidden sm:inline">Kiosk Setup</span>
                     </button>
 
@@ -713,10 +713,10 @@ export default function CashierPOSTerminalPage() {
                             printTestReceipt(outlet, paperWidth);
                             toast.success(`Sample ${paperWidth} receipt sent to printer`);
                         }}
-                        className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white/80 hover:text-white flex items-center gap-1 transition cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800 hover:text-slate-900 flex items-center gap-1 transition cursor-pointer"
                         title={`Test Thermal Receipt Printer (${paperWidth})`}
                     >
-                        <Printer className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        <Printer className="w-3.5 h-3.5 text-blue-600" />
                         <span className="hidden sm:inline">Test ({paperWidth})</span>
                     </button>
 
@@ -724,7 +724,7 @@ export default function CashierPOSTerminalPage() {
                     <button
                         type="button"
                         onClick={() => setIsPettyCashOpen(true)}
-                        className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white/80 hover:text-white flex items-center gap-1 transition cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800 hover:text-slate-900 flex items-center gap-1 transition cursor-pointer"
                         title="Record Petty Cash Expense"
                     >
                         <Banknote className="w-3.5 h-3.5 text-emerald-400" />
@@ -735,7 +735,7 @@ export default function CashierPOSTerminalPage() {
                     <button
                         type="button"
                         onClick={toggleFullscreen}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition"
+                        className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition"
                         title="Toggle Fullscreen"
                     >
                         {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -745,7 +745,7 @@ export default function CashierPOSTerminalPage() {
 
             {/* URGENT UNACCEPTED ORDER ALARM BANNER IN POS */}
             {alarmOrder && (
-                <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xl border-b-4 border-yellow-400 animate-pulse shrink-0 z-30">
+                <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-slate-900 p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xl border-b-4 border-yellow-400 animate-pulse shrink-0 z-30">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/30">
                             <BellRing className="w-6 h-6 text-yellow-300 animate-bounce" />
@@ -763,14 +763,14 @@ export default function CashierPOSTerminalPage() {
                         <Link
                             href="/admin"
                             onClick={() => soundManager.stopContinuousOrderAlarm()}
-                            className="flex-1 sm:flex-none px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs rounded-xl uppercase tracking-wider transition shadow-xl text-center"
+                            className="flex-1 sm:flex-none px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-white font-black text-xs rounded-xl uppercase tracking-wider transition shadow-xl text-center"
                         >
                             Open Orders Kanban
                         </Link>
                         <button
                             type="button"
                             onClick={() => soundManager.stopContinuousOrderAlarm()}
-                            className="px-3.5 py-2.5 bg-black/40 hover:bg-black/60 text-white font-bold text-xs rounded-xl transition cursor-pointer"
+                            className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl transition cursor-pointer"
                         >
                             Silence Alarm
                         </button>
@@ -797,7 +797,7 @@ export default function CashierPOSTerminalPage() {
                 </div>
 
                 {/* Right 35%: Cashier Ticket Cart */}
-                <div className="w-full md:w-96 lg:w-[420px] h-full shrink-0 border-t md:border-t-0 md:border-l border-[#D4AF37]/30 shadow-2xl overflow-hidden">
+                <div className="w-full md:w-96 lg:w-[420px] h-full shrink-0 border-t md:border-t-0 md:border-l border-slate-200 shadow-2xl overflow-hidden">
                     <POSTicketCart
                         orderType={orderType}
                         selectedTable={selectedTable}

@@ -23,7 +23,7 @@ export function TableQRBatchModal({ isOpen, onClose, tables }: TableQRBatchModal
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
             <div className="relative w-full max-w-4xl max-h-[92vh] bg-white rounded-3xl p-4 sm:p-6 sm:p-8 flex flex-col shadow-2xl overflow-hidden">
                 {/* Header (Hidden on print) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-cream-200 shrink-0 print:hidden gap-3">
@@ -67,7 +67,7 @@ export function TableQRBatchModal({ isOpen, onClose, tables }: TableQRBatchModal
                             return (
                                 <div
                                     key={t.id}
-                                    className="bg-espresso-950 text-white rounded-3xl p-6 border-4 border-amber-400/40 shadow-xl flex flex-col items-center text-center relative overflow-hidden print:border-black print:bg-white print:text-black print:shadow-none print:break-inside-avoid"
+                                    className="bg-espresso-950 text-slate-900 rounded-3xl p-6 border-4 border-amber-400/40 shadow-xl flex flex-col items-center text-center relative overflow-hidden print:border-black print:bg-white print:text-black print:shadow-none print:break-inside-avoid"
                                 >
                                     {/* Gold Accent Top Bar */}
                                     <div className="absolute top-0 inset-x-0 h-2.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
@@ -79,7 +79,7 @@ export function TableQRBatchModal({ isOpen, onClose, tables }: TableQRBatchModal
                                     </div>
 
                                     {/* Table Badge */}
-                                    <div className="px-6 py-2 rounded-2xl bg-amber-500/20 border border-amber-400/50 text-amber-300 print:bg-black print:text-white font-black text-2xl tracking-tight mb-4">
+                                    <div className="px-6 py-2 rounded-2xl bg-amber-500/20 border border-amber-400/50 text-amber-300 print:bg-black print:text-slate-900 font-black text-2xl tracking-tight mb-4">
                                         TABLE {t.label}
                                     </div>
 
@@ -92,14 +92,14 @@ export function TableQRBatchModal({ isOpen, onClose, tables }: TableQRBatchModal
                                         />
                                     </div>
 
-                                    <h3 className="font-extrabold text-sm text-white print:text-black mb-1">
+                                    <h3 className="font-extrabold text-sm text-slate-900 print:text-black mb-1">
                                         Scan to View Digital Menu & Order
                                     </h3>
-                                    <p className="text-[11px] text-white/60 print:text-gray-600 max-w-[220px] leading-tight">
+                                    <p className="text-[11px] text-slate-600 print:text-gray-600 max-w-[220px] leading-tight">
                                         Use any Phone Camera or UPI App to order directly to your table!
                                     </p>
 
-                                    <div className="mt-4 pt-3 border-t border-white/10 print:border-gray-300 w-full flex items-center justify-between text-[10px] text-white/40 print:text-gray-500">
+                                    <div className="mt-4 pt-3 border-t border-slate-200 print:border-gray-300 w-full flex items-center justify-between text-[10px] text-slate-400 print:text-gray-500">
                                         <span>Free Wi-Fi & Fast Service</span>
                                         <span>Kadiri, AP</span>
                                     </div>

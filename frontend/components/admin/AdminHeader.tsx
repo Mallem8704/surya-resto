@@ -118,12 +118,12 @@ export function AdminHeader({
 
     return (
         <>
-            <header className="bg-white border-b border-cream-200 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+            <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
                 <div className="flex items-center gap-2 sm:gap-3">
                     {/* Mobile Hamburger Button */}
                     <button
                         onClick={() => setMobileDrawerOpen(true)}
-                        className="md:hidden p-2 rounded-xl text-espresso-700 hover:bg-cream-100 transition cursor-pointer"
+                        className="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                         aria-label="Open Navigation Menu"
                     >
                         <Menu className="w-5 h-5" />
@@ -136,18 +136,18 @@ export function AdminHeader({
                             disabled={!isOwner}
                             className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all text-left ${
                                 isBranch2
-                                    ? "bg-emerald-50 border-emerald-300 text-emerald-950"
-                                    : "bg-amber-50 border-amber-300 text-amber-950"
+                                    ? "bg-emerald-50 border-emerald-200 text-emerald-950"
+                                    : "bg-blue-50/80 border-blue-200 text-blue-950"
                             } ${isOwner && allOutlets.length > 1 ? "cursor-pointer hover:shadow-xs" : "cursor-default opacity-95"}`}
                             title={isOwner ? "Click to switch branch (Admin Password Required)" : "Assigned Branch"}
                         >
-                            <span className={`w-2.5 h-2.5 rounded-full ${isBranch2 ? "bg-emerald-500" : "bg-amber-500"} animate-pulse shrink-0`} />
+                            <span className={`w-2.5 h-2.5 rounded-full ${isBranch2 ? "bg-emerald-500" : "bg-blue-600"} animate-pulse shrink-0`} />
                             <div className="flex flex-col">
                                 <span className="text-xs font-black tracking-wide max-w-[140px] sm:max-w-[220px] truncate">
                                     {outlet?.name || "Surya Family Restaurant"}
                                 </span>
                                 {!isOwner && (
-                                    <span className="text-[9px] font-bold text-espresso-500 uppercase tracking-tighter">
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
                                         Assigned Branch
                                     </span>
                                 )}
@@ -159,10 +159,10 @@ export function AdminHeader({
 
                         {/* Admin Branch Switcher Dropdown */}
                         {isOwner && branchDropdownOpen && allOutlets.length > 1 && (
-                            <div className="absolute top-full left-0 mt-1.5 w-72 max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-cream-200 shadow-xl p-2 z-50 animate-in fade-in">
-                                <p className="text-[10px] font-black uppercase tracking-wider text-espresso-400 px-2 py-1 flex items-center justify-between">
+                            <div className="absolute top-full left-0 mt-1.5 w-72 max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-slate-200 shadow-xl p-2 z-50 animate-in fade-in">
+                                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2 py-1 flex items-center justify-between">
                                     <span>Switch Active Branch</span>
-                                    <Shield className="w-3 h-3 text-amber-500" />
+                                    <Shield className="w-3 h-3 text-blue-600" />
                                 </p>
                                 {allOutlets.map((b) => (
                                     <button
@@ -176,8 +176,8 @@ export function AdminHeader({
                                         }}
                                         className={`w-full p-2 rounded-xl text-left flex items-start gap-2.5 transition cursor-pointer ${
                                             outlet?.id === b.id
-                                                ? "bg-terracotta-50 border border-terracotta-200 text-terracotta-900 font-bold"
-                                                : "hover:bg-cream-50 text-espresso-800"
+                                                ? "bg-blue-50 border border-blue-200 text-blue-900 font-bold"
+                                                : "hover:bg-slate-50 text-slate-800"
                                         }`}
                                     >
                                         <Building2 className="w-4 h-4 mt-0.5 shrink-0 opacity-70" />
@@ -185,12 +185,12 @@ export function AdminHeader({
                                             <div className="flex items-center justify-between">
                                                 <p className="text-xs font-bold truncate">{b.name}</p>
                                                 {outlet?.id === b.id && (
-                                                    <span className="text-[9px] bg-terracotta-200 text-terracotta-950 font-black px-1.5 py-0.5 rounded-md">
+                                                    <span className="text-[9px] bg-blue-600 text-white font-black px-1.5 py-0.5 rounded-md">
                                                         Active
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-[10px] text-espresso-500 line-clamp-1">{b.address}</p>
+                                            <p className="text-[10px] text-slate-500 line-clamp-1">{b.address}</p>
                                         </div>
                                     </button>
                                 ))}
@@ -202,11 +202,11 @@ export function AdminHeader({
                     <div
                         className={`hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
                             wsConnected
-                                ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-                                : "bg-saffron-50 border-saffron-300 text-saffron-800"
+                                ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                                : "bg-amber-50 border-amber-200 text-amber-800"
                         }`}
                     >
-                        <Radio className={`w-3 h-3 ${wsConnected ? "animate-pulse text-emerald-600" : "text-saffron-600"}`} />
+                        <Radio className={`w-3 h-3 ${wsConnected ? "animate-pulse text-emerald-600" : "text-amber-600"}`} />
                         <span>{wsConnected ? "Socket Active" : "Connecting..."}</span>
                     </div>
 
@@ -216,15 +216,15 @@ export function AdminHeader({
                             onClick={() => setSyncPopoverOpen(!syncPopoverOpen)}
                             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
                                 syncStatus?.cloud_connected
-                                    ? "bg-sky-50 border-sky-300 text-sky-950 hover:bg-sky-100"
-                                    : "bg-cream-100 border-cream-300 text-espresso-900 hover:bg-cream-200"
+                                    ? "bg-blue-50 border-blue-200 text-blue-950 hover:bg-blue-100"
+                                    : "bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100"
                             }`}
                             title="Zero-Cost Hybrid Cloud Sync Status"
                         >
                             {syncStatus?.cloud_connected ? (
-                                <Cloud className="w-3.5 h-3.5 text-sky-600 animate-pulse shrink-0" />
+                                <Cloud className="w-3.5 h-3.5 text-blue-600 animate-pulse shrink-0" />
                             ) : (
-                                <HardDrive className="w-3.5 h-3.5 text-espresso-600 shrink-0" />
+                                <HardDrive className="w-3.5 h-3.5 text-slate-600 shrink-0" />
                             )}
                             <span className="hidden sm:inline">
                                 {syncStatus?.cloud_connected ? "Hybrid: Cloud Active" : "Hybrid: Local-First"}
@@ -239,29 +239,29 @@ export function AdminHeader({
 
                         {/* Hybrid Sync Popover Dropdown */}
                         {syncPopoverOpen && (
-                            <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-80 bg-white rounded-2xl border border-cream-200 shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2">
-                                <div className="flex items-center justify-between pb-2.5 border-b border-cream-100 mb-3">
+                            <div className="absolute top-full left-0 sm:left-auto sm:right-0 mt-2 w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2">
+                                <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 mb-3">
                                     <div className="flex items-center gap-2">
-                                        <div className="p-1.5 rounded-lg bg-sky-50 text-sky-600">
+                                        <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
                                             <Database className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <h4 className="text-xs font-black text-espresso-950">Zero-Cost Hybrid Sync</h4>
-                                            <p className="text-[10px] text-espresso-500 font-medium">Local-First Floor + Free Cloud Backup</p>
+                                            <h4 className="text-xs font-black text-slate-900">Zero-Cost Hybrid Sync</h4>
+                                            <p className="text-[10px] text-slate-500 font-medium">Local-First Floor + Free Cloud Backup</p>
                                         </div>
                                     </div>
                                     <button
                                         onClick={() => setSyncPopoverOpen(false)}
-                                        className="text-espresso-400 hover:text-espresso-700 p-1 rounded-md cursor-pointer"
+                                        className="text-slate-400 hover:text-slate-700 p-1 rounded-md cursor-pointer"
                                     >
                                         <X className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
 
                                 <div className="space-y-2 text-xs">
-                                    <div className="flex items-center justify-between p-2 rounded-xl bg-cream-50 border border-cream-200">
-                                        <span className="text-espresso-600 font-medium">Architecture Mode</span>
-                                        <span className="font-extrabold text-espresso-900 text-right">
+                                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200">
+                                        <span className="text-slate-600 font-medium">Architecture Mode</span>
+                                        <span className="font-extrabold text-slate-900 text-right">
                                             {syncStatus?.cloud_connected ? "Active Dual Sync" : "Local Standalone (₹0)"}
                                         </span>
                                     </div>
@@ -274,21 +274,21 @@ export function AdminHeader({
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2 pt-1">
-                                        <div className="p-2 rounded-xl bg-cream-50 border border-cream-200 text-center">
-                                            <p className="text-[10px] text-espresso-500 uppercase font-bold">Unsynced Orders</p>
-                                            <p className="text-base font-black text-terracotta-600">
+                                        <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                                            <p className="text-[10px] text-slate-500 uppercase font-bold">Unsynced Orders</p>
+                                            <p className="text-base font-black text-blue-600">
                                                 {syncStatus?.pending_orders ?? 0}
                                             </p>
                                         </div>
-                                        <div className="p-2 rounded-xl bg-cream-50 border border-cream-200 text-center">
-                                            <p className="text-[10px] text-espresso-500 uppercase font-bold">Total Orders</p>
-                                            <p className="text-base font-black text-espresso-900">
+                                        <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                                            <p className="text-[10px] text-slate-500 uppercase font-bold">Total Orders</p>
+                                            <p className="text-base font-black text-slate-900">
                                                 {syncStatus?.total_orders ?? 0}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <p className="text-[10px] text-espresso-500 leading-tight pt-1 flex items-start gap-1.5">
+                                    <p className="text-[10px] text-slate-500 leading-tight pt-1 flex items-start gap-1.5">
                                         <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                                         <span>
                                             <strong>Zero Internet Downtime:</strong> Counter billing &amp; KDS always run locally with 0 latency. Orders automatically replicate to free Supabase PostgreSQL whenever internet is available.
@@ -296,10 +296,10 @@ export function AdminHeader({
                                     </p>
                                 </div>
 
-                                <div className="mt-3.5 pt-3 border-t border-cream-100 flex items-center justify-between gap-2">
+                                <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                                     <button
                                         onClick={refreshSyncStatus}
-                                        className="p-2 text-espresso-500 hover:text-espresso-800 hover:bg-cream-100 rounded-xl transition cursor-pointer"
+                                        className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition cursor-pointer"
                                         title="Refresh status"
                                     >
                                         <RefreshCw className="w-3.5 h-3.5" />
@@ -308,7 +308,7 @@ export function AdminHeader({
                                     <button
                                         onClick={handleTriggerSync}
                                         disabled={isSyncing}
-                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-terracotta-600 hover:bg-terracotta-700 text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer"
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer"
                                     >
                                         <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
                                         <span>{isSyncing ? "Syncing..." : "Sync to Cloud Now"}</span>
@@ -323,7 +323,7 @@ export function AdminHeader({
                 <div className="flex items-center gap-2 sm:gap-4">
                     {/* Pending Service Calls Banner Button */}
                     {pendingCount > 0 && (
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 border border-red-300 text-red-900 text-xs font-extrabold animate-bounce shadow-xs">
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 border border-red-200 text-red-900 text-xs font-extrabold animate-bounce shadow-xs">
                             <Bell className="w-3.5 h-3.5 text-red-600 shrink-0" />
                             <span>{pendingCount}</span>
                         </div>
@@ -333,7 +333,7 @@ export function AdminHeader({
                     <LanguageToggle />
 
                     {/* Role Pill */}
-                    <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-extrabold tracking-wider uppercase border border-cream-300 bg-cream-100 text-espresso-800">
+                    <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold tracking-wider uppercase border border-slate-200 bg-slate-50 text-slate-800">
                         <span>{isOwner ? "Owner Cockpit" : "Staff Portal"}</span>
                     </div>
                 </div>
@@ -344,25 +344,25 @@ export function AdminHeader({
                 <div className="fixed inset-0 z-50 flex md:hidden animate-in fade-in">
                     {/* Backdrop */}
                     <div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs"
                         onClick={() => setMobileDrawerOpen(false)}
                     />
 
                     {/* Drawer Content */}
-                    <div className="relative w-72 max-w-[85vw] bg-espresso-950 text-white flex flex-col justify-between h-full p-4 shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+                    <div className="relative w-72 max-w-[85vw] bg-white text-slate-800 flex flex-col justify-between h-full p-4 shadow-2xl z-10 animate-in slide-in-from-left duration-200">
                         <div>
                             {/* Drawer Header */}
-                            <div className="flex items-center justify-between pb-4 border-b border-espresso-800 mb-4">
+                            <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
                                 <div className="flex items-center gap-2.5">
                                     <SuryaSunLogo size={32} />
                                     <div>
-                                        <h3 className="font-extrabold text-sm text-white">{t("app_title")}</h3>
-                                        <p className="text-[10px] text-terracotta-400 font-bold">{outlet?.name || "Admin"}</p>
+                                        <h3 className="font-extrabold text-sm text-slate-900">{t("app_title")}</h3>
+                                        <p className="text-[10px] text-blue-600 font-bold">{outlet?.name || "Admin"}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => setMobileDrawerOpen(false)}
-                                    className="p-1.5 rounded-lg text-espresso-400 hover:text-white hover:bg-espresso-900 transition cursor-pointer"
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -379,13 +379,13 @@ export function AdminHeader({
                                             key={item.href}
                                             href={item.href}
                                             onClick={() => setMobileDrawerOpen(false)}
-                                            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                                                 active
-                                                    ? "bg-terracotta-500 text-white shadow-md shadow-terracotta-500/30"
-                                                    : "text-espresso-300 hover:bg-espresso-900 hover:text-white"
+                                                    ? "bg-blue-50 text-blue-700 font-bold shadow-2xs border-l-4 border-blue-600"
+                                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                                             }`}
                                         >
-                                            <Icon className={`w-4 h-4 shrink-0 ${active ? "text-white" : "text-espresso-400"}`} />
+                                            <Icon className={`w-4 h-4 shrink-0 ${active ? "text-blue-600" : "text-slate-400"}`} />
                                             <span>{t(item.labelKey as any)}</span>
                                         </Link>
                                     );
@@ -394,20 +394,20 @@ export function AdminHeader({
                         </div>
 
                         {/* Drawer Footer User Info & Logout */}
-                        <div className="pt-4 border-t border-espresso-800">
-                            <div className="flex items-center justify-between mb-3">
+                        <div className="pt-4 border-t border-slate-200">
+                            <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-espresso-800 flex items-center justify-center text-xs font-bold">
-                                        {isOwner ? <Shield className="w-4 h-4 text-saffron-400" /> : <User className="w-4 h-4 text-emerald-400" />}
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
+                                        {isOwner ? <Shield className="w-4 h-4 text-blue-600" /> : <User className="w-4 h-4 text-emerald-600" />}
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-white truncate max-w-[120px]">{isOwner ? "Branch Admin" : "Floor Staff"}</p>
-                                        <p className="text-[10px] text-espresso-400 uppercase">{user?.role || "Staff"}</p>
+                                        <p className="text-xs font-bold text-slate-900 truncate max-w-[120px]">{isOwner ? "Branch Admin" : "Floor Staff"}</p>
+                                        <p className="text-[10px] text-slate-500 uppercase">{user?.role || "Staff"}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={logout}
-                                    className="p-2 rounded-xl text-red-400 hover:bg-red-950/50 hover:text-red-300 transition cursor-pointer"
+                                    className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                                     title="Logout"
                                 >
                                     <LogOut className="w-4 h-4" />

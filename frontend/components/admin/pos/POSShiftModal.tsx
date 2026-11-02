@@ -147,16 +147,16 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-2xl bg-[#17130F] text-white rounded-3xl border border-[#D4AF37]/40 shadow-2xl flex flex-col overflow-hidden max-h-[92vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-2xl bg-[#17130F] text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[92vh]">
                 {/* MODAL HEADER */}
-                <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 bg-black/40">
+                <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-100">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400">
                             <Briefcase className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="font-serif font-black text-lg sm:text-xl text-white flex items-center gap-2">
+                            <h2 className="font-serif font-black text-lg sm:text-xl text-slate-900 flex items-center gap-2">
                                 Cash Drawer &amp; Shift Register
                                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
                                     hasOpenShift ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30" : "bg-red-500/20 text-red-300 border border-red-500/30"
@@ -164,7 +164,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                     {hasOpenShift ? "Shift Open" : "Register Closed"}
                                 </span>
                             </h2>
-                            <p className="text-xs text-white/50">Opening float, live drawer reconciliation &amp; cashier shift handover</p>
+                            <p className="text-xs text-slate-500">Opening float, live drawer reconciliation &amp; cashier shift handover</p>
                         </div>
                     </div>
 
@@ -172,7 +172,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                         <button
                             type="button"
                             onClick={fetchShiftStatus}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 transition cursor-pointer"
+                            className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 transition cursor-pointer"
                             title="Refresh shift data"
                         >
                             <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -180,7 +180,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                         <button
                             type="button"
                             onClick={onClose}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition cursor-pointer"
+                            className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -190,27 +190,27 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                 {/* MODAL BODY */}
                 <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1">
                     {isLoading ? (
-                        <div className="py-12 text-center text-xs text-white/40">Loading shift register status...</div>
+                        <div className="py-12 text-center text-xs text-slate-400">Loading shift register status...</div>
                     ) : !hasOpenShift ? (
                         /* ══════════════════════════════════════════════════════════
                             1. START NEW SHIFT FORM
                            ══════════════════════════════════════════════════════════ */
                         <form onSubmit={handleOpenShiftSubmit} className="space-y-4 max-w-lg mx-auto">
-                            <div className="p-4 rounded-3xl bg-black/40 border border-white/10 space-y-3">
+                            <div className="p-4 rounded-3xl bg-slate-100 border border-slate-200 space-y-3">
                                 <div className="flex items-center gap-2 text-amber-400">
                                     <Shield className="w-4 h-4" />
-                                    <h3 className="font-bold text-sm text-white">Start Cashier Shift</h3>
+                                    <h3 className="font-bold text-sm text-slate-900">Start Cashier Shift</h3>
                                 </div>
-                                <p className="text-xs text-white/60">
+                                <p className="text-xs text-slate-600">
                                     Enter your starting drawer float (coins &amp; change) to begin billing and tracking cash reconciliation.
                                 </p>
 
                                 <div>
-                                    <label className="text-xs font-bold text-white/70 block mb-1">Shift Name</label>
+                                    <label className="text-xs font-bold text-slate-600 block mb-1">Shift Name</label>
                                     <select
                                         value={shiftName}
                                         onChange={(e) => setShiftName(e.target.value)}
-                                        className="w-full px-3 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400 font-bold"
+                                        className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-amber-400 font-bold"
                                     >
                                         <option value="Morning / Lunch Shift">Morning / Lunch Shift (7:00 AM - 4:00 PM)</option>
                                         <option value="Evening / Dinner Shift">Evening / Dinner Shift (4:00 PM - 11:30 PM)</option>
@@ -219,7 +219,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-white/70 block mb-1">
+                                    <label className="text-xs font-bold text-slate-600 block mb-1">
                                         Opening Cash Float (₹ in Drawer) *
                                     </label>
                                     <div className="relative">
@@ -233,7 +233,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                             placeholder="2000"
                                             required
                                             min="0"
-                                            className="w-full pl-8 pr-3 py-2.5 bg-black/60 border border-white/10 rounded-xl text-sm font-mono font-black text-white focus:outline-none focus:border-amber-400"
+                                            className="w-full pl-8 pr-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-mono font-black text-slate-900 focus:outline-none focus:border-amber-400"
                                         />
                                     </div>
                                     <div className="flex gap-2 mt-2">
@@ -242,7 +242,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                                 key={amt}
                                                 type="button"
                                                 onClick={() => setOpeningFloatRupees(amt)}
-                                                className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-mono text-white/80"
+                                                className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-mono text-slate-800"
                                             >
                                                 ₹{amt}
                                             </button>
@@ -251,13 +251,13 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-white/70 block mb-1">Opening Notes (Optional)</label>
+                                    <label className="text-xs font-bold text-slate-600 block mb-1">Opening Notes (Optional)</label>
                                     <input
                                         type="text"
                                         value={openNotes}
                                         onChange={(e) => setOpenNotes(e.target.value)}
                                         placeholder="e.g. Received ₹2000 from Manager Asif"
-                                        className="w-full px-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400"
+                                        className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-amber-400"
                                     />
                                 </div>
                             </div>
@@ -265,7 +265,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                             <button
                                 type="submit"
                                 disabled={isOpening}
-                                className="w-full py-3.5 rounded-2xl bg-[#D4AF37] hover:bg-[#C59B27] text-black font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition cursor-pointer"
+                                className="w-full py-3.5 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 text-white font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition cursor-pointer"
                             >
                                 <Briefcase className="w-4 h-4" />
                                 <span>{isOpening ? "Starting Shift..." : "Open Shift & Unlock Register"}</span>
@@ -278,31 +278,31 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                         <div className="space-y-6">
                             {/* Live Shift KPI Cards */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                                <div className="p-3 rounded-2xl bg-black/40 border border-white/10">
-                                    <span className="text-[10px] text-white/50 block uppercase font-bold">Opening Float</span>
-                                    <span className="font-mono font-black text-sm sm:text-base text-white">
+                                <div className="p-3 rounded-2xl bg-slate-100 border border-slate-200">
+                                    <span className="text-[10px] text-slate-500 block uppercase font-bold">Opening Float</span>
+                                    <span className="font-mono font-black text-sm sm:text-base text-slate-900">
                                         ₹{currentShift.opening_float_rupees.toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="p-3 rounded-2xl bg-black/40 border border-emerald-500/30">
+                                <div className="p-3 rounded-2xl bg-slate-100 border border-emerald-500/30">
                                     <span className="text-[10px] text-emerald-400 block uppercase font-bold">Cash Sales</span>
                                     <span className="font-mono font-black text-sm sm:text-base text-emerald-400">
                                         +₹{currentShift.cash_sales_rupees.toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="p-3 rounded-2xl bg-black/40 border border-teal-500/30">
+                                <div className="p-3 rounded-2xl bg-slate-100 border border-teal-500/30">
                                     <span className="text-[10px] text-teal-400 block uppercase font-bold">Petty Cash In</span>
                                     <span className="font-mono font-black text-sm sm:text-base text-teal-400">
                                         +₹{(currentShift.petty_cash_in_rupees || 0).toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="p-3 rounded-2xl bg-black/40 border border-rose-500/30">
+                                <div className="p-3 rounded-2xl bg-slate-100 border border-rose-500/30">
                                     <span className="text-[10px] text-rose-400 block uppercase font-bold">Petty Cash Out</span>
                                     <span className="font-mono font-black text-sm sm:text-base text-rose-400">
                                         -₹{(currentShift.petty_cash_out_rupees || 0).toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="p-3 rounded-2xl bg-black/40 border border-indigo-500/30">
+                                <div className="p-3 rounded-2xl bg-slate-100 border border-indigo-500/30">
                                     <span className="text-[10px] text-indigo-400 block uppercase font-bold">UPI Online QR</span>
                                     <span className="font-mono font-black text-sm sm:text-base text-indigo-400">
                                         ₹{currentShift.upi_sales_rupees.toFixed(2)}
@@ -310,20 +310,20 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                 </div>
                                 <div className="p-3 rounded-2xl bg-amber-500/15 border border-amber-400/40">
                                     <span className="text-[10px] text-amber-300 block uppercase font-black">Expected Drawer</span>
-                                    <span className="font-mono font-black text-base text-[#D4AF37]">
+                                    <span className="font-mono font-black text-base text-blue-600">
                                         ₹{currentShift.expected_cash_rupees.toFixed(2)}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Denomination Counter Matrix */}
-                            <div className="p-4 rounded-3xl bg-black/40 border border-white/10 space-y-3">
-                                <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                                    <h4 className="font-bold text-xs sm:text-sm text-white flex items-center gap-2">
+                            <div className="p-4 rounded-3xl bg-slate-100 border border-slate-200 space-y-3">
+                                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 flex items-center gap-2">
                                         <Calculator className="w-4 h-4 text-amber-400" />
                                         Physical Cash Counter (Shift Closing Handover)
                                     </h4>
-                                    <span className="text-[11px] font-mono text-white/50">Enter Note Counts</span>
+                                    <span className="text-[11px] font-mono text-slate-500">Enter Note Counts</span>
                                 </div>
 
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -336,30 +336,30 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                         { key: "10", label: "₹10 Notes" },
                                         { key: "coins", label: "Coins Total (₹)" },
                                     ].map((d) => (
-                                        <div key={d.key} className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-                                            <span className="text-[10px] text-white/60 font-bold block mb-1">{d.label}</span>
+                                        <div key={d.key} className="p-2.5 rounded-xl bg-white border border-slate-100">
+                                            <span className="text-[10px] text-slate-600 font-bold block mb-1">{d.label}</span>
                                             <input
                                                 type="number"
                                                 min="0"
                                                 value={counts[d.key]}
                                                 onChange={(e) => setCounts({ ...counts, [d.key]: e.target.value })}
-                                                className="w-full px-2 py-1 bg-black/60 border border-white/10 rounded-lg text-xs font-mono font-bold text-white focus:outline-none focus:border-amber-400"
+                                                className="w-full px-2 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-amber-400"
                                             />
                                         </div>
                                     ))}
                                 </div>
 
                                 {/* Reconciled Comparison Bar */}
-                                <div className="mt-3 p-4 rounded-2xl bg-black/60 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <div className="mt-3 p-4 rounded-2xl bg-slate-100 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
                                     <div>
-                                        <span className="text-[10px] text-white/50 block uppercase font-bold">Total Physical Cash Counted</span>
-                                        <span className="font-mono font-black text-xl text-white">
+                                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Total Physical Cash Counted</span>
+                                        <span className="font-mono font-black text-xl text-slate-900">
                                             ₹{totalPhysicalCashRupees.toFixed(2)}
                                         </span>
                                     </div>
 
                                     <div className="text-right">
-                                        <span className="text-[10px] text-white/50 block uppercase font-bold">Handover Difference</span>
+                                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Handover Difference</span>
                                         <span
                                             className={`font-mono font-black text-lg ${
                                                 differenceRupees === 0
@@ -379,13 +379,13 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                 </div>
 
                                 <div>
-                                    <label className="text-[11px] text-white/60 font-bold block mb-1">Shift Closing Audit Notes</label>
+                                    <label className="text-[11px] text-slate-600 font-bold block mb-1">Shift Closing Audit Notes</label>
                                     <input
                                         type="text"
                                         value={closingNotes}
                                         onChange={(e) => setClosingNotes(e.target.value)}
                                         placeholder="e.g. Handed over cash box to night manager Saleem"
-                                        className="w-full px-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400"
+                                        className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-amber-400"
                                     />
                                 </div>
                             </div>
@@ -395,7 +395,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="w-full sm:w-auto px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 font-bold text-xs text-white/70 transition cursor-pointer"
+                                    className="w-full sm:w-auto px-4 py-3 rounded-xl bg-white hover:bg-slate-100 font-bold text-xs text-slate-600 transition cursor-pointer"
                                 >
                                     Keep Shift Active &amp; Return to POS
                                 </button>
@@ -404,7 +404,7 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                     type="button"
                                     onClick={handleCloseShiftSubmit}
                                     disabled={isClosing}
-                                    className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition cursor-pointer"
+                                    className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl transition cursor-pointer"
                                 >
                                     <Printer className="w-4 h-4" />
                                     <span>{isClosing ? "Closing Shift..." : "Close Shift &amp; Print Handover (X-Report)"}</span>

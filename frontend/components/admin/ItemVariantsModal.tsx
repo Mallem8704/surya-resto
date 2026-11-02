@@ -184,19 +184,19 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-2xl bg-[#17130F] text-white rounded-3xl border border-[#D4AF37]/40 shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-2xl bg-[#17130F] text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
                 {/* MODAL HEADER */}
-                <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 bg-black/40">
+                <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-100">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                        <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/20 border border-slate-200 flex items-center justify-center text-blue-600">
                             <Layers className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="font-serif font-black text-lg sm:text-xl text-white flex items-center gap-2">
+                            <h2 className="font-serif font-black text-lg sm:text-xl text-slate-900 flex items-center gap-2">
                                 {item.name}
                             </h2>
-                            <p className="text-xs text-white/50">
+                            <p className="text-xs text-slate-500">
                                 Manage Portion Sizes (Single/Full/Family) &amp; Custom Add-ons
                             </p>
                         </div>
@@ -205,21 +205,21 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                     <button
                         type="button"
                         onClick={onClose}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition cursor-pointer"
+                        className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* TABS SWITCHER */}
-                <div className="flex border-b border-white/10 bg-black/20 p-1.5 gap-2 px-4">
+                <div className="flex border-b border-slate-200 bg-black/20 p-1.5 gap-2 px-4">
                     <button
                         type="button"
                         onClick={() => setActiveTab("variants")}
                         className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
                             activeTab === "variants"
-                                ? "bg-[#D4AF37] text-black shadow-md"
-                                : "text-white/60 hover:text-white bg-white/5"
+                                ? "bg-blue-600 text-white shadow-xs shadow-md"
+                                : "text-slate-600 hover:text-slate-900 bg-white"
                         }`}
                     >
                         <Tag className="w-4 h-4" />
@@ -231,8 +231,8 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                         onClick={() => setActiveTab("addons")}
                         className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
                             activeTab === "addons"
-                                ? "bg-[#D4AF37] text-black shadow-md"
-                                : "text-white/60 hover:text-white bg-white/5"
+                                ? "bg-blue-600 text-white shadow-xs shadow-md"
+                                : "text-slate-600 hover:text-slate-900 bg-white"
                         }`}
                     >
                         <Sparkles className="w-4 h-4" />
@@ -249,12 +249,12 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                         <div className="space-y-6">
                             {/* Existing Variants List */}
                             <div className="space-y-2">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-white/50">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                                     Current Portion Sizes
                                 </h3>
 
                                 {variants.length === 0 ? (
-                                    <div className="p-4 rounded-2xl bg-black/40 border border-dashed border-white/10 text-center text-xs text-white/40">
+                                    <div className="p-4 rounded-2xl bg-slate-100 border border-dashed border-slate-200 text-center text-xs text-slate-400">
                                         No portion variants added yet. This item uses its base price of <strong>{formatRupees(item.price_paise)}</strong>.
                                     </div>
                                 ) : (
@@ -264,7 +264,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                             return (
                                                 <div
                                                     key={v.id}
-                                                    className="p-3 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between gap-3"
+                                                    className="p-3 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between gap-3"
                                                 >
                                                     {isEditing ? (
                                                         <div className="flex-1 flex items-center gap-2">
@@ -272,15 +272,15 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                                 type="text"
                                                                 value={editVariantName}
                                                                 onChange={(e) => setEditVariantName(e.target.value)}
-                                                                className="px-2.5 py-1 bg-black/60 border border-white/20 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-[#D4AF37]"
+                                                                className="px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600"
                                                             />
                                                             <div className="relative w-28">
-                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-[#D4AF37]">₹</span>
+                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-blue-600">₹</span>
                                                                 <input
                                                                     type="number"
                                                                     value={editVariantPriceRupees}
                                                                     onChange={(e) => setEditVariantPriceRupees(e.target.value)}
-                                                                    className="w-full pl-6 pr-2 py-1 bg-black/60 border border-white/20 rounded-lg text-xs font-mono font-bold text-white focus:outline-none focus:border-[#D4AF37]"
+                                                                    className="w-full pl-6 pr-2 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600"
                                                                 />
                                                             </div>
                                                             <button
@@ -293,7 +293,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                             <button
                                                                 type="button"
                                                                 onClick={() => setEditingVariantId(null)}
-                                                                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/60"
+                                                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
                                                             >
                                                                 <X className="w-4 h-4" />
                                                             </button>
@@ -302,17 +302,17 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                         <>
                                                             <div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className="font-bold text-sm text-white">{v.name}</span>
+                                                                    <span className="font-bold text-sm text-slate-900">{v.name}</span>
                                                                     {v.name_te && (
-                                                                        <span className="text-xs text-white/40 font-telugu">({v.name_te})</span>
+                                                                        <span className="text-xs text-slate-400 font-telugu">({v.name_te})</span>
                                                                     )}
                                                                     {v.is_default && (
-                                                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30 uppercase">
+                                                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-blue-600 border border-slate-200 uppercase">
                                                                             Default
                                                                         </span>
                                                                     )}
                                                                 </div>
-                                                                <span className="font-mono font-black text-sm text-[#D4AF37] block mt-0.5">
+                                                                <span className="font-mono font-black text-sm text-blue-600 block mt-0.5">
                                                                     {formatRupees(v.price_paise)}
                                                                 </span>
                                                             </div>
@@ -325,7 +325,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                                         setEditVariantName(v.name);
                                                                         setEditVariantPriceRupees((v.price_paise / 100).toString());
                                                                     }}
-                                                                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition cursor-pointer"
+                                                                    className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                                                                     title="Edit price/name"
                                                                 >
                                                                     <Edit2 className="w-3.5 h-3.5" />
@@ -349,40 +349,40 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                             </div>
 
                             {/* Add New Variant Box */}
-                            <form onSubmit={handleAddVariant} className="p-4 rounded-3xl bg-black/30 border border-white/10 space-y-3">
-                                <h4 className="font-bold text-xs uppercase tracking-wider text-[#D4AF37] flex items-center gap-1.5">
+                            <form onSubmit={handleAddVariant} className="p-4 rounded-3xl bg-slate-50 border border-slate-200 space-y-3">
+                                <h4 className="font-bold text-xs uppercase tracking-wider text-blue-600 flex items-center gap-1.5">
                                     <Plus className="w-4 h-4" />
                                     Add New Portion Variant
                                 </h4>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                                     <div>
-                                        <label className="text-[10px] text-white/50 block mb-1">Variant Name *</label>
+                                        <label className="text-[10px] text-slate-500 block mb-1">Variant Name *</label>
                                         <input
                                             type="text"
                                             value={variantName}
                                             onChange={(e) => setVariantName(e.target.value)}
                                             placeholder="e.g. Family Pack (3-4 Pax)"
                                             required
-                                            className="w-full px-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                                            className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] text-white/50 block mb-1">Telugu Name (Optional)</label>
+                                        <label className="text-[10px] text-slate-500 block mb-1">Telugu Name (Optional)</label>
                                         <input
                                             type="text"
                                             value={variantNameTe}
                                             onChange={(e) => setVariantNameTe(e.target.value)}
                                             placeholder="e.g. ఫ్యామిలీ ప్యాక్"
-                                            className="w-full px-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                                            className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] text-white/50 block mb-1">Price (₹) *</label>
+                                        <label className="text-[10px] text-slate-500 block mb-1">Price (₹) *</label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#D4AF37]">₹</span>
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-blue-600">₹</span>
                                             <input
                                                 type="number"
                                                 step="1"
@@ -391,19 +391,19 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                 onChange={(e) => setVariantPriceRupees(e.target.value)}
                                                 placeholder="750"
                                                 required
-                                                className="w-full pl-7 pr-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs font-mono font-bold text-white focus:outline-none focus:border-[#D4AF37]"
+                                                className="w-full pl-7 pr-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600"
                                             />
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-1">
-                                    <label className="flex items-center gap-2 text-xs text-white/70 cursor-pointer">
+                                    <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
                                         <input
                                             type="checkbox"
                                             checked={isDefaultVariant}
                                             onChange={(e) => setIsDefaultVariant(e.target.checked)}
-                                            className="rounded border-white/20 text-[#D4AF37] focus:ring-0"
+                                            className="rounded border-slate-200 text-blue-600 focus:ring-0"
                                         />
                                         <span>Set as Default Portion</span>
                                     </label>
@@ -428,12 +428,12 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                         <div className="space-y-6">
                             {/* Existing Addons List */}
                             <div className="space-y-2">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-white/50">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                                     Current Custom Add-ons
                                 </h3>
 
                                 {addons.length === 0 ? (
-                                    <div className="p-4 rounded-2xl bg-black/40 border border-dashed border-white/10 text-center text-xs text-white/40">
+                                    <div className="p-4 rounded-2xl bg-slate-100 border border-dashed border-slate-200 text-center text-xs text-slate-400">
                                         No custom add-ons added yet.
                                     </div>
                                 ) : (
@@ -443,7 +443,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                             return (
                                                 <div
                                                     key={a.id}
-                                                    className="p-3 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between gap-3"
+                                                    className="p-3 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-between gap-3"
                                                 >
                                                     {isEditing ? (
                                                         <div className="flex-1 flex items-center gap-2">
@@ -451,15 +451,15 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                                 type="text"
                                                                 value={editAddonName}
                                                                 onChange={(e) => setEditAddonName(e.target.value)}
-                                                                className="px-2.5 py-1 bg-black/60 border border-white/20 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-[#D4AF37]"
+                                                                className="px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600"
                                                             />
                                                             <div className="relative w-28">
-                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-[#D4AF37]">₹</span>
+                                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-blue-600">₹</span>
                                                                 <input
                                                                     type="number"
                                                                     value={editAddonPriceRupees}
                                                                     onChange={(e) => setEditAddonPriceRupees(e.target.value)}
-                                                                    className="w-full pl-6 pr-2 py-1 bg-black/60 border border-white/20 rounded-lg text-xs font-mono font-bold text-white focus:outline-none focus:border-[#D4AF37]"
+                                                                    className="w-full pl-6 pr-2 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600"
                                                                 />
                                                             </div>
                                                             <button
@@ -472,7 +472,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                             <button
                                                                 type="button"
                                                                 onClick={() => setEditingAddonId(null)}
-                                                                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/60"
+                                                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
                                                             >
                                                                 <X className="w-4 h-4" />
                                                             </button>
@@ -481,12 +481,12 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                         <>
                                                             <div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className="font-bold text-sm text-white">{a.name}</span>
+                                                                    <span className="font-bold text-sm text-slate-900">{a.name}</span>
                                                                     {a.name_te && (
-                                                                        <span className="text-xs text-white/40 font-telugu">({a.name_te})</span>
+                                                                        <span className="text-xs text-slate-400 font-telugu">({a.name_te})</span>
                                                                     )}
                                                                 </div>
-                                                                <span className="font-mono font-black text-sm text-[#D4AF37] block mt-0.5">
+                                                                <span className="font-mono font-black text-sm text-blue-600 block mt-0.5">
                                                                     +{formatRupees(a.price_paise)}
                                                                 </span>
                                                             </div>
@@ -499,7 +499,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                                         setEditAddonName(a.name);
                                                                         setEditAddonPriceRupees((a.price_paise / 100).toString());
                                                                     }}
-                                                                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition cursor-pointer"
+                                                                    className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                                                                     title="Edit price/name"
                                                                 >
                                                                     <Edit2 className="w-3.5 h-3.5" />
@@ -523,40 +523,40 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                             </div>
 
                             {/* Add New Addon Box */}
-                            <form onSubmit={handleAddAddon} className="p-4 rounded-3xl bg-black/30 border border-white/10 space-y-3">
-                                <h4 className="font-bold text-xs uppercase tracking-wider text-[#D4AF37] flex items-center gap-1.5">
+                            <form onSubmit={handleAddAddon} className="p-4 rounded-3xl bg-slate-50 border border-slate-200 space-y-3">
+                                <h4 className="font-bold text-xs uppercase tracking-wider text-blue-600 flex items-center gap-1.5">
                                     <Plus className="w-4 h-4" />
                                     Add New Custom Add-on
                                 </h4>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                                     <div>
-                                        <label className="text-[10px] text-white/50 block mb-1">Addon Name *</label>
+                                        <label className="text-[10px] text-slate-500 block mb-1">Addon Name *</label>
                                         <input
                                             type="text"
                                             value={addonName}
                                             onChange={(e) => setAddonName(e.target.value)}
                                             placeholder="e.g. Extra Arabian Mayo (50ml)"
                                             required
-                                            className="w-full px-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                                            className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] text-white/50 block mb-1">Telugu Name (Optional)</label>
+                                        <label className="text-[10px] text-slate-500 block mb-1">Telugu Name (Optional)</label>
                                         <input
                                             type="text"
                                             value={addonNameTe}
                                             onChange={(e) => setAddonNameTe(e.target.value)}
                                             placeholder="e.g. ఎక్స్ట్రా మయోన్నైస్"
-                                            className="w-full px-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                                            className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] text-white/50 block mb-1">Extra Price (₹) *</label>
+                                        <label className="text-[10px] text-slate-500 block mb-1">Extra Price (₹) *</label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#D4AF37]">₹</span>
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-blue-600">₹</span>
                                             <input
                                                 type="number"
                                                 step="1"
@@ -565,7 +565,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                 onChange={(e) => setAddonPriceRupees(e.target.value)}
                                                 placeholder="25"
                                                 required
-                                                className="w-full pl-7 pr-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs font-mono font-bold text-white focus:outline-none focus:border-[#D4AF37]"
+                                                className="w-full pl-7 pr-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600"
                                             />
                                         </div>
                                     </div>

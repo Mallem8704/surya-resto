@@ -271,10 +271,10 @@ export function PaymentSettlementModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-            <div className="bg-[#120e09] border border-amber-400/40 rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in">
+            <div className="bg-[#120e09] border border-amber-400/40 rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col text-slate-900">
                 {/* Header */}
-                <div className="p-5 bg-gradient-to-r from-amber-950/80 via-black to-amber-950/80 border-b border-white/10 flex items-center justify-between">
+                <div className="p-5 bg-gradient-to-r from-amber-950/80 via-black to-amber-950/80 border-b border-slate-200 flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2">
                             <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-black text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
@@ -290,28 +290,28 @@ export function PaymentSettlementModal({
                                     </>
                                 )}
                             </span>
-                            <span className="font-mono text-xs text-white/60">#{order.order_number}</span>
+                            <span className="font-mono text-xs text-slate-600">#{order.order_number}</span>
                         </div>
-                        <h2 className="text-xl font-black text-white mt-1">
+                        <h2 className="text-xl font-black text-slate-900 mt-1">
                             Settle Bill: <span className="text-amber-400 font-mono">{formatRupees(totalPaise)}</span>
                         </h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 transition cursor-pointer"
+                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 transition cursor-pointer"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-white/10 bg-black/40 p-1.5 gap-1.5">
+                <div className="flex border-b border-slate-200 bg-slate-100 p-1.5 gap-1.5">
                     <button
                         onClick={() => setActiveTab("cash")}
                         className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                             activeTab === "cash"
                                 ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-black"
-                                : "text-white/60 hover:text-white hover:bg-white/5"
+                                : "text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                     >
                         <Banknote className="w-4 h-4" />
@@ -323,7 +323,7 @@ export function PaymentSettlementModal({
                         className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                             activeTab === "upi"
                                 ? "bg-amber-500 text-black shadow-md shadow-amber-500/20 font-black"
-                                : "text-white/60 hover:text-white hover:bg-white/5"
+                                : "text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                     >
                         <QrCode className="w-4 h-4" />
@@ -335,7 +335,7 @@ export function PaymentSettlementModal({
                         className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                             activeTab === "card"
                                 ? "bg-purple-500 text-black shadow-md shadow-purple-500/20 font-black"
-                                : "text-white/60 hover:text-white hover:bg-white/5"
+                                : "text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                     >
                         <CreditCard className="w-4 h-4" />
@@ -347,7 +347,7 @@ export function PaymentSettlementModal({
                         className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                             activeTab === "split"
                                 ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/20 font-black"
-                                : "text-white/60 hover:text-white hover:bg-white/5"
+                                : "text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                     >
                         <Users className="w-4 h-4" />
@@ -361,7 +361,7 @@ export function PaymentSettlementModal({
                     {activeTab === "cash" && (
                         <div className="space-y-4 animate-in fade-in">
                             <div>
-                                <label className="block text-xs font-bold text-white/70 mb-1.5">
+                                <label className="block text-xs font-bold text-slate-600 mb-1.5">
                                     Cash Amount Received from Customer (₹)
                                 </label>
                                 <input
@@ -369,7 +369,7 @@ export function PaymentSettlementModal({
                                     value={tenderedAmount}
                                     onChange={(e) => setTenderedAmount(e.target.value)}
                                     placeholder="Enter cash given"
-                                    className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/20 text-xl font-mono font-black text-amber-400 focus:outline-none focus:border-emerald-400"
+                                    className="w-full px-4 py-3 rounded-2xl bg-slate-100 border border-slate-200 text-xl font-mono font-black text-amber-400 focus:outline-none focus:border-emerald-400"
                                 />
                             </div>
 
@@ -383,7 +383,7 @@ export function PaymentSettlementModal({
                                         className={`px-3 py-2 rounded-xl text-xs font-black transition cursor-pointer ${
                                             Number(tenderedAmount) === note.val
                                                 ? "bg-emerald-500 text-black shadow-md"
-                                                : "bg-white/10 hover:bg-white/20 text-white"
+                                                : "bg-slate-100 hover:bg-slate-200 text-slate-900"
                                         }`}
                                     >
                                         {note.label}
@@ -435,10 +435,10 @@ export function PaymentSettlementModal({
                             {isLoadingUpi ? (
                                 <div className="py-12 flex flex-col items-center gap-2">
                                     <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
-                                    <p className="text-xs text-white/60">Generating Dynamic UPI QR...</p>
+                                    <p className="text-xs text-slate-600">Generating Dynamic UPI QR...</p>
                                 </div>
                             ) : dynamicUpi ? (
-                                <div className="p-4 rounded-3xl bg-black/60 border border-amber-400/30 flex flex-col items-center gap-3">
+                                <div className="p-4 rounded-3xl bg-slate-100 border border-amber-400/30 flex flex-col items-center gap-3">
                                     <div className="bg-white p-3 rounded-2xl shadow-xl">
                                         <img
                                             src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
@@ -457,7 +457,7 @@ export function PaymentSettlementModal({
                                         <p className="text-lg font-mono font-black text-amber-400">
                                             ₹{dynamicUpi.amount_rs.toFixed(2)}
                                         </p>
-                                        <p className="text-[11px] text-white/50 font-mono">
+                                        <p className="text-[11px] text-slate-500 font-mono">
                                             VPA: {dynamicUpi.upi_vpa} &bull; {dynamicUpi.outlet_name}
                                         </p>
                                     </div>
@@ -465,7 +465,7 @@ export function PaymentSettlementModal({
                                     {/* Mobile Direct UPI Intent */}
                                     <a
                                         href={dynamicUpi.upi_uri}
-                                        className="sm:hidden w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer"
+                                        className="sm:hidden w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-white/15 border border-slate-200 text-xs font-bold text-slate-900 flex items-center justify-center gap-1.5 cursor-pointer"
                                     >
                                         <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
                                         <span>Open in UPI App on this device</span>
@@ -487,14 +487,14 @@ export function PaymentSettlementModal({
                     {/* TAB 3: CARD PAYMENT */}
                     {activeTab === "card" && (
                         <div className="space-y-4 animate-in fade-in">
-                            <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+                            <div className="p-4 rounded-2xl bg-slate-100 border border-slate-200 space-y-3">
                                 <div className="flex items-center gap-2 text-purple-400">
                                     <CreditCard className="w-5 h-5" />
-                                    <h4 className="font-bold text-sm text-white">Card Payment / POS Machine</h4>
+                                    <h4 className="font-bold text-sm text-slate-900">Card Payment / POS Machine</h4>
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-white/70 mb-1">
+                                    <label className="block text-xs font-bold text-slate-600 mb-1">
                                         Card Network
                                     </label>
                                     <div className="grid grid-cols-4 gap-2">
@@ -506,7 +506,7 @@ export function PaymentSettlementModal({
                                                 className={`py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
                                                     cardNetwork === net
                                                         ? "bg-purple-500 text-black font-black shadow"
-                                                        : "bg-white/10 text-white/70 hover:bg-white/15"
+                                                        : "bg-slate-100 text-slate-600 hover:bg-white/15"
                                                 }`}
                                             >
                                                 {net}
@@ -517,7 +517,7 @@ export function PaymentSettlementModal({
 
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label className="block text-xs font-bold text-white/70 mb-1">
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">
                                             Last 4 Digits (Optional)
                                         </label>
                                         <input
@@ -526,11 +526,11 @@ export function PaymentSettlementModal({
                                             placeholder="e.g. 4242"
                                             value={cardLast4}
                                             onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                                            className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-sm font-mono text-white focus:outline-none focus:border-purple-400"
+                                            className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-purple-400"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-white/70 mb-1">
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">
                                             Approval / Ref No (Optional)
                                         </label>
                                         <input
@@ -538,14 +538,14 @@ export function PaymentSettlementModal({
                                             placeholder="RRN / Txn ID"
                                             value={cardTxnRef}
                                             onChange={(e) => setCardTxnRef(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-sm font-mono text-white focus:outline-none focus:border-purple-400"
+                                            className="w-full px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-sm font-mono text-slate-900 focus:outline-none focus:border-purple-400"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 flex justify-between items-center text-xs">
                                     <span className="text-purple-300">Amount to Charge on EDC POS:</span>
-                                    <span className="text-lg font-mono font-black text-white">₹{totalRs.toFixed(2)}</span>
+                                    <span className="text-lg font-mono font-black text-slate-900">₹{totalRs.toFixed(2)}</span>
                                 </div>
                             </div>
 
@@ -571,7 +571,7 @@ export function PaymentSettlementModal({
                                     className={`py-2 rounded-xl text-xs font-black transition cursor-pointer ${
                                         splitType === "equal"
                                             ? "bg-cyan-500 text-black"
-                                            : "bg-white/10 text-white/70"
+                                            : "bg-slate-100 text-slate-600"
                                     }`}
                                 >
                                     Divide by Persons
@@ -582,7 +582,7 @@ export function PaymentSettlementModal({
                                     className={`py-2 rounded-xl text-xs font-black transition cursor-pointer ${
                                         splitType === "custom"
                                             ? "bg-cyan-500 text-black"
-                                            : "bg-white/10 text-white/70"
+                                            : "bg-slate-100 text-slate-600"
                                     }`}
                                 >
                                     Hybrid (Cash + UPI + Card)
@@ -591,7 +591,7 @@ export function PaymentSettlementModal({
 
                             {splitType === "equal" ? (
                                 <div className="space-y-3">
-                                    <label className="block text-xs font-bold text-white/70">
+                                    <label className="block text-xs font-bold text-slate-600">
                                         Number of Friends / People Splitting
                                     </label>
                                     <div className="grid grid-cols-5 gap-2">
@@ -603,7 +603,7 @@ export function PaymentSettlementModal({
                                                 className={`py-2.5 rounded-xl font-black text-xs transition cursor-pointer ${
                                                     splitPeople === p
                                                         ? "bg-cyan-500 text-black shadow-lg"
-                                                        : "bg-white/10 text-white hover:bg-white/15"
+                                                        : "bg-slate-100 text-slate-900 hover:bg-white/15"
                                                 }`}
                                             >
                                                 {p} Pax
@@ -616,7 +616,7 @@ export function PaymentSettlementModal({
                                             <p className="text-[11px] text-cyan-300 font-bold uppercase">
                                                 Each Person Pays
                                             </p>
-                                            <p className="text-2xl font-mono font-black text-white">
+                                            <p className="text-2xl font-mono font-black text-slate-900">
                                                 ₹{(totalRs / splitPeople).toFixed(2)}
                                             </p>
                                         </div>
@@ -626,29 +626,29 @@ export function PaymentSettlementModal({
                             ) : (
                                 <div className="space-y-3">
                                     <div>
-                                        <label className="block text-xs font-bold text-white/70 mb-1">
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">
                                             Cash Portion (₹)
                                         </label>
                                         <input
                                             type="number"
                                             value={customCashRs}
                                             onChange={(e) => setCustomCashRs(e.target.value)}
-                                            className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/20 text-sm font-mono text-emerald-400 focus:outline-none"
+                                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm font-mono text-emerald-400 focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-white/70 mb-1">
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">
                                             UPI Portion (₹)
                                         </label>
                                         <input
                                             type="number"
                                             value={customUpiRs}
                                             onChange={(e) => setCustomUpiRs(e.target.value)}
-                                            className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/20 text-sm font-mono text-amber-400 focus:outline-none"
+                                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm font-mono text-amber-400 focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-white/70 mb-1">
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">
                                             Card Portion (₹)
                                         </label>
                                         <input
@@ -656,12 +656,12 @@ export function PaymentSettlementModal({
                                             value={customCardRs}
                                             onChange={(e) => setCustomCardRs(e.target.value)}
                                             placeholder="0"
-                                            className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/20 text-sm font-mono text-purple-400 focus:outline-none"
+                                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-sm font-mono text-purple-400 focus:outline-none"
                                         />
                                     </div>
 
                                     <div className="flex justify-between text-xs font-bold pt-1">
-                                        <span className="text-white/60">Total Bill: ₹{totalRs}</span>
+                                        <span className="text-slate-600">Total Bill: ₹{totalRs}</span>
                                         <span
                                             className={
                                                 (Number(customCashRs) || 0) + (Number(customUpiRs) || 0) + (Number(customCardRs) || 0) === totalRs
@@ -688,10 +688,10 @@ export function PaymentSettlementModal({
                 </div>
 
                 {/* Footer Fast Actions */}
-                <div className="p-4 bg-black/60 border-t border-white/10 flex items-center justify-between text-xs">
+                <div className="p-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-xs">
                     <button
                         onClick={() => printPOSReceipt(order, outlet)}
-                        className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold flex items-center gap-1.5 cursor-pointer"
+                        className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-white/15 text-slate-900 font-bold flex items-center gap-1.5 cursor-pointer"
                     >
                         <Printer className="w-3.5 h-3.5 text-amber-400" />
                         <span>Print Bill</span>

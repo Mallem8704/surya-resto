@@ -36,8 +36,8 @@ export function VegBadge({ isVeg, showText = true }: { isVeg: boolean; showText?
 export function SpecialBadge({ label }: { label?: string }) {
     const { t } = useLanguage();
     return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-saffron-500 text-espresso-950 text-[11px] font-extrabold shadow-sm shadow-saffron-500/20">
-            <Star className="w-3 h-3 fill-espresso-950 stroke-none" />
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[11px] font-extrabold shadow-sm shadow-amber-400/20">
+            <Star className="w-3 h-3 fill-slate-950 stroke-none" />
             <span>{label || t("special")}</span>
         </span>
     );
@@ -106,10 +106,10 @@ export function OrderStatusBadge({ status }: { status: string }) {
             labelKey: "status_accepted",
         },
         preparing: {
-            bg: "bg-saffron-50",
-            text: "text-saffron-800",
-            border: "border-saffron-200",
-            icon: <ChefHat className="w-3.5 h-3.5 text-saffron-600 animate-bounce" />,
+            bg: "bg-amber-50",
+            text: "text-amber-800",
+            border: "border-amber-200",
+            icon: <ChefHat className="w-3.5 h-3.5 text-amber-600 animate-bounce" />,
             labelKey: "status_preparing",
         },
         ready: {
@@ -120,10 +120,10 @@ export function OrderStatusBadge({ status }: { status: string }) {
             labelKey: "status_ready",
         },
         served: {
-            bg: "bg-cream-200",
-            text: "text-espresso-800",
-            border: "border-cream-300",
-            icon: <CheckCircle className="w-3.5 h-3.5 text-espresso-700" />,
+            bg: "bg-slate-100",
+            text: "text-slate-700",
+            border: "border-slate-200",
+            icon: <CheckCircle className="w-3.5 h-3.5 text-slate-600" />,
             labelKey: "status_served",
         },
         cancelled: {

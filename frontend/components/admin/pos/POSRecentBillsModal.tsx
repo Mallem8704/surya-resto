@@ -188,22 +188,22 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-5xl h-[90vh] bg-[#17130F] text-white rounded-3xl border border-[#D4AF37]/30 shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-5xl h-[90vh] bg-[#17130F] text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
                 {/* MODAL HEADER */}
-                <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/10 bg-black/40">
+                <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-100">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                        <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-slate-200 flex items-center justify-center text-blue-600">
                             <FileText className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="font-serif font-black text-lg sm:text-xl text-white flex items-center gap-2">
+                            <h2 className="font-serif font-black text-lg sm:text-xl text-slate-900 flex items-center gap-2">
                                 Bill History &amp; Quick Reprint
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-white/70 font-bold">
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
                                     [F7]
                                 </span>
                             </h2>
-                            <p className="text-xs text-white/50">Look up today's bills, reprint duplicates, or adjust payment tender</p>
+                            <p className="text-xs text-slate-500">Look up today's bills, reprint duplicates, or adjust payment tender</p>
                         </div>
                     </div>
 
@@ -211,7 +211,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                         <button
                             type="button"
                             onClick={fetchRecentOrders}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 transition cursor-pointer"
+                            className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 transition cursor-pointer"
                             title="Refresh bills"
                         >
                             <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -219,7 +219,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                         <button
                             type="button"
                             onClick={onClose}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition cursor-pointer"
+                            className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -229,22 +229,22 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                 {/* MODAL BODY (TWO COLUMN LAYOUT) */}
                 <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
                     {/* LEFT LIST: SEARCH & BILL CARDS */}
-                    <div className="w-full md:w-5/12 border-r border-white/10 flex flex-col bg-black/20">
+                    <div className="w-full md:w-5/12 border-r border-slate-200 flex flex-col bg-black/20">
                         {/* Search & Filter Bar */}
-                        <div className="p-3 space-y-2 border-b border-white/10">
+                        <div className="p-3 space-y-2 border-b border-slate-200">
                             <div className="relative">
-                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search bill #, table, customer..."
-                                    className="w-full pl-9 pr-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#D4AF37]"
+                                    className="w-full pl-9 pr-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600"
                                 />
                             </div>
 
                             {/* Status Filter Tabs */}
-                            <div className="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5 text-[11px] overflow-x-auto no-scrollbar">
+                            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl border border-slate-100 text-[11px] overflow-x-auto no-scrollbar">
                                 {[
                                     { id: "all", label: "All Bills" },
                                     { id: "paid", label: "Settled (Paid)" },
@@ -256,7 +256,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                         type="button"
                                         onClick={() => setStatusFilter(tab.id)}
                                         className={`flex-1 py-1 rounded-lg font-bold transition cursor-pointer ${
-                                            statusFilter === tab.id ? "bg-[#D4AF37] text-black shadow" : "text-white/60 hover:text-white"
+                                            statusFilter === tab.id ? "bg-blue-600 text-white shadow-xs shadow" : "text-slate-600 hover:text-slate-900"
                                         }`}
                                     >
                                         {tab.label}
@@ -268,9 +268,9 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                         {/* Bills List */}
                         <div className="flex-1 overflow-y-auto p-2 space-y-2">
                             {isLoading ? (
-                                <div className="p-8 text-center text-xs text-white/40">Loading today's bills...</div>
+                                <div className="p-8 text-center text-xs text-slate-400">Loading today's bills...</div>
                             ) : filteredOrders.length === 0 ? (
-                                <div className="p-8 text-center text-xs text-white/40">No bills found matching search.</div>
+                                <div className="p-8 text-center text-xs text-slate-400">No bills found matching search.</div>
                             ) : (
                                 filteredOrders.map((o) => {
                                     const isSelected = selectedOrder?.id === o.id;
@@ -282,21 +282,21 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                             onClick={() => setSelectedOrder(o)}
                                             className={`p-3 rounded-2xl border transition cursor-pointer ${
                                                 isSelected
-                                                    ? "bg-[#D4AF37]/15 border-[#D4AF37] shadow-lg"
-                                                    : "bg-black/40 border-white/5 hover:border-white/20"
+                                                    ? "bg-blue-50 border-blue-600 shadow-lg"
+                                                    : "bg-slate-100 border-slate-100 hover:border-slate-200"
                                             }`}
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div>
-                                                    <span className="font-mono font-black text-xs text-white">
+                                                    <span className="font-mono font-black text-xs text-slate-900">
                                                         #{o.order_number}
                                                     </span>
-                                                    <span className="text-[10px] text-white/50 block">
+                                                    <span className="text-[10px] text-slate-500 block">
                                                         {new Date(o.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} • {o.order_type === "delivery" ? "Delivery" : o.order_type === "takeaway" ? "Takeaway" : `Table ${o.table?.label || "1"}`}
                                                     </span>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="font-mono font-black text-sm text-[#D4AF37]">
+                                                    <span className="font-mono font-black text-sm text-blue-600">
                                                         {formatRupees(o.total_paise || 0)}
                                                     </span>
                                                     <span
@@ -314,8 +314,8 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                             </div>
 
                                             {o.customer_name && (
-                                                <div className="mt-1 text-[10px] text-white/60 truncate flex items-center gap-1">
-                                                    <User className="w-3 h-3 text-white/40" />
+                                                <div className="mt-1 text-[10px] text-slate-600 truncate flex items-center gap-1">
+                                                    <User className="w-3 h-3 text-slate-400" />
                                                     {o.customer_name} {o.customer_phone ? `(${o.customer_phone})` : ""}
                                                 </div>
                                             )}
@@ -327,17 +327,17 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                     </div>
 
                     {/* RIGHT DETAIL: SELECTED BILL PREVIEW & ACTIONS */}
-                    <div className="flex-1 flex flex-col bg-black/40 p-4 sm:p-6 overflow-y-auto">
+                    <div className="flex-1 flex flex-col bg-slate-100 p-4 sm:p-6 overflow-y-auto">
                         {selectedOrder ? (
                             <div className="space-y-5 max-w-xl mx-auto w-full">
                                 {/* Bill Meta Card */}
-                                <div className="p-4 rounded-3xl bg-[#17130F] border border-white/10 space-y-3">
-                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                <div className="p-4 rounded-3xl bg-[#17130F] border border-slate-200 space-y-3">
+                                    <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                                         <div>
-                                            <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider block">
+                                            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
                                                 Tax Invoice / Cash Bill
                                             </span>
-                                            <h3 className="font-mono font-black text-xl text-white">
+                                            <h3 className="font-mono font-black text-xl text-slate-900">
                                                 #{selectedOrder.order_number}
                                             </h3>
                                         </div>
@@ -346,7 +346,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                             <button
                                                 type="button"
                                                 onClick={() => handleReprint(selectedOrder)}
-                                                className="px-3.5 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#C59B27] text-black font-black text-xs uppercase flex items-center gap-1.5 shadow-lg transition cursor-pointer"
+                                                className="px-3.5 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-white font-black text-xs uppercase flex items-center gap-1.5 shadow-lg transition cursor-pointer"
                                             >
                                                 <Printer className="w-4 h-4" />
                                                 <span>Reprint (Duplicate)</span>
@@ -356,9 +356,9 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
 
                                     {/* Order Info Grid */}
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
-                                        <div className="p-2.5 rounded-xl bg-black/40 border border-white/5">
-                                            <span className="text-[10px] text-white/40 block">Type / Seating</span>
-                                            <span className="font-bold text-white inline-flex items-center gap-1.5 mt-0.5">
+                                        <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-100">
+                                            <span className="text-[10px] text-slate-400 block">Type / Seating</span>
+                                            <span className="font-bold text-slate-900 inline-flex items-center gap-1.5 mt-0.5">
                                                 {selectedOrder.order_type === "delivery" ? (
                                                     <>
                                                         <Bike className="w-3.5 h-3.5 text-amber-400" />
@@ -377,14 +377,14 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                                 )}
                                             </span>
                                         </div>
-                                        <div className="p-2.5 rounded-xl bg-black/40 border border-white/5">
-                                            <span className="text-[10px] text-white/40 block">Time</span>
-                                            <span className="font-bold text-white">
+                                        <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-100">
+                                            <span className="text-[10px] text-slate-400 block">Time</span>
+                                            <span className="font-bold text-slate-900">
                                                 {new Date(selectedOrder.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                             </span>
                                         </div>
-                                        <div className="p-2.5 rounded-xl bg-black/40 border border-white/5">
-                                            <span className="text-[10px] text-white/40 block">Payment Tender</span>
+                                        <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-100">
+                                            <span className="text-[10px] text-slate-400 block">Payment Tender</span>
                                             <span className="font-bold text-amber-400 uppercase">
                                                 {selectedOrder.payment_method || "CASH"} ({selectedOrder.payment_status || "PAID"})
                                             </span>
@@ -392,36 +392,36 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                     </div>
 
                                     {selectedOrder.customer_name && (
-                                        <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-xs">
-                                            <span className="text-[10px] text-white/40 block">Customer Details</span>
-                                            <span className="font-bold text-white">
+                                        <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-100 text-xs">
+                                            <span className="text-[10px] text-slate-400 block">Customer Details</span>
+                                            <span className="font-bold text-slate-900">
                                                 {selectedOrder.customer_name} {selectedOrder.customer_phone ? `• ${selectedOrder.customer_phone}` : ""}
                                             </span>
                                             {selectedOrder.delivery_address && (
-                                                <p className="text-[10px] text-white/60 mt-0.5">{selectedOrder.delivery_address}</p>
+                                                <p className="text-[10px] text-slate-600 mt-0.5">{selectedOrder.delivery_address}</p>
                                             )}
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Itemized List */}
-                                <div className="p-4 rounded-3xl bg-[#17130F] border border-white/10 space-y-3">
-                                    <h4 className="font-serif font-black text-sm text-white border-b border-white/10 pb-2">
+                                <div className="p-4 rounded-3xl bg-[#17130F] border border-slate-200 space-y-3">
+                                    <h4 className="font-serif font-black text-sm text-slate-900 border-b border-slate-200 pb-2">
                                         Ordered Items ({selectedOrder.items?.length || 0})
                                     </h4>
 
                                     <div className="space-y-2">
                                         {(selectedOrder.items || []).map((it: any, i: number) => (
-                                            <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-white/5">
+                                            <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-100">
                                                 <div>
-                                                    <span className="font-bold text-white">{it.item_name || it.menu_item?.name}</span>
+                                                    <span className="font-bold text-slate-900">{it.item_name || it.menu_item?.name}</span>
                                                     {it.variant_name && (
                                                         <span className="text-[10px] text-amber-400 block">▶ {it.variant_name}</span>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="font-mono font-bold text-white/60">x{it.qty}</span>
-                                                    <span className="font-mono font-bold text-white">
+                                                    <span className="font-mono font-bold text-slate-600">x{it.qty}</span>
+                                                    <span className="font-mono font-bold text-slate-900">
                                                         {formatRupees(it.total_price_paise || 0)}
                                                     </span>
                                                 </div>
@@ -430,8 +430,8 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                     </div>
 
                                     {/* Financial Breakdown */}
-                                    <div className="pt-2 border-t border-white/10 space-y-1.5 text-xs">
-                                        <div className="flex justify-between text-white/60">
+                                    <div className="pt-2 border-t border-slate-200 space-y-1.5 text-xs">
+                                        <div className="flex justify-between text-slate-600">
                                             <span>Subtotal:</span>
                                             <span className="font-mono">{formatRupees(selectedOrder.subtotal_paise || 0)}</span>
                                         </div>
@@ -441,11 +441,11 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                                 <span className="font-mono">-{formatRupees(selectedOrder.discount_paise || 0)}</span>
                                             </div>
                                         )}
-                                        <div className="flex justify-between text-white/60">
+                                        <div className="flex justify-between text-slate-600">
                                             <span>GST (5%):</span>
                                             <span className="font-mono">{formatRupees(selectedOrder.tax_paise || 0)}</span>
                                         </div>
-                                        <div className="flex justify-between font-black text-base text-[#D4AF37] pt-1.5 border-t border-white/10">
+                                        <div className="flex justify-between font-black text-base text-blue-600 pt-1.5 border-t border-slate-200">
                                             <span>NET PAID:</span>
                                             <span className="font-mono">{formatRupees(selectedOrder.total_paise || 0)}</span>
                                         </div>
@@ -461,7 +461,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                                 setNewPaymentMethod(selectedOrder.payment_method || "cash");
                                                 setShowChangePayment(true);
                                             }}
-                                            className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 font-bold text-xs text-white flex items-center justify-center gap-2 transition cursor-pointer"
+                                            className="p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 font-bold text-xs text-slate-900 flex items-center justify-center gap-2 transition cursor-pointer"
                                         >
                                             <ArrowRightLeft className="w-4 h-4 text-amber-400" />
                                             <span>Change Payment Method</span>
@@ -479,7 +479,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                 )}
                             </div>
                         ) : (
-                            <div className="flex-1 flex items-center justify-center text-white/40 text-xs">
+                            <div className="flex-1 flex items-center justify-center text-slate-400 text-xs">
                                 Select a bill on the left to view complete details &amp; reprint
                             </div>
                         )}
@@ -488,20 +488,20 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
 
                 {/* MODAL 1: CHANGE PAYMENT METHOD */}
                 {showChangePayment && (
-                    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
                         <div className="w-full max-w-md bg-[#1E1914] rounded-3xl border border-amber-500/40 p-5 space-y-4 shadow-2xl">
-                            <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                                <h3 className="font-serif font-black text-base text-white flex items-center gap-2">
+                            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                                <h3 className="font-serif font-black text-base text-slate-900 flex items-center gap-2">
                                     <ArrowRightLeft className="w-4 h-4 text-amber-400" />
                                     Change Payment Tender
                                 </h3>
-                                <button type="button" onClick={() => setShowChangePayment(false)} className="text-white/60 hover:text-white">
+                                <button type="button" onClick={() => setShowChangePayment(false)} className="text-slate-600 hover:text-slate-900">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            <p className="text-xs text-white/60">
-                                Adjust the payment method recorded for bill <strong className="text-white">#{selectedOrder?.order_number}</strong> ({formatRupees(selectedOrder?.total_paise || 0)}).
+                            <p className="text-xs text-slate-600">
+                                Adjust the payment method recorded for bill <strong className="text-slate-900">#{selectedOrder?.order_number}</strong> ({formatRupees(selectedOrder?.total_paise || 0)}).
                             </p>
 
                             <div className="grid grid-cols-3 gap-2">
@@ -517,7 +517,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                         className={`p-3 rounded-2xl border text-xs font-bold transition flex flex-col items-center gap-1.5 cursor-pointer ${
                                             newPaymentMethod === m.id
                                                 ? "bg-amber-500/20 border-amber-400 text-amber-300"
-                                                : "bg-black/40 border-white/10 text-white/70 hover:bg-white/5"
+                                                : "bg-slate-100 border-slate-200 text-slate-600 hover:bg-white"
                                         }`}
                                     >
                                         <m.icon className="w-5 h-5" />
@@ -527,13 +527,13 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                             </div>
 
                             <div>
-                                <label className="text-[11px] text-white/60 font-bold block mb-1">Audit Reason / Notes</label>
+                                <label className="text-[11px] text-slate-600 font-bold block mb-1">Audit Reason / Notes</label>
                                 <input
                                     type="text"
                                     value={paymentNotes}
                                     onChange={(e) => setPaymentNotes(e.target.value)}
                                     placeholder="e.g. Guest paid via PhonePe instead of Cash"
-                                    className="w-full px-3 py-2 bg-black/60 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400"
+                                    className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-amber-400"
                                 />
                             </div>
 
@@ -541,7 +541,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                 <button
                                     type="button"
                                     onClick={() => setShowChangePayment(false)}
-                                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-white/70"
+                                    className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-xs font-bold text-slate-600"
                                 >
                                     Cancel
                                 </button>
@@ -549,7 +549,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                     type="button"
                                     onClick={handleChangePaymentSubmit}
                                     disabled={isUpdatingPayment}
-                                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-black text-xs uppercase tracking-wider"
+                                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs uppercase tracking-wider"
                                 >
                                     {isUpdatingPayment ? "Updating..." : "Save Payment Method"}
                                 </button>
@@ -560,20 +560,20 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
 
                 {/* MODAL 2: VOID / CANCEL BILL */}
                 {showVoidModal && (
-                    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
                         <div className="w-full max-w-md bg-[#1E1914] rounded-3xl border border-red-500/40 p-5 space-y-4 shadow-2xl">
-                            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                                 <h3 className="font-serif font-black text-base text-red-400 flex items-center gap-2">
                                     <AlertTriangle className="w-4 h-4" />
                                     Void / Cancel Bill
                                 </h3>
-                                <button type="button" onClick={() => setShowVoidModal(false)} className="text-white/60 hover:text-white">
+                                <button type="button" onClick={() => setShowVoidModal(false)} className="text-slate-600 hover:text-slate-900">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            <p className="text-xs text-white/60">
-                                Are you sure you want to VOID bill <strong className="text-white">#{selectedOrder?.order_number}</strong> ({formatRupees(selectedOrder?.total_paise || 0)})? This will release table occupancy and record a cancellation loss in audit logs.
+                            <p className="text-xs text-slate-600">
+                                Are you sure you want to VOID bill <strong className="text-slate-900">#{selectedOrder?.order_number}</strong> ({formatRupees(selectedOrder?.total_paise || 0)})? This will release table occupancy and record a cancellation loss in audit logs.
                             </p>
 
                             <div>
@@ -583,7 +583,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                     value={voidReason}
                                     onChange={(e) => setVoidReason(e.target.value)}
                                     placeholder="e.g. Customer changed mind / duplicate punch / wrong order"
-                                    className="w-full px-3 py-2 bg-black/60 border border-red-500/30 rounded-xl text-xs text-white focus:outline-none focus:border-red-400"
+                                    className="w-full px-3 py-2 bg-slate-100 border border-red-500/30 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-red-400"
                                 />
                             </div>
 
@@ -591,7 +591,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                 <button
                                     type="button"
                                     onClick={() => setShowVoidModal(false)}
-                                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-white/70"
+                                    className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-xs font-bold text-slate-600"
                                 >
                                     Cancel
                                 </button>
@@ -599,7 +599,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                     type="button"
                                     onClick={handleVoidSubmit}
                                     disabled={isVoiding || !voidReason.trim()}
-                                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider disabled:opacity-50"
+                                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-slate-900 font-black text-xs uppercase tracking-wider disabled:opacity-50"
                                 >
                                     {isVoiding ? "Voiding..." : "Confirm Void Bill"}
                                 </button>

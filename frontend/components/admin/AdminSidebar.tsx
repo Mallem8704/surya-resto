@@ -55,15 +55,15 @@ export function AdminSidebar({ className = "" }: { className?: string }) {
 
     return (
         <aside
-            className={`hidden md:flex w-64 bg-espresso-950 text-white flex-col justify-between border-r border-espresso-800 shrink-0 ${className}`}
+            className={`hidden md:flex w-64 bg-white text-slate-800 flex-col justify-between border-r border-slate-200 shrink-0 shadow-2xs select-none ${className}`}
         >
             {/* Top Brand */}
             <div>
-                <div className="p-4 border-b border-espresso-800 flex items-center gap-3">
+                <div className="p-4 border-b border-slate-200 flex items-center gap-3 bg-white">
                     <SuryaSunLogo size={36} />
                     <div>
-                        <h2 className="font-extrabold text-sm tracking-tight text-white">{t("app_title")}</h2>
-                        <span className="text-[10px] text-terracotta-400 font-bold uppercase tracking-wider block">
+                        <h2 className="font-extrabold text-sm tracking-tight text-slate-900">{t("app_title")}</h2>
+                        <span className="text-[10px] text-blue-600 font-extrabold uppercase tracking-wider block">
                             {outlet?.name || "Admin"} Cockpit
                         </span>
                     </div>
@@ -79,13 +79,13 @@ export function AdminSidebar({ className = "" }: { className?: string }) {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
                                     active
-                                        ? "bg-terracotta-500 text-white shadow-md shadow-terracotta-500/30"
-                                        : "text-espresso-300 hover:bg-espresso-900 hover:text-white"
+                                        ? "bg-blue-50 text-blue-700 font-bold shadow-2xs border-l-4 border-blue-600"
+                                        : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
                                 }`}
                             >
-                                <Icon className={`w-4 h-4 shrink-0 ${active ? "text-white" : "text-espresso-400"}`} />
+                                <Icon className={`w-4 h-4 shrink-0 transition-colors ${active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-700"}`} />
                                 <span>{t(item.labelKey as any)}</span>
                             </Link>
                         );
@@ -94,17 +94,17 @@ export function AdminSidebar({ className = "" }: { className?: string }) {
             </div>
 
             {/* Bottom User Info & Logout */}
-            <div className="p-4 border-t border-espresso-800 bg-espresso-900/60">
-                <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="p-4 border-t border-slate-200 bg-slate-50/90">
+                <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2.5 overflow-hidden">
-                        <div className="w-8 h-8 rounded-full bg-espresso-800 border border-espresso-700 flex items-center justify-center text-xs font-bold text-espresso-200 shrink-0">
-                            {isOwner ? <Shield className="w-4 h-4 text-saffron-400" /> : <User className="w-4 h-4 text-emerald-400" />}
+                        <div className="w-8 h-8 rounded-full bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-xs font-bold text-slate-700 shrink-0">
+                            {isOwner ? <Shield className="w-4 h-4 text-blue-600" /> : <User className="w-4 h-4 text-emerald-600" />}
                         </div>
                         <div className="overflow-hidden">
-                            <h4 className="text-xs font-bold text-white truncate">
+                            <h4 className="text-xs font-bold text-slate-900 truncate">
                                 {isOwner ? "Branch Admin" : "Floor Staff"}
                             </h4>
-                            <span className="text-[10px] uppercase font-extrabold tracking-wider text-saffron-400">
+                            <span className="text-[10px] uppercase font-extrabold tracking-wider text-blue-700">
                                 {user?.role || "Staff"} &bull; B{user?.outlet_id === 56 || user?.outlet_id === 2 ? "2" : "1"}
                             </span>
                         </div>
@@ -113,14 +113,14 @@ export function AdminSidebar({ className = "" }: { className?: string }) {
                     <button
                         onClick={logout}
                         title="Sign Out"
-                        className="p-1.5 rounded-lg text-espresso-400 hover:text-red-400 hover:bg-espresso-800 transition cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                         aria-label="Logout"
                     >
                         <LogOut className="w-4 h-4" />
                     </button>
                 </div>
 
-                <div className="text-[10px] text-espresso-500 text-center font-medium truncate px-1">
+                <div className="text-[10px] text-slate-400 text-center font-medium truncate px-1">
                     {outlet?.name || "Surya Family Restaurant"} &bull; Kadiri
                 </div>
             </div>

@@ -94,28 +94,28 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-[#16120E] border border-[#D4AF37]/40 rounded-3xl p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-150">
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-[#16120E] border border-slate-200 rounded-3xl p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-150">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-2">
-                        <Banknote className="w-5 h-5 text-[#D4AF37]" />
-                        <h3 className="font-serif font-black text-base text-white">
+                        <Banknote className="w-5 h-5 text-blue-600" />
+                        <h3 className="font-serif font-black text-base text-slate-900">
                             Cash Drawer &amp; Petty Cash
                         </h3>
                     </div>
-                    <button onClick={onClose} className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition cursor-pointer">
+                    <button onClick={onClose} className="p-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Switcher */}
-                    <div className="flex rounded-2xl bg-black/50 p-1 border border-white/10">
+                    <div className="flex rounded-2xl bg-slate-100 p-1 border border-slate-200">
                         <button
                             type="button"
                             onClick={() => setType("cash_out")}
                             className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                                type === "cash_out" ? "bg-red-600 text-white" : "text-white/60"
+                                type === "cash_out" ? "bg-red-600 text-white" : "text-slate-600"
                             }`}
                         >
                             <ArrowDownRight className="w-4 h-4" />
@@ -125,7 +125,7 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
                             type="button"
                             onClick={() => setType("cash_in")}
                             className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                                type === "cash_in" ? "bg-emerald-600 text-white" : "text-white/60"
+                                type === "cash_in" ? "bg-emerald-600 text-white" : "text-slate-600"
                             }`}
                         >
                             <ArrowUpRight className="w-4 h-4" />
@@ -135,7 +135,7 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
 
                     {/* Amount */}
                     <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider">
+                        <label className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
                             Amount (₹)
                         </label>
                         <input
@@ -144,7 +144,7 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
                             placeholder="e.g. 250"
                             value={amountRupees}
                             onChange={(e) => setAmountRupees(e.target.value)}
-                            className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/10 text-white font-mono text-lg font-bold focus:outline-none focus:border-[#D4AF37]"
+                            className="w-full px-4 py-3 rounded-2xl bg-slate-100 border border-slate-200 text-slate-900 font-mono text-lg font-bold focus:outline-none focus:border-blue-600"
                             autoFocus
                             required
                         />
@@ -152,13 +152,13 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
 
                     {/* Quick Reasons */}
                     <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-white/50 uppercase tracking-wider">
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                             Category / Reason
                         </label>
                         <select
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white text-xs focus:outline-none focus:border-[#D4AF37]"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                         >
                             {QUICK_EXPENSE_REASONS.map((r) => (
                                 <option key={r} value={r} className="bg-[#16120E]">
@@ -170,7 +170,7 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
 
                     {/* Notes */}
                     <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-white/50 uppercase tracking-wider">
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                             Additional Notes
                         </label>
                         <input
@@ -178,7 +178,7 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
                             placeholder="e.g. Paid to milk vendor 5 Litres"
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
-                            className="w-full px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 text-white text-xs focus:outline-none focus:border-[#D4AF37]"
+                            className="w-full px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                         />
                     </div>
 
@@ -186,14 +186,14 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-bold text-white"
+                            className="flex-1 py-3 rounded-2xl bg-white hover:bg-slate-100 text-xs font-bold text-slate-900"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className="flex-1 py-3 rounded-2xl bg-[#D4AF37] text-black font-black text-xs uppercase tracking-wider shadow-lg hover:scale-102 transition flex items-center justify-center gap-2 cursor-pointer"
+                            className="flex-1 py-3 rounded-2xl bg-blue-600 text-white shadow-xs font-black text-xs uppercase tracking-wider shadow-lg hover:scale-102 transition flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <Save className="w-4 h-4" />
                             <span>Save Entry</span>

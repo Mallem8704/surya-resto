@@ -12,9 +12,7 @@ interface AudioUnlockBannerProps {
 
 /**
  * Audio Autoplay Unlock Indicator & Soundbox Control for Kitchen Tablets, KDS & Cashier POS.
- * Browsers block Web Audio API and SpeechSynthesis until first touch/click.
- * Provides live soundbox toggles (Voice + Chime vs Chime only), English/Telugu language selection,
- * and quick test actions for Table Orders and UPI Payment confirmations.
+ * Clean, eye-comfortable light theme with Royal Blue accents.
  */
 export function AudioUnlockBanner({
     variant = "banner",
@@ -58,70 +56,50 @@ export function AudioUnlockBanner({
             setTimeout(() => {
                 setJustActivated(false);
             }, 5000);
-        } catch (e) {
-            console.warn("Error unlocking audio:", e);
+        } catch (err) {
+            console.error("Audio unlock failed", err);
         }
     };
 
     const handleModeChange = (mode: SoundMode) => {
         setSoundMode(mode);
         soundManager.setSoundMode(mode);
-        if (mode === "mute") {
-            // mute
-        } else {
-            soundManager.playAddToCartPop();
-        }
     };
 
     const handleLangChange = (lang: "en" | "te") => {
         setVoiceLang(lang);
         soundManager.setVoiceLanguage(lang);
-        soundManager.testVoice("table", lang);
     };
 
     const handleTestTableOrder = () => {
-        soundManager.playOrderVoiceAlert({
-            order_number: "101",
-            table_label: "T3",
-            order_type: "dine_in",
-            total_paise: 45000,
-        }, voiceLang as any);
-    };
-
-    const handleTestDeliveryOrder = () => {
-        soundManager.playOrderVoiceAlert({
-            order_number: "102",
-            order_type: "delivery",
-            total_paise: 65000,
-        }, voiceLang as any);
+        soundManager.testVoice("table", voiceLang);
     };
 
     const handleTestPayment = () => {
-        soundManager.playPaymentSoundbox(450, "UPI", "T3");
+        soundManager.testVoice("payment", voiceLang);
     };
 
-    // Compact mode (toolbars, subheaders)
+    // Compact Button variant
     if (variant === "compact") {
         return (
-            <div className={`flex items-center gap-1.5 ${className}`}>
+            <div className={`inline-flex items-center gap-1.5 ${className}`}>
                 <button
                     type="button"
-                    onClick={isUnlocked ? () => setShowControls(!showControls) : handleUnlock}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    onClick={!isUnlocked ? handleUnlock : () => setShowControls(!showControls)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 cursor-pointer ${
                         isUnlocked
-                            ? "bg-emerald-950/80 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900"
-                            : "bg-amber-500/20 border-amber-500/60 text-amber-300 hover:bg-amber-500/30 animate-pulse"
+                            ? "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100"
+                            : "bg-amber-500 border-amber-600 text-slate-950 animate-pulse hover:bg-amber-400"
                     }`}
-                    title={isUnlocked ? "Voice Soundbox Active - Click to configure" : "Tap to enable Voice Soundbox"}
                 >
                     {isUnlocked ? (
                         <>
-                            <Volume2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                             <span>Voice Alert Active ({voiceLang === "te" ? "తెలుగు" : "ENG"})</span>
                         </>
                     ) : (
                         <>
-                            <BellRing className="w-4 h-4 text-amber-400 animate-bounce shrink-0" />
+                            <BellRing className="w-3.5 h-3.5 text-slate-950 animate-bounce shrink-0" />
                             <span>Tap to Enable Voice Soundbox</span>
                         </>
                     )}
@@ -140,19 +118,19 @@ export function AudioUnlockBanner({
                     <button
                         type="button"
                         onClick={handleUnlock}
-                        className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-saffron-500 to-amber-600 text-espresso-950 font-black text-xs sm:text-sm shadow-2xl border-2 border-amber-300/80 animate-pulse hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-xl hover:bg-blue-700 animate-pulse transition-all cursor-pointer"
                     >
                         <BellRing className="w-4 h-4 animate-bounce shrink-0" />
                         <span>Tap to enable Voice Soundbox</span>
                     </button>
                 ) : (
-                    <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-lg backdrop-blur-md">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-blue-200 text-blue-900 text-xs font-bold shadow-md">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                         <span>Soundbox Active ({voiceLang === "te" ? "తెలుగు" : "EN"})</span>
                         <button
                             type="button"
                             onClick={handleTestTableOrder}
-                            className="ml-1 text-[11px] underline text-emerald-400 hover:text-emerald-200 cursor-pointer"
+                            className="ml-1 text-[11px] underline text-blue-600 hover:text-blue-800 cursor-pointer"
                         >
                             Test Order
                         </button>
@@ -171,8 +149,8 @@ export function AudioUnlockBanner({
         <div
             className={`w-full transition-all duration-300 ${
                 !isUnlocked
-                    ? "bg-gradient-to-r from-amber-600 via-saffron-500 to-amber-600 text-espresso-950 shadow-lg border-b-2 border-amber-300"
-                    : "bg-emerald-950/95 border-b border-emerald-500/40 text-emerald-200"
+                    ? "bg-amber-50 border-b border-amber-200 text-amber-950"
+                    : "bg-blue-50/90 border-b border-blue-200 text-blue-950"
             } px-3 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-xs sm:text-sm shrink-0 z-40 select-none ${className}`}
         >
             <div
@@ -181,28 +159,28 @@ export function AudioUnlockBanner({
             >
                 {!isUnlocked ? (
                     <>
-                        <div className="w-7 h-7 rounded-full bg-espresso-950 text-saffron-400 flex items-center justify-center shrink-0 shadow animate-bounce">
+                        <div className="w-7 h-7 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs animate-bounce">
                             <BellRing className="w-4 h-4" />
                         </div>
                         <div>
-                            <span className="font-black text-espresso-950 text-xs sm:text-sm tracking-tight block">
+                            <span className="font-bold text-amber-950 text-xs sm:text-sm tracking-tight block">
                                 Tap to enable Restaurant Voice Soundbox
                             </span>
-                            <span className="text-[11px] font-semibold text-espresso-900/90">
+                            <span className="text-[11px] font-medium text-amber-800">
                                 Kitchen, Delivery & Table orders will announce in loud spoken voice
                             </span>
                         </div>
                     </>
                 ) : (
                     <>
-                        <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                         </div>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                            <span className="font-bold text-white text-xs sm:text-sm">
+                            <span className="font-bold text-slate-900 text-xs sm:text-sm">
                                 Voice Soundbox Active
                             </span>
-                            <span className="text-[11px] text-emerald-300/80">
+                            <span className="text-[11px] text-slate-600">
                                 • Spoken voice alerts enabled for Table, Delivery, KOT & UPI payments
                             </span>
                         </div>
@@ -215,21 +193,21 @@ export function AudioUnlockBanner({
                     <button
                         type="button"
                         onClick={handleUnlock}
-                        className="px-3.5 py-1.5 rounded-full bg-espresso-950 text-saffron-300 hover:text-white hover:bg-espresso-900 font-black text-xs shadow-md transition-all cursor-pointer whitespace-nowrap"
+                        className="px-3.5 py-1.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
                     >
                         Enable Audio Now
                     </button>
                 ) : (
                     <>
                         {/* Sound Mode Toggle */}
-                        <div className="flex items-center bg-emerald-900/60 rounded-lg p-0.5 border border-emerald-500/30 text-[11px] font-semibold">
+                        <div className="flex items-center bg-white rounded-lg p-0.5 border border-slate-200 text-[11px] font-semibold shadow-2xs">
                             <button
                                 type="button"
                                 onClick={() => handleModeChange("voice_and_chime")}
                                 className={`px-2 py-0.5 rounded transition ${
                                     soundMode === "voice_and_chime"
-                                        ? "bg-emerald-600 text-white font-bold shadow-xs"
-                                        : "text-emerald-300 hover:text-white"
+                                        ? "bg-blue-600 text-white font-bold shadow-xs"
+                                        : "text-slate-600 hover:text-slate-900"
                                 }`}
                                 title="Spoken Voice announcement + Bell Chime"
                             >
@@ -240,8 +218,8 @@ export function AudioUnlockBanner({
                                 onClick={() => handleModeChange("chime_only")}
                                 className={`px-2 py-0.5 rounded transition ${
                                     soundMode === "chime_only"
-                                        ? "bg-emerald-600 text-white font-bold shadow-xs"
-                                        : "text-emerald-300 hover:text-white"
+                                        ? "bg-blue-600 text-white font-bold shadow-xs"
+                                        : "text-slate-600 hover:text-slate-900"
                                 }`}
                                 title="Bell Chime only (no spoken voice)"
                             >
@@ -250,14 +228,14 @@ export function AudioUnlockBanner({
                         </div>
 
                         {/* Language Selector */}
-                        <div className="flex items-center bg-emerald-900/60 rounded-lg p-0.5 border border-emerald-500/30 text-[11px] font-semibold">
+                        <div className="flex items-center bg-white rounded-lg p-0.5 border border-slate-200 text-[11px] font-semibold shadow-2xs">
                             <button
                                 type="button"
                                 onClick={() => handleLangChange("en")}
                                 className={`px-2 py-0.5 rounded transition ${
                                     voiceLang === "en"
-                                        ? "bg-emerald-600 text-white font-bold shadow-xs"
-                                        : "text-emerald-300 hover:text-white"
+                                        ? "bg-blue-600 text-white font-bold shadow-xs"
+                                        : "text-slate-600 hover:text-slate-900"
                                 }`}
                             >
                                 English
@@ -267,8 +245,8 @@ export function AudioUnlockBanner({
                                 onClick={() => handleLangChange("te")}
                                 className={`px-2 py-0.5 rounded transition ${
                                     voiceLang === "te"
-                                        ? "bg-emerald-600 text-white font-bold shadow-xs"
-                                        : "text-emerald-300 hover:text-white"
+                                        ? "bg-blue-600 text-white font-bold shadow-xs"
+                                        : "text-slate-600 hover:text-slate-900"
                                 }`}
                             >
                                 తెలుగు
@@ -279,10 +257,10 @@ export function AudioUnlockBanner({
                         <button
                             type="button"
                             onClick={handleTestTableOrder}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold border border-emerald-500/40 transition cursor-pointer flex items-center gap-1 shadow-xs"
+                            className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold border border-slate-200 transition cursor-pointer flex items-center gap-1 shadow-2xs"
                             title="Test Table Order voice announcement"
                         >
-                            <Play className="w-3 h-3 text-amber-400 fill-amber-400" />
+                            <Play className="w-3 h-3 text-blue-600 fill-blue-600" />
                             <span>Test Table</span>
                         </button>
 
@@ -290,7 +268,7 @@ export function AudioUnlockBanner({
                         <button
                             type="button"
                             onClick={handleTestPayment}
-                            className="px-2 py-1 rounded-lg bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 text-xs font-semibold border border-emerald-500/30 transition cursor-pointer hidden md:flex items-center gap-1"
+                            className="px-2 py-1 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 transition cursor-pointer hidden md:flex items-center gap-1 shadow-2xs"
                             title="Test UPI payment soundbox chime & voice"
                         >
                             <span>Test UPI</span>
@@ -300,7 +278,7 @@ export function AudioUnlockBanner({
                         <button
                             type="button"
                             onClick={() => setIsDismissed(true)}
-                            className="text-xs text-emerald-400/70 hover:text-emerald-200 p-1 rounded hover:bg-emerald-900/50 transition cursor-pointer flex items-center justify-center"
+                            className="text-xs text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-100 transition cursor-pointer flex items-center justify-center"
                             title="Dismiss notification"
                         >
                             <X className="w-4 h-4" />

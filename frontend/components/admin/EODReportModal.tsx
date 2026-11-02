@@ -68,11 +68,11 @@ export function EODReportModal({ isOpen, onClose }: EODReportModalProps) {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in"
             onClick={onClose}
         >
             <div
-                className="relative w-full max-w-2xl max-h-[90vh] bg-espresso-950 text-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-espresso-800 animate-in zoom-in-95 duration-200"
+                className="relative w-full max-w-2xl max-h-[90vh] bg-espresso-950 text-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-espresso-800 animate-in zoom-in-95 duration-200"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Modal Header */}
@@ -82,7 +82,7 @@ export function EODReportModal({ isOpen, onClose }: EODReportModalProps) {
                             <Store className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-black text-white flex items-center gap-2">
+                            <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
                                 <span>Daily End-of-Day (EOD) Z-Report</span>
                                 <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 font-mono font-bold">
                                     {outlet?.name || "Surya Family Restaurant"}
@@ -95,7 +95,7 @@ export function EODReportModal({ isOpen, onClose }: EODReportModalProps) {
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl text-espresso-400 hover:text-white hover:bg-espresso-800 transition-colors cursor-pointer"
+                        className="p-2 rounded-xl text-espresso-400 hover:text-slate-900 hover:bg-espresso-800 transition-colors cursor-pointer"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -109,11 +109,11 @@ export function EODReportModal({ isOpen, onClose }: EODReportModalProps) {
                             type="date"
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
-                            className="bg-espresso-950 border border-espresso-700 text-xs text-white rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-amber-500 font-bold"
+                            className="bg-espresso-950 border border-espresso-700 text-xs text-slate-900 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-amber-500 font-bold"
                         />
                         <button
                             onClick={fetchReport}
-                            className="p-1.5 rounded-lg bg-espresso-800 hover:bg-espresso-700 text-espresso-300 hover:text-white transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg bg-espresso-800 hover:bg-espresso-700 text-espresso-300 hover:text-slate-900 transition-colors cursor-pointer"
                             title="Refresh Report"
                         >
                             <RefreshCw className="w-3.5 h-3.5" />
@@ -133,7 +133,7 @@ export function EODReportModal({ isOpen, onClose }: EODReportModalProps) {
                         <button
                             onClick={() => dispatchEODWhatsApp(report, outlet?.phone || "9876543210")}
                             disabled={!report}
-                            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all shadow-md cursor-pointer disabled:opacity-50"
+                            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-900 font-extrabold text-xs transition-all shadow-md cursor-pointer disabled:opacity-50"
                         >
                             <Share2 className="w-3.5 h-3.5" />
                             <span>Send to WhatsApp</span>
@@ -162,7 +162,7 @@ export function EODReportModal({ isOpen, onClose }: EODReportModalProps) {
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 <div className="p-4 rounded-2xl bg-espresso-900/80 border border-espresso-800 flex flex-col justify-between">
                                     <span className="text-[11px] font-bold text-espresso-400 uppercase tracking-wider">Total Orders</span>
-                                    <div className="text-2xl font-black text-white font-mono mt-1">{s.total_orders || 0}</div>
+                                    <div className="text-2xl font-black text-slate-900 font-mono mt-1">{s.total_orders || 0}</div>
                                     <span className="text-[10px] text-espresso-500 mt-1">Dine-in: {oc.dine_in?.count || 0} • Deliv: {oc.delivery?.count || 0}</span>
                                 </div>
                                 <div className="p-4 rounded-2xl bg-espresso-900/80 border border-espresso-800 flex flex-col justify-between">
@@ -194,7 +194,7 @@ export function EODReportModal({ isOpen, onClose }: EODReportModalProps) {
                                             <span className="text-xs font-bold text-espresso-300">Cash in Drawer</span>
                                             <p className="text-[10px] text-espresso-500">{pm.cash?.count || 0} cash bills</p>
                                         </div>
-                                        <span className="text-base font-black text-white font-mono">{formatRupees(pm.cash?.total_paise || 0)}</span>
+                                        <span className="text-base font-black text-slate-900 font-mono">{formatRupees(pm.cash?.total_paise || 0)}</span>
                                     </div>
                                     <div className="p-3.5 rounded-xl bg-espresso-950 border border-espresso-800 flex items-center justify-between">
                                         <div>
@@ -229,7 +229,7 @@ export function EODReportModal({ isOpen, onClose }: EODReportModalProps) {
                                                     <span className="w-5 h-5 rounded-md bg-espresso-800 flex items-center justify-center font-bold text-espresso-400 text-[10px]">
                                                         {i + 1}
                                                     </span>
-                                                    <span className="font-bold text-white">{it.item_name}</span>
+                                                    <span className="font-bold text-slate-900">{it.item_name}</span>
                                                     <span className="text-[10px] text-espresso-400 bg-espresso-800/80 px-2 py-0.5 rounded-md">
                                                         x{it.qty_sold} sold
                                                     </span>

@@ -56,9 +56,9 @@ import { useOutlet } from "@/context/OutletContext";
 const KANBAN_COLUMNS = [
     { key: "placed", titleKey: "status_placed", color: "border-blue-300 bg-blue-50/50", headerBg: "bg-blue-500", nextStatus: "accepted", nextLabel: "Accept" },
     { key: "accepted", titleKey: "status_accepted", color: "border-indigo-300 bg-indigo-50/50", headerBg: "bg-indigo-500", nextStatus: "preparing", nextLabel: "Start Prep" },
-    { key: "preparing", titleKey: "status_preparing", color: "border-saffron-300 bg-saffron-50/50", headerBg: "bg-saffron-500", nextStatus: "ready", nextLabel: "Mark Ready" },
+    { key: "preparing", titleKey: "status_preparing", color: "border-amber-200 bg-amber-50/40", headerBg: "bg-amber-500", nextStatus: "ready", nextLabel: "Mark Ready" },
     { key: "ready", titleKey: "status_ready", color: "border-emerald-300 bg-emerald-50/50", headerBg: "bg-emerald-500", nextStatus: "served", nextLabel: "Mark Served" },
-    { key: "served", titleKey: "status_served", color: "border-cream-300 bg-cream-100/50", headerBg: "bg-espresso-800", nextStatus: null, nextLabel: null },
+    { key: "served", titleKey: "status_served", color: "border-slate-200 bg-slate-50/50", headerBg: "bg-slate-700", nextStatus: null, nextLabel: null },
 ];
 
 function getElapsedMinutes(dateStr: string | Date): number {
@@ -356,14 +356,14 @@ export default function AdminLiveOrdersKanbanPage() {
 
     if (authLoading || !isAuthenticated) {
         return (
-            <div className="min-h-screen bg-cream-100 flex items-center justify-center text-espresso-700">
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-700">
                 Verifying authorization...
             </div>
         );
     }
 
     return (
-        <div className="flex h-screen bg-cream-100 overflow-hidden font-sans">
+        <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
             {/* Sidebar */}
             <AdminSidebar />
 
@@ -437,7 +437,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                     </span>
                                     <button
                                         onClick={() => handleAttendServiceCall(call.id)}
-                                        className="px-2.5 py-0.5 rounded-full bg-white text-red-600 hover:bg-cream-100 text-[10px] font-extrabold cursor-pointer transition"
+                                        className="px-2.5 py-0.5 rounded-full bg-white text-red-600 hover:bg-slate-50 text-[10px] font-extrabold cursor-pointer transition"
                                     >
                                         Attend
                                     </button>
@@ -448,13 +448,13 @@ export default function AdminLiveOrdersKanbanPage() {
                 )}
 
                 {/* MAIN CONTENT CONTAINER (DUAL-MODE: HORIZONTAL QUEUE OR KANBAN COLUMNS) */}
-                <main className={`flex-1 p-4 sm:p-6 bg-cream-100 flex flex-col ${viewMode === "horizontal" ? "overflow-y-auto" : "overflow-x-auto overflow-y-hidden"}`}>
+                <main className={`flex-1 p-4 sm:p-6 bg-slate-50 flex flex-col ${viewMode === "horizontal" ? "overflow-y-auto" : "overflow-x-auto overflow-y-hidden"}`}>
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4 shrink-0">
                         <div>
-                            <h2 className="text-xl font-extrabold text-espresso-950 tracking-tight flex items-center gap-2">
+                            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                                 {viewMode === "horizontal" ? "Live Order Queue (Widescreen)" : "Live Kitchen & Dispatch Kanban"}
                             </h2>
-                            <p className="text-xs text-espresso-600">
+                            <p className="text-xs text-slate-600">
                                 {viewMode === "horizontal"
                                     ? "Real-time horizontal order stream with live timers, kitchen breakdowns, and instant actions."
                                     : "Real-time pipeline for Dine-in Tables & Free Home Delivery."}
@@ -464,14 +464,14 @@ export default function AdminLiveOrdersKanbanPage() {
                         {/* Top Controls Strip: Dual-Mode Switcher, Type Filters & Quick Actions */}
                         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
                             {/* Dual Mode Switcher */}
-                            <div className="flex items-center bg-white p-1 rounded-xl border border-cream-300 shadow-2xs">
+                            <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-2xs">
                                 <button
                                     type="button"
                                     onClick={() => handleSetViewMode("horizontal")}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
                                         viewMode === "horizontal"
-                                            ? "bg-espresso-950 text-white shadow-xs"
-                                            : "text-espresso-600 hover:text-espresso-900"
+                                            ? "bg-slate-900 text-white shadow-xs"
+                                            : "text-slate-600 hover:text-slate-900"
                                     }`}
                                     title="Switch to Widescreen Horizontal Queue"
                                 >
@@ -483,8 +483,8 @@ export default function AdminLiveOrdersKanbanPage() {
                                     onClick={() => handleSetViewMode("kanban")}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
                                         viewMode === "kanban"
-                                            ? "bg-espresso-950 text-white shadow-xs"
-                                            : "text-espresso-600 hover:text-espresso-900"
+                                            ? "bg-slate-900 text-white shadow-xs"
+                                            : "text-slate-600 hover:text-slate-900"
                                     }`}
                                     title="Switch to 5-Column Kanban Board"
                                 >
@@ -494,14 +494,14 @@ export default function AdminLiveOrdersKanbanPage() {
                             </div>
 
                             {/* Order Type Filter Tabs */}
-                            <div className="flex items-center bg-white p-1 rounded-xl border border-cream-300 shadow-2xs">
+                            <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-2xs">
                                 <button
                                     type="button"
                                     onClick={() => setOrderTypeFilter("all")}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-black transition cursor-pointer ${
                                         orderTypeFilter === "all"
-                                            ? "bg-espresso-900 text-white"
-                                            : "text-espresso-600 hover:text-espresso-900"
+                                            ? "bg-slate-800 text-white"
+                                            : "text-slate-600 hover:text-slate-900"
                                     }`}
                                 >
                                     All ({orders.length})
@@ -512,7 +512,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                     className={`px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1 cursor-pointer ${
                                         orderTypeFilter === "dine_in"
                                             ? "bg-amber-600 text-white"
-                                            : "text-espresso-600 hover:text-espresso-900"
+                                            : "text-slate-600 hover:text-slate-900"
                                     }`}
                                 >
                                     <Store className="w-3 h-3" />
@@ -524,7 +524,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                     className={`px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1 cursor-pointer ${
                                         orderTypeFilter === "delivery"
                                             ? "bg-cyan-600 text-white"
-                                            : "text-espresso-600 hover:text-espresso-900"
+                                            : "text-slate-600 hover:text-slate-900"
                                     }`}
                                 >
                                     <Bike className="w-3 h-3" />
@@ -534,9 +534,9 @@ export default function AdminLiveOrdersKanbanPage() {
 
                             <Link
                                 href="/admin/reservations"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-saffron-500/20 to-amber-500/20 border border-saffron-400/60 hover:border-saffron-500 text-espresso-900 text-xs font-bold transition shadow-2xs cursor-pointer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-saffron-500/20 to-amber-500/20 border border-amber-400/60 hover:border-blue-500 text-slate-900 text-xs font-bold transition shadow-2xs cursor-pointer"
                             >
-                                <Calendar className="w-3.5 h-3.5 text-saffron-600" />
+                                <Calendar className="w-3.5 h-3.5 text-amber-600" />
                                 <span>Pre-Bookings ({todayReservationsCount})</span>
                             </Link>
 
@@ -557,7 +557,7 @@ export default function AdminLiveOrdersKanbanPage() {
                     {viewMode === "horizontal" ? (
                         <div className="flex-1 flex flex-col min-h-0">
                             {/* Horizontal Stage Filter Tabs & Search / Sort Strip */}
-                            <div className="bg-white rounded-2xl border border-cream-200 p-3 mb-4 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shrink-0">
+                            <div className="bg-white rounded-2xl border border-slate-200 p-3 mb-4 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shrink-0">
                                 {/* Stage Filter Pills */}
                                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
                                     <button
@@ -565,8 +565,8 @@ export default function AdminLiveOrdersKanbanPage() {
                                         onClick={() => setStageFilter("all")}
                                         className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition cursor-pointer ${
                                             stageFilter === "all"
-                                                ? "bg-espresso-950 text-white shadow-xs"
-                                                : "bg-cream-100 hover:bg-cream-200 text-espresso-700"
+                                                ? "bg-slate-900 text-white shadow-xs"
+                                                : "bg-slate-50 hover:bg-slate-100 text-slate-700"
                                         }`}
                                     >
                                         All ({countAll})
@@ -605,11 +605,11 @@ export default function AdminLiveOrdersKanbanPage() {
                                         onClick={() => setStageFilter("preparing")}
                                         className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
                                             stageFilter === "preparing"
-                                                ? "bg-saffron-600 text-white shadow-xs"
-                                                : "bg-saffron-50 text-saffron-800 hover:bg-saffron-100 border border-saffron-200"
+                                                ? "bg-amber-600 text-white shadow-xs"
+                                                : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200"
                                         }`}
                                     >
-                                        <span className="w-2 h-2 rounded-full bg-saffron-500" />
+                                        <span className="w-2 h-2 rounded-full bg-amber-500" />
                                         <span>Cooking</span>
                                         <span className="font-mono text-[11px] font-extrabold">({countPreparing})</span>
                                     </button>
@@ -633,8 +633,8 @@ export default function AdminLiveOrdersKanbanPage() {
                                         onClick={() => setStageFilter("completed")}
                                         className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
                                             stageFilter === "completed"
-                                                ? "bg-espresso-800 text-white shadow-xs"
-                                                : "bg-cream-100 text-espresso-700 hover:bg-cream-200 border border-cream-300"
+                                                ? "bg-slate-700 text-white shadow-xs"
+                                                : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
                                         }`}
                                     >
                                         <span className="w-2 h-2 rounded-full bg-espresso-500" />
@@ -646,19 +646,19 @@ export default function AdminLiveOrdersKanbanPage() {
                                 {/* Search Bar & Urgent Sort Switcher */}
                                 <div className="flex items-center gap-2 shrink-0">
                                     <div className="relative flex-1 sm:w-64">
-                                        <Search className="w-3.5 h-3.5 text-espresso-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                        <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                                         <input
                                             type="text"
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                             placeholder="Search order, phone, dish..."
-                                            className="w-full pl-8 pr-7 py-1.5 bg-cream-50 border border-cream-300 rounded-xl text-xs font-medium text-espresso-950 placeholder:text-espresso-400 focus:outline-none focus:border-espresso-900 transition"
+                                            className="w-full pl-8 pr-7 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 transition"
                                         />
                                         {searchQuery && (
                                             <button
                                                 type="button"
                                                 onClick={() => setSearchQuery("")}
-                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-espresso-400 hover:text-espresso-700 text-xs font-black cursor-pointer"
+                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-black cursor-pointer"
                                             >
                                                 ✕
                                             </button>
@@ -666,14 +666,14 @@ export default function AdminLiveOrdersKanbanPage() {
                                     </div>
 
                                     {/* Sort Mode */}
-                                    <div className="flex items-center bg-cream-100 p-0.5 rounded-xl border border-cream-300">
+                                    <div className="flex items-center bg-slate-50 p-0.5 rounded-xl border border-slate-200">
                                         <button
                                             type="button"
                                             onClick={() => setSortBy("urgent")}
                                             className={`px-2.5 py-1 rounded-lg text-xs font-black transition cursor-pointer ${
                                                 sortBy === "urgent"
-                                                    ? "bg-white text-espresso-950 shadow-2xs"
-                                                    : "text-espresso-600 hover:text-espresso-900"
+                                                    ? "bg-white text-slate-900 shadow-2xs"
+                                                    : "text-slate-600 hover:text-slate-900"
                                             }`}
                                             title="Longest waiting orders first"
                                         >
@@ -684,8 +684,8 @@ export default function AdminLiveOrdersKanbanPage() {
                                             onClick={() => setSortBy("newest")}
                                             className={`px-2.5 py-1 rounded-lg text-xs font-black transition cursor-pointer ${
                                                 sortBy === "newest"
-                                                    ? "bg-white text-espresso-950 shadow-2xs"
-                                                    : "text-espresso-600 hover:text-espresso-900"
+                                                    ? "bg-white text-slate-900 shadow-2xs"
+                                                    : "text-slate-600 hover:text-slate-900"
                                             }`}
                                             title="Newest orders first"
                                         >
@@ -700,20 +700,20 @@ export default function AdminLiveOrdersKanbanPage() {
                                 {isLoadingOrders ? (
                                     <div className="space-y-3">
                                         {[1, 2, 3].map((k) => (
-                                            <div key={k} className="bg-white rounded-2xl p-5 border border-cream-200 shadow-2xs space-y-3 animate-pulse">
+                                            <div key={k} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3 animate-pulse">
                                                 <div className="flex justify-between items-center">
-                                                    <div className="h-5 w-32 bg-cream-200 rounded-lg"></div>
-                                                    <div className="h-5 w-24 bg-cream-100 rounded-lg"></div>
+                                                    <div className="h-5 w-32 bg-slate-100 rounded-lg"></div>
+                                                    <div className="h-5 w-24 bg-slate-50 rounded-lg"></div>
                                                 </div>
-                                                <div className="h-12 w-full bg-cream-100 rounded-xl"></div>
+                                                <div className="h-12 w-full bg-slate-50 rounded-xl"></div>
                                             </div>
                                         ))}
                                     </div>
                                 ) : filteredHorizontalOrders.length === 0 ? (
-                                    <div className="bg-white rounded-2xl border border-dashed border-cream-300 p-12 text-center my-4 flex flex-col items-center justify-center">
-                                        <UtensilsCrossed className="w-10 h-10 text-espresso-300 mb-3" />
-                                        <h4 className="font-extrabold text-espresso-900 text-sm">No orders found</h4>
-                                        <p className="text-xs text-espresso-500 mt-1 max-w-sm">
+                                    <div className="bg-white rounded-2xl border border-dashed border-slate-200 p-12 text-center my-4 flex flex-col items-center justify-center">
+                                        <UtensilsCrossed className="w-10 h-10 text-slate-400 mb-3" />
+                                        <h4 className="font-extrabold text-slate-900 text-sm">No orders found</h4>
+                                        <p className="text-xs text-slate-500 mt-1 max-w-sm">
                                             {searchQuery
                                                 ? `No orders match your search "${searchQuery}". Try clearing the search.`
                                                 : stageFilter !== "all"
@@ -727,7 +727,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                     setSearchQuery("");
                                                     setStageFilter("all");
                                                 }}
-                                                className="mt-4 px-4 py-1.5 rounded-xl bg-espresso-950 text-white text-xs font-bold transition hover:bg-espresso-800 cursor-pointer"
+                                                className="mt-4 px-4 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold transition hover:bg-slate-700 cursor-pointer"
                                             >
                                                 Reset Filters
                                             </button>
@@ -747,16 +747,16 @@ export default function AdminLiveOrdersKanbanPage() {
                                                 key={order.id}
                                                 className={`bg-white rounded-2xl border p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col xl:flex-row items-stretch xl:items-start justify-between gap-4 sm:gap-6 ${
                                                     isFlash
-                                                        ? "ring-4 ring-saffron-400 border-saffron-500 scale-[1.01] shadow-lg animate-pulse"
+                                                        ? "ring-4 ring-blue-400 border-blue-500 scale-[1.01] shadow-lg animate-pulse"
                                                         : isUnaccepted
                                                         ? "border-red-400 bg-red-50/20 ring-2 ring-red-200"
                                                         : isDelivery
                                                         ? "border-cyan-200 hover:border-cyan-400"
-                                                        : "border-cream-300 hover:border-terracotta-300"
+                                                        : "border-slate-200 hover:border-blue-200"
                                                 }`}
                                             >
                                                 {/* ZONE 1: Identifier, Token & Urgency Elapsed Timer */}
-                                                <div className="xl:w-56 shrink-0 flex flex-col justify-between gap-3 border-b xl:border-b-0 xl:border-r border-cream-200 pb-3 xl:pb-0 xl:pr-5">
+                                                <div className="xl:w-56 shrink-0 flex flex-col justify-between gap-3 border-b xl:border-b-0 xl:border-r border-slate-200 pb-3 xl:pb-0 xl:pr-5">
                                                     <div>
                                                         <div className="flex items-center gap-2 flex-wrap mb-2">
                                                             {isDelivery ? (
@@ -765,19 +765,19 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                     DELIVERY
                                                                 </span>
                                                             ) : (
-                                                                <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-espresso-950 text-white flex items-center gap-1.5 shadow-2xs">
-                                                                    <Store className="w-3.5 h-3.5 text-saffron-400" />
+                                                                <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-slate-900 text-white flex items-center gap-1.5 shadow-2xs">
+                                                                    <Store className="w-3.5 h-3.5 text-amber-500" />
                                                                     TABLE {order.table_label || order.table_id || "Dine"}
                                                                 </span>
                                                             )}
-                                                            <span className="text-xs font-black px-2 py-0.5 rounded-md bg-cream-200 text-espresso-900 font-mono">
+                                                            <span className="text-xs font-black px-2 py-0.5 rounded-md bg-slate-100 text-slate-900 font-mono">
                                                                 #{order.order_number}
                                                             </span>
                                                         </div>
 
                                                         {/* Prominent Daily Token */}
                                                         <div className="mt-1">
-                                                            <span className="text-[11px] font-bold text-espresso-500">Billing Token:</span>
+                                                            <span className="text-[11px] font-bold text-slate-500">Billing Token:</span>
                                                             <div className="mt-0.5">
                                                                 <span className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-950 border border-amber-300 text-sm font-black font-mono inline-block">
                                                                     Token #{displayToken}
@@ -806,23 +806,23 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                 </div>
                                                             )
                                                         ) : (
-                                                            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-espresso-600 bg-cream-200 px-2.5 py-1 rounded-lg">
+                                                            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
                                                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                                                 <span>Completed</span>
                                                             </div>
                                                         )}
-                                                        <div className="text-[11px] text-espresso-400 font-medium pl-0.5">
+                                                        <div className="text-[11px] text-slate-400 font-medium pl-0.5">
                                                             Placed: {formatTimeOnly(order.created_at)} ({formatRelativeTime(order.created_at)})
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* ZONE 2: Customer, Contact & Delivery Address */}
-                                                <div className="xl:w-64 shrink-0 flex flex-col justify-between gap-3 border-b xl:border-b-0 xl:border-r border-cream-200 pb-3 xl:pb-0 xl:pr-5">
+                                                <div className="xl:w-64 shrink-0 flex flex-col justify-between gap-3 border-b xl:border-b-0 xl:border-r border-slate-200 pb-3 xl:pb-0 xl:pr-5">
                                                     <div className="space-y-2">
                                                         <div>
                                                             <div className="flex items-center gap-2 flex-wrap">
-                                                                <span className="font-extrabold text-espresso-950 text-sm">
+                                                                <span className="font-extrabold text-slate-900 text-sm">
                                                                     {order.customer_name || "Surya Diner"}
                                                                 </span>
                                                                 {order.customer_order_count && order.customer_order_count >= 5 ? (
@@ -839,14 +839,14 @@ export default function AdminLiveOrdersKanbanPage() {
 
                                                             {order.customer_phone && (
                                                                 <div className="flex items-center justify-between gap-2 mt-1">
-                                                                    <span className="font-mono text-xs font-bold text-espresso-700 flex items-center gap-1">
-                                                                        <Phone className="w-3 h-3 text-espresso-400" />
+                                                                    <span className="font-mono text-xs font-bold text-slate-700 flex items-center gap-1">
+                                                                        <Phone className="w-3 h-3 text-slate-400" />
                                                                         +91 {order.customer_phone}
                                                                     </span>
                                                                     <div className="flex items-center gap-1 shrink-0">
                                                                         <a
                                                                             href={`tel:${order.customer_phone}`}
-                                                                            className="p-1.5 rounded-lg bg-cream-100 hover:bg-emerald-100 text-espresso-700 hover:text-emerald-800 transition cursor-pointer"
+                                                                            className="p-1.5 rounded-lg bg-slate-50 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 transition cursor-pointer"
                                                                             title="Call Customer"
                                                                         >
                                                                             <PhoneCall className="w-3.5 h-3.5 text-emerald-600" />
@@ -855,7 +855,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                             href={`https://wa.me/91${order.customer_phone.replace(/\D/g, "")}`}
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
-                                                                            className="p-1.5 rounded-lg bg-cream-100 hover:bg-emerald-100 text-espresso-700 hover:text-emerald-800 transition cursor-pointer"
+                                                                            className="p-1.5 rounded-lg bg-slate-50 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 transition cursor-pointer"
                                                                             title="Open WhatsApp Chat"
                                                                         >
                                                                             <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
@@ -887,9 +887,9 @@ export default function AdminLiveOrdersKanbanPage() {
                                                 {/* ZONE 3: Food Items Breakdown */}
                                                 <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                                                     <div>
-                                                        <div className="text-xs font-black uppercase tracking-wider text-espresso-600 mb-2 flex items-center justify-between">
+                                                        <div className="text-xs font-black uppercase tracking-wider text-slate-600 mb-2 flex items-center justify-between">
                                                             <span>Items ({order.items?.reduce((acc: number, it: any) => acc + (it.qty || 1), 0) || 0})</span>
-                                                            <span className="text-[11px] text-espresso-400 font-normal">Kitchen Breakdown</span>
+                                                            <span className="text-[11px] text-slate-400 font-normal">Kitchen Breakdown</span>
                                                         </div>
 
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -904,35 +904,35 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                 return (
                                                                     <div
                                                                         key={it.id}
-                                                                        className="p-2.5 rounded-xl bg-cream-50/80 border border-cream-200 text-xs flex flex-col justify-between"
+                                                                        className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200 text-xs flex flex-col justify-between"
                                                                     >
                                                                         <div className="flex items-start justify-between gap-1.5">
                                                                             <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0">
-                                                                                <span className="w-5 h-5 rounded-md bg-espresso-900 text-white font-black text-[11px] flex items-center justify-center shrink-0">
+                                                                                <span className="w-5 h-5 rounded-md bg-slate-800 text-white font-black text-[11px] flex items-center justify-center shrink-0">
                                                                                     {it.qty}x
                                                                                 </span>
-                                                                                <span className="font-extrabold text-espresso-950 truncate">
+                                                                                <span className="font-extrabold text-slate-900 truncate">
                                                                                     {it.item_name}
                                                                                 </span>
                                                                                 {it.variant_name && (
-                                                                                    <span className="text-[10px] font-black uppercase bg-saffron-100 text-saffron-900 border border-saffron-300 px-1.5 py-0.2 rounded-md shrink-0">
+                                                                                    <span className="text-[10px] font-black uppercase bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded-md shrink-0">
                                                                                         {it.variant_name}
                                                                                     </span>
                                                                                 )}
                                                                             </div>
-                                                                            <span className="font-bold text-espresso-700 shrink-0">
+                                                                            <span className="font-bold text-slate-700 shrink-0">
                                                                                 {formatRupees(it.total_price_paise)}
                                                                             </span>
                                                                         </div>
 
                                                                         {addonsList.length > 0 && (
-                                                                            <p className="text-[10px] text-terracotta-700 font-semibold mt-1">
+                                                                            <p className="text-[10px] text-blue-700 font-semibold mt-1">
                                                                                 + {addonsList.map((a) => a.name).join(", ")}
                                                                             </p>
                                                                         )}
 
                                                                         {it.notes && (
-                                                                            <p className="text-[10px] text-espresso-500 italic mt-0.5">
+                                                                            <p className="text-[10px] text-slate-500 italic mt-0.5">
                                                                                 "{it.notes}"
                                                                             </p>
                                                                         )}
@@ -944,13 +944,13 @@ export default function AdminLiveOrdersKanbanPage() {
                                                 </div>
 
                                                 {/* ZONE 4: Financials, POS Thermal Strip & 1-Click Status Action Hub */}
-                                                <div className="xl:w-64 shrink-0 flex flex-col justify-between gap-3 border-t xl:border-t-0 xl:border-l border-cream-200 pt-3 xl:pt-0 xl:pl-5">
+                                                <div className="xl:w-64 shrink-0 flex flex-col justify-between gap-3 border-t xl:border-t-0 xl:border-l border-slate-200 pt-3 xl:pt-0 xl:pl-5">
                                                     <div>
                                                         {/* Amount & Payment Status */}
                                                         <div className="flex items-center justify-between gap-2 mb-2">
                                                             <div>
-                                                                <span className="text-[11px] text-espresso-500 font-bold block">Bill Total</span>
-                                                                <span className="text-lg font-black text-espresso-950 font-mono">
+                                                                <span className="text-[11px] text-slate-500 font-bold block">Bill Total</span>
+                                                                <span className="text-lg font-black text-slate-900 font-mono">
                                                                     {formatRupees(order.total_paise)}
                                                                 </span>
                                                             </div>
@@ -978,11 +978,11 @@ export default function AdminLiveOrdersKanbanPage() {
                                                         </div>
 
                                                         {/* Thermal POS & WhatsApp Strip */}
-                                                        <div className="grid grid-cols-4 gap-1 p-1 bg-cream-100 rounded-xl border border-cream-200 mb-3">
+                                                        <div className="grid grid-cols-4 gap-1 p-1 bg-slate-50 rounded-xl border border-slate-200 mb-3">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => printKOT(order, outlet)}
-                                                                className="py-1 px-1 rounded-lg bg-white hover:bg-cream-200 text-espresso-900 text-[10px] font-extrabold border border-cream-300 flex items-center justify-center gap-1 transition cursor-pointer"
+                                                                className="py-1 px-1 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-[10px] font-extrabold border border-slate-200 flex items-center justify-center gap-1 transition cursor-pointer"
                                                                 title="Print Kitchen Order Ticket"
                                                             >
                                                                 <Printer className="w-2.5 h-2.5 text-amber-600" />
@@ -991,7 +991,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                             <button
                                                                 type="button"
                                                                 onClick={() => printPOSReceipt(order, outlet)}
-                                                                className="py-1 px-1 rounded-lg bg-white hover:bg-cream-200 text-espresso-900 text-[10px] font-extrabold border border-cream-300 flex items-center justify-center gap-1 transition cursor-pointer"
+                                                                className="py-1 px-1 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-[10px] font-extrabold border border-slate-200 flex items-center justify-center gap-1 transition cursor-pointer"
                                                                 title="Print Customer Tax Bill"
                                                             >
                                                                 <Receipt className="w-2.5 h-2.5 text-emerald-600" />
@@ -1044,7 +1044,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                     <Button
                                                                         variant="primary"
                                                                         size="md"
-                                                                        className="w-full py-2.5 text-xs font-black bg-saffron-600 hover:bg-saffron-700 text-white uppercase tracking-wider"
+                                                                        className="w-full py-2.5 text-xs font-black bg-amber-600 hover:bg-saffron-700 text-white uppercase tracking-wider"
                                                                         onClick={() => handleAdvanceStatus(order.id, "preparing")}
                                                                     >
                                                                         🍳 Start Cooking
@@ -1073,7 +1073,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                     </Button>
                                                                 )}
                                                                 {order.status === "delivered" && (
-                                                                    <div className="text-center py-2 px-3 rounded-xl bg-cream-200 text-espresso-700 font-extrabold text-xs">
+                                                                    <div className="text-center py-2 px-3 rounded-xl bg-slate-100 text-slate-700 font-extrabold text-xs">
                                                                         ✓ Delivered
                                                                     </div>
                                                                 )}
@@ -1094,7 +1094,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                     <Button
                                                                         variant="primary"
                                                                         size="md"
-                                                                        className="w-full py-2.5 text-xs font-black bg-saffron-600 hover:bg-saffron-700 text-white uppercase tracking-wider"
+                                                                        className="w-full py-2.5 text-xs font-black bg-amber-600 hover:bg-saffron-700 text-white uppercase tracking-wider"
                                                                         onClick={() => handleAdvanceStatus(order.id, "preparing")}
                                                                     >
                                                                         🍳 Start Prep
@@ -1115,7 +1115,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                     <Button
                                                                         variant="primary"
                                                                         size="md"
-                                                                        className="w-full py-2.5 text-xs font-black bg-espresso-900 hover:bg-espresso-800 text-white uppercase tracking-wider"
+                                                                        className="w-full py-2.5 text-xs font-black bg-slate-800 hover:bg-slate-700 text-white uppercase tracking-wider"
                                                                         onClick={() => handleAdvanceStatus(order.id, "served")}
                                                                         rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
                                                                     >
@@ -1123,7 +1123,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                     </Button>
                                                                 )}
                                                                 {order.status === "served" && (
-                                                                    <div className="text-center py-2 px-3 rounded-xl bg-cream-200 text-espresso-700 font-extrabold text-xs">
+                                                                    <div className="text-center py-2 px-3 rounded-xl bg-slate-100 text-slate-700 font-extrabold text-xs">
                                                                         ✓ Served & Settled
                                                                     </div>
                                                                 )}
@@ -1135,7 +1135,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => handleCancelOrder(order.id)}
-                                                                    className="text-[11px] text-espresso-400 hover:text-red-600 flex items-center gap-1 font-bold transition cursor-pointer"
+                                                                    className="text-[11px] text-slate-400 hover:text-red-600 flex items-center gap-1 font-bold transition cursor-pointer"
                                                                     title="Cancel Order"
                                                                 >
                                                                     <XCircle className="w-3 h-3" />
@@ -1163,8 +1163,8 @@ export default function AdminLiveOrdersKanbanPage() {
                                     onClick={() => setMobileColumnFilter("all")}
                                     className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition cursor-pointer ${
                                         mobileColumnFilter === "all"
-                                            ? "bg-espresso-950 text-white shadow-xs"
-                                            : "bg-white border border-cream-300 text-espresso-700"
+                                            ? "bg-slate-900 text-white shadow-xs"
+                                            : "bg-white border border-slate-200 text-slate-700"
                                     }`}
                                 >
                                     All Stages
@@ -1185,8 +1185,8 @@ export default function AdminLiveOrdersKanbanPage() {
                                             onClick={() => setMobileColumnFilter(col.key)}
                                             className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
                                                 mobileColumnFilter === col.key
-                                                    ? "bg-espresso-950 text-white shadow-xs"
-                                                    : "bg-white border border-cream-300 text-espresso-700"
+                                                    ? "bg-slate-900 text-white shadow-xs"
+                                                    : "bg-white border border-slate-200 text-slate-700"
                                             }`}
                                         >
                                             <span className={`w-2 h-2 rounded-full ${col.headerBg}`} />
@@ -1223,14 +1223,14 @@ export default function AdminLiveOrdersKanbanPage() {
                                             className={`rounded-2xl border ${col.color} flex flex-col h-full overflow-hidden shadow-2xs min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-start flex-1`}
                                         >
                                             {/* Column Header */}
-                                            <div className="p-3.5 border-b border-cream-200 bg-white flex items-center justify-between shrink-0">
+                                            <div className="p-3.5 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
                                                 <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
                                                     <span className={`w-2.5 h-2.5 rounded-full ${col.headerBg}`} />
-                                                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-espresso-900">
+                                                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-900">
                                                         {t(col.titleKey as any)}
                                                     </h3>
                                                 </div>
-                                                <span className="w-5 h-5 rounded-full bg-cream-200 text-espresso-800 text-[11px] font-extrabold flex items-center justify-center">
+                                                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-800 text-[11px] font-extrabold flex items-center justify-center">
                                                     {columnOrders.length}
                                                 </span>
                                             </div>
@@ -1240,15 +1240,15 @@ export default function AdminLiveOrdersKanbanPage() {
                                                 {isLoadingOrders ? (
                                                     <div className="space-y-3">
                                                         {[1, 2].map((k) => (
-                                                            <div key={k} className="bg-white rounded-xl p-3.5 border border-cream-200 shadow-2xs space-y-2.5 animate-pulse">
-                                                                <div className="h-4 w-24 bg-cream-200 rounded"></div>
-                                                                <div className="h-3 w-32 bg-cream-100 rounded"></div>
-                                                                <div className="h-8 w-full bg-cream-100 rounded-lg"></div>
+                                                            <div key={k} className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-2xs space-y-2.5 animate-pulse">
+                                                                <div className="h-4 w-24 bg-slate-100 rounded"></div>
+                                                                <div className="h-3 w-32 bg-slate-50 rounded"></div>
+                                                                <div className="h-8 w-full bg-slate-50 rounded-lg"></div>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 ) : columnOrders.length === 0 ? (
-                                                    <div className="h-32 flex items-center justify-center text-espresso-400 text-xs font-medium border border-dashed border-cream-300 rounded-xl">
+                                                    <div className="h-32 flex items-center justify-center text-slate-400 text-xs font-medium border border-dashed border-slate-200 rounded-xl">
                                                         No orders in {col.key}
                                                     </div>
                                                 ) : (
@@ -1261,10 +1261,10 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                 key={order.id}
                                                                 className={`bg-white rounded-xl p-3.5 border shadow-2xs flex flex-col gap-2.5 transition-all duration-300 ${
                                                                     isFlash
-                                                                        ? "ring-4 ring-saffron-400 border-saffron-500 scale-[1.02] shadow-lg animate-pulse"
+                                                                        ? "ring-4 ring-blue-400 border-blue-500 scale-[1.02] shadow-lg animate-pulse"
                                                                         : isDelivery
                                                                         ? "border-cyan-300 hover:border-cyan-500 hover:shadow-sm"
-                                                                        : "border-cream-300 hover:border-terracotta-300 hover:shadow-sm"
+                                                                        : "border-slate-200 hover:border-blue-200 hover:shadow-sm"
                                                                 }`}
                                                             >
                                                                 {/* Card Header */}
@@ -1276,17 +1276,17 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                                 Delivery #{order.order_number}
                                                                             </span>
                                                                         ) : (
-                                                                            <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-espresso-900 text-white">
+                                                                            <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-slate-800 text-white">
                                                                                 Table {order.table_label || `T${order.table_id}`}
                                                                             </span>
                                                                         )}
                                                                         {!isDelivery && (
-                                                                            <span className="text-[11px] text-espresso-500 font-semibold block mt-1">
+                                                                            <span className="text-[11px] text-slate-500 font-semibold block mt-1">
                                                                                 #{order.order_number}
                                                                             </span>
                                                                         )}
                                                                     </div>
-                                                                    <span className="text-[10px] text-espresso-400 font-medium">
+                                                                    <span className="text-[10px] text-slate-400 font-medium">
                                                                         {formatRelativeTime(order.created_at)}
                                                                     </span>
                                                                 </div>
@@ -1326,14 +1326,14 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                         {/* Phone & 1-Click Communications */}
                                                                         {order.customer_phone && (
                                                                             <div className="flex items-center justify-between gap-2 pt-0.5">
-                                                                                <span className="font-mono text-[11px] font-bold text-espresso-700 flex items-center gap-1">
-                                                                                    <Phone className="w-3 h-3 text-espresso-400" />
+                                                                                <span className="font-mono text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                                                                    <Phone className="w-3 h-3 text-slate-400" />
                                                                                     +91 {order.customer_phone}
                                                                                 </span>
                                                                                 <div className="flex items-center gap-1 shrink-0">
                                                                                     <a
                                                                                         href={`tel:${order.customer_phone}`}
-                                                                                        className="p-1 rounded-md bg-white border border-cream-300 hover:bg-cream-100 text-espresso-700 transition"
+                                                                                        className="p-1 rounded-md bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition"
                                                                                         title="Call Diner"
                                                                                     >
                                                                                         <PhoneCall className="w-3 h-3 text-emerald-600" />
@@ -1342,7 +1342,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                                         href={`https://wa.me/91${order.customer_phone.replace(/\D/g, "")}`}
                                                                                         target="_blank"
                                                                                         rel="noopener noreferrer"
-                                                                                        className="p-1 rounded-md bg-white border border-cream-300 hover:bg-emerald-50 text-espresso-700 transition"
+                                                                                        className="p-1 rounded-md bg-white border border-slate-200 hover:bg-emerald-50 text-slate-700 transition"
                                                                                         title="Open WhatsApp Chat"
                                                                                     >
                                                                                         <MessageCircle className="w-3 h-3 text-emerald-600" />
@@ -1373,28 +1373,28 @@ export default function AdminLiveOrdersKanbanPage() {
 
                                                                         return (
                                                                             <div key={it.id} className="py-1.5">
-                                                                                <div className="flex justify-between items-start font-bold text-espresso-900">
+                                                                                <div className="flex justify-between items-start font-bold text-slate-900">
                                                                                     <div className="flex-1 pr-2">
                                                                                         <div className="flex items-center gap-1.5 flex-wrap">
                                                                                             <span>{it.qty}x {it.item_name}</span>
                                                                                             {it.variant_name && (
-                                                                                                <span className="text-[10px] font-black uppercase bg-saffron-100 text-saffron-900 border border-saffron-300 px-1.5 py-0.2 rounded-md">
+                                                                                                <span className="text-[10px] font-black uppercase bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.2 rounded-md">
                                                                                                     {it.variant_name}
                                                                                                 </span>
                                                                                             )}
                                                                                         </div>
                                                                                         {addonsList.length > 0 && (
-                                                                                            <p className="text-[10px] text-terracotta-700 font-semibold mt-0.5">
+                                                                                            <p className="text-[10px] text-blue-700 font-semibold mt-0.5">
                                                                                                 + {addonsList.map((a) => a.name).join(", ")}
                                                                                             </p>
                                                                                         )}
                                                                                     </div>
-                                                                                    <span className="text-espresso-600 font-medium shrink-0">
+                                                                                    <span className="text-slate-600 font-medium shrink-0">
                                                                                         {formatRupees(it.total_price_paise)}
                                                                                     </span>
                                                                                 </div>
                                                                                 {it.notes && (
-                                                                                    <p className="text-[10px] text-espresso-500 italic mt-0.5">
+                                                                                    <p className="text-[10px] text-slate-500 italic mt-0.5">
                                                                                         "{it.notes}"
                                                                                     </p>
                                                                                 )}
@@ -1405,16 +1405,16 @@ export default function AdminLiveOrdersKanbanPage() {
 
                                                                 {/* Customer Notes */}
                                                                 {order.customer_notes && (
-                                                                    <div className="p-2 rounded-lg bg-cream-100 text-[10px] text-espresso-700 italic border border-cream-200">
+                                                                    <div className="p-2 rounded-lg bg-slate-50 text-[10px] text-slate-700 italic border border-slate-200">
                                                                         Note: {order.customer_notes}
                                                                     </div>
                                                                 )}
 
                                                                 {/* Thermal POS & WhatsApp Dispatch Strip */}
-                                                                <div className="flex flex-wrap items-center gap-1 py-1 px-1.5 rounded-xl bg-cream-50/80 border border-cream-200 text-[10px]">
+                                                                <div className="flex flex-wrap items-center gap-1 py-1 px-1.5 rounded-xl bg-slate-50/80 border border-slate-200 text-[10px]">
                                                                     <button
                                                                         onClick={() => printKOT(order, outlet)}
-                                                                        className="px-2 py-1 rounded-md bg-white border border-cream-300 hover:bg-cream-100 text-espresso-800 font-bold flex items-center gap-1 transition cursor-pointer"
+                                                                        className="px-2 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold flex items-center gap-1 transition cursor-pointer"
                                                                         title="Print Kitchen Order Ticket (KOT)"
                                                                     >
                                                                         <Printer className="w-2.5 h-2.5 text-amber-600" />
@@ -1423,7 +1423,7 @@ export default function AdminLiveOrdersKanbanPage() {
 
                                                                     <button
                                                                         onClick={() => printPOSReceipt(order, outlet)}
-                                                                        className="px-2 py-1 rounded-md bg-white border border-cream-300 hover:bg-cream-100 text-espresso-800 font-bold flex items-center gap-1 transition cursor-pointer"
+                                                                        className="px-2 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold flex items-center gap-1 transition cursor-pointer"
                                                                         title="Print Customer Tax Invoice / Bill"
                                                                     >
                                                                         <Printer className="w-2.5 h-2.5 text-emerald-600" />
@@ -1454,9 +1454,9 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                 </div>
 
                                                                 {/* Financial & Payment Row */}
-                                                                <div className="pt-2 border-t border-cream-100 flex items-center justify-between text-xs">
+                                                                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                                                                     <div>
-                                                                        <span className="font-extrabold text-espresso-950 block">
+                                                                        <span className="font-extrabold text-slate-900 block">
                                                                             {formatRupees(order.total_paise)}
                                                                         </span>
                                                                         <span className="text-[10px] font-bold inline-flex items-center gap-1">
@@ -1467,8 +1467,8 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                                 </>
                                                                             ) : (
                                                                                 <>
-                                                                                    <Clock className="w-3 h-3 text-saffron-600 shrink-0" />
-                                                                                    <span className="text-saffron-700">
+                                                                                    <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                                                                                    <span className="text-amber-700">
                                                                                         {isDelivery ? "Cash on Delivery (COD)" : "Pay at Counter"}
                                                                                     </span>
                                                                                 </>
@@ -1561,7 +1561,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                                     {order.status !== "served" && order.status !== "delivered" && order.status !== "cancelled" && (
                                                                         <button
                                                                             onClick={() => handleCancelOrder(order.id)}
-                                                                            className="p-1.5 rounded-lg text-espresso-400 hover:text-red-600 hover:bg-red-50 text-[11px] font-bold transition cursor-pointer"
+                                                                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 text-[11px] font-bold transition cursor-pointer"
                                                                             title="Cancel Order"
                                                                         >
                                                                             <XCircle className="w-4 h-4" />

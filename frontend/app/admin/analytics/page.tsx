@@ -201,7 +201,7 @@ export default function AdminAnalyticsDashboardPage() {
     const maxHourlyOrders = Math.max(...hourlyDistribution.map((h) => h.order_count || 0), 1);
 
     return (
-        <div className="flex h-screen bg-[#0F0C09] text-white overflow-hidden font-sans">
+        <div className="flex h-screen bg-slate-50 text-slate-800 overflow-hidden font-sans">
             <AdminSidebar />
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -216,12 +216,12 @@ export default function AdminAnalyticsDashboardPage() {
                     {/* ══════════════════════════════════════════════════════════
                         TOP CONTROL TOOLBAR (Petpooja & TMbill Standard)
                        ══════════════════════════════════════════════════════════ */}
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-3xl bg-[#17130F] border border-[#D4AF37]/30 shadow-xl">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-3xl bg-white border border-slate-200 shadow-xl">
                         {/* Title & Branch Switcher */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <BarChart3 className="w-6 h-6 text-[#D4AF37]" />
-                                <h1 className="font-serif text-xl sm:text-2xl font-black text-white">
+                                <BarChart3 className="w-6 h-6 text-blue-600" />
+                                <h1 className="font-serif text-xl sm:text-2xl font-black text-slate-900">
                                     Business Intelligence &amp; Analytics
                                 </h1>
                                 <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 uppercase">
@@ -237,8 +237,8 @@ export default function AdminAnalyticsDashboardPage() {
                                         onClick={() => setSelectedBranchId(0)}
                                         className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 ${
                                             selectedBranchId === 0
-                                                ? "bg-[#D4AF37] text-black shadow-md"
-                                                : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
+                                                ? "bg-blue-600 text-white shadow-xs shadow-md"
+                                                : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100"
                                         }`}
                                     >
                                         <Building2 className="w-3.5 h-3.5" />
@@ -249,8 +249,8 @@ export default function AdminAnalyticsDashboardPage() {
                                         onClick={() => setSelectedBranchId(1)}
                                         className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 ${
                                             selectedBranchId === 1
-                                                ? "bg-amber-500 text-black shadow-md"
-                                                : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
+                                                ? "bg-amber-500 text-slate-950 shadow-md"
+                                                : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100"
                                         }`}
                                     >
                                         <Store className="w-3.5 h-3.5" />
@@ -261,8 +261,8 @@ export default function AdminAnalyticsDashboardPage() {
                                         onClick={() => setSelectedBranchId(2)}
                                         className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 ${
                                             selectedBranchId === 2
-                                                ? "bg-amber-500 text-black shadow-md"
-                                                : "bg-white/5 border border-white/10 text-white/70 hover:bg-white/10"
+                                                ? "bg-amber-500 text-slate-950 shadow-md"
+                                                : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100"
                                         }`}
                                     >
                                         <Sparkles className="w-3.5 h-3.5" />
@@ -270,12 +270,12 @@ export default function AdminAnalyticsDashboardPage() {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
                                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                                    <span className="text-xs font-bold text-white/80">
+                                    <span className="text-xs font-bold text-slate-800">
                                         {outlet?.name || "Surya Family Restaurant"}
                                     </span>
-                                    <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Assigned Outlet</span>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Assigned Outlet</span>
                                 </div>
                             )}
                         </div>
@@ -283,7 +283,7 @@ export default function AdminAnalyticsDashboardPage() {
                         {/* Date Presets & Actions */}
                         <div className="flex flex-wrap items-center gap-2">
                             {/* Date Presets */}
-                            <div className="flex rounded-xl bg-black/50 p-1 border border-white/10 text-xs overflow-x-auto no-scrollbar max-w-full">
+                            <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs overflow-x-auto no-scrollbar max-w-full">
                                 {[
                                     { id: "today", label: "Today" },
                                     { id: "yesterday", label: "Yesterday" },
@@ -296,7 +296,7 @@ export default function AdminAnalyticsDashboardPage() {
                                         type="button"
                                         onClick={() => setTimePreset(p.id as any)}
                                         className={`px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-                                            timePreset === p.id ? "bg-[#D4AF37] text-black shadow" : "text-white/60 hover:text-white"
+                                            timePreset === p.id ? "bg-blue-600 text-white shadow-xs shadow" : "text-slate-600 hover:text-slate-900"
                                         }`}
                                     >
                                         {p.label}
@@ -308,10 +308,10 @@ export default function AdminAnalyticsDashboardPage() {
                             <button
                                 type="button"
                                 onClick={handleExportCSV}
-                                className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white flex items-center gap-1.5 transition cursor-pointer"
+                                className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-900 flex items-center gap-1.5 transition cursor-pointer"
                                 title="Export Analytics to CSV Excel"
                             >
-                                <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                <Download className="w-3.5 h-3.5 text-blue-600" />
                                 <span className="hidden sm:inline">Export CSV</span>
                             </button>
 
@@ -330,7 +330,7 @@ export default function AdminAnalyticsDashboardPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowEODModal(true)}
-                                className="px-3.5 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#C59B27] text-black font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg transition cursor-pointer"
+                                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-slate-900 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg transition cursor-pointer"
                                 title="Daily Z-Report Register Closing"
                             >
                                 <Printer className="w-3.5 h-3.5" />
@@ -344,26 +344,26 @@ export default function AdminAnalyticsDashboardPage() {
                        ══════════════════════════════════════════════════════════ */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                         {/* 1. Net Revenue */}
-                        <div className="p-4 rounded-3xl bg-[#17130F] border border-[#D4AF37]/30 shadow-lg space-y-2">
-                            <div className="flex items-center justify-between text-[#D4AF37]">
+                        <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-lg space-y-2">
+                            <div className="flex items-center justify-between text-blue-600">
                                 <span className="text-[11px] font-bold uppercase tracking-wider">Net Revenue</span>
                                 <DollarSign className="w-4 h-4" />
                             </div>
-                            <h3 className="font-mono font-black text-xl sm:text-2xl text-white">
+                            <h3 className="font-mono font-black text-xl sm:text-2xl text-slate-900">
                                 {formatRupees(summary?.net_sales_paise || summary?.total_revenue_paise || 0)}
                             </h3>
-                            <p className="text-[10px] text-white/50">
+                            <p className="text-[10px] text-slate-500">
                                 Gross: {formatRupees(summary?.gross_sales_paise || 0)}
                             </p>
                         </div>
 
                         {/* 2. Total Orders */}
-                        <div className="p-4 rounded-3xl bg-[#17130F] border border-white/10 shadow-lg space-y-2">
+                        <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-lg space-y-2">
                             <div className="flex items-center justify-between text-blue-400">
                                 <span className="text-[11px] font-bold uppercase tracking-wider">Total Orders</span>
                                 <ShoppingBag className="w-4 h-4" />
                             </div>
-                            <h3 className="font-mono font-black text-xl sm:text-2xl text-white">
+                            <h3 className="font-mono font-black text-xl sm:text-2xl text-slate-900">
                                 {summary?.total_orders || 0}
                             </h3>
                             <p className="text-[10px] text-emerald-400">
@@ -372,43 +372,43 @@ export default function AdminAnalyticsDashboardPage() {
                         </div>
 
                         {/* 3. Average Order Value (AOV) */}
-                        <div className="p-4 rounded-3xl bg-[#17130F] border border-white/10 shadow-lg space-y-2">
+                        <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-lg space-y-2">
                             <div className="flex items-center justify-between text-amber-400">
                                 <span className="text-[11px] font-bold uppercase tracking-wider">Average Order</span>
                                 <TrendingUp className="w-4 h-4" />
                             </div>
-                            <h3 className="font-mono font-black text-xl sm:text-2xl text-white">
+                            <h3 className="font-mono font-black text-xl sm:text-2xl text-slate-900">
                                 {formatRupees(summary?.avg_order_value_paise || 0)}
                             </h3>
-                            <p className="text-[10px] text-white/50">Per Table / Ticket</p>
+                            <p className="text-[10px] text-slate-500">Per Table / Ticket</p>
                         </div>
 
                         {/* 4. Total Discounts */}
-                        <div className="p-4 rounded-3xl bg-[#17130F] border border-white/10 shadow-lg space-y-2">
+                        <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-lg space-y-2">
                             <div className="flex items-center justify-between text-purple-400">
                                 <span className="text-[11px] font-bold uppercase tracking-wider">Discounts Given</span>
                                 <Award className="w-4 h-4" />
                             </div>
-                            <h3 className="font-mono font-black text-xl sm:text-2xl text-white">
+                            <h3 className="font-mono font-black text-xl sm:text-2xl text-slate-900">
                                 {formatRupees(summary?.total_discount_paise || 0)}
                             </h3>
                             <p className="text-[10px] text-purple-300">Coupons &amp; Promos</p>
                         </div>
 
                         {/* 5. GST / Tax Collected */}
-                        <div className="p-4 rounded-3xl bg-[#17130F] border border-white/10 shadow-lg space-y-2">
+                        <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-lg space-y-2">
                             <div className="flex items-center justify-between text-emerald-400">
                                 <span className="text-[11px] font-bold uppercase tracking-wider">GST Collected</span>
                                 <Shield className="w-4 h-4" />
                             </div>
-                            <h3 className="font-mono font-black text-xl sm:text-2xl text-white">
+                            <h3 className="font-mono font-black text-xl sm:text-2xl text-slate-900">
                                 {formatRupees(summary?.total_tax_paise || 0)}
                             </h3>
-                            <p className="text-[10px] text-white/50">Govt Tax (5%)</p>
+                            <p className="text-[10px] text-slate-500">Govt Tax (5%)</p>
                         </div>
 
                         {/* 6. Cancelled / Void Loss */}
-                        <div className="p-4 rounded-3xl bg-[#17130F] border border-red-500/30 shadow-lg space-y-2">
+                        <div className="p-4 rounded-3xl bg-white border border-red-500/30 shadow-lg space-y-2">
                             <div className="flex items-center justify-between text-red-400">
                                 <span className="text-[11px] font-bold uppercase tracking-wider">Void / Cancelled</span>
                                 <AlertTriangle className="w-4 h-4" />
@@ -416,7 +416,7 @@ export default function AdminAnalyticsDashboardPage() {
                             <h3 className="font-mono font-black text-xl sm:text-2xl text-red-400">
                                 {summary?.cancelled_orders?.count || 0}
                             </h3>
-                            <p className="text-[10px] text-white/50">
+                            <p className="text-[10px] text-slate-500">
                                 Loss: {formatRupees(summary?.cancelled_orders?.lost_revenue_paise || 0)}
                             </p>
                         </div>
@@ -427,33 +427,33 @@ export default function AdminAnalyticsDashboardPage() {
                        ══════════════════════════════════════════════════════════ */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Channel Share (Dine-In vs Takeaway vs Delivery) */}
-                        <div className="p-5 sm:p-6 rounded-3xl bg-[#17130F] border border-white/10 shadow-xl space-y-4">
-                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                        <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-4">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                                 <div className="flex items-center gap-2">
-                                    <Utensils className="w-5 h-5 text-[#D4AF37]" />
-                                    <h3 className="font-serif font-black text-base text-white">
+                                    <Utensils className="w-5 h-5 text-blue-600" />
+                                    <h3 className="font-serif font-black text-base text-slate-900">
                                         Sales by Channel (Channel Share)
                                     </h3>
                                 </div>
-                                <span className="text-[11px] font-mono text-white/50">{timePreset.toUpperCase()}</span>
+                                <span className="text-[11px] font-mono text-slate-500">{timePreset.toUpperCase()}</span>
                             </div>
 
                             <div className="space-y-4">
                                 {channels.map((c, i) => (
                                     <div key={i} className="space-y-1.5">
                                         <div className="flex items-center justify-between text-xs font-bold">
-                                            <span className="flex items-center gap-2 text-white">
+                                            <span className="flex items-center gap-2 text-slate-900">
                                                 {c.name === "Dine-In Tables" ? <Utensils className="w-3.5 h-3.5 text-amber-400" /> : c.name === "Takeaway Parcel" ? <ShoppingBag className="w-3.5 h-3.5 text-emerald-400" /> : <Bike className="w-3.5 h-3.5 text-blue-400" />}
                                                 {c.name}
                                             </span>
                                             <div className="flex items-center gap-3">
-                                                <span className="text-white/60 font-mono">{c.count} orders</span>
-                                                <span className="text-[#D4AF37] font-mono font-black">₹{c.revenue_rupees.toFixed(2)}</span>
+                                                <span className="text-slate-600 font-mono">{c.count} orders</span>
+                                                <span className="text-blue-600 font-mono font-black">₹{c.revenue_rupees.toFixed(2)}</span>
                                                 <span className="text-xs font-mono font-black text-emerald-400 w-12 text-right">{c.percentage}%</span>
                                             </div>
                                         </div>
                                         {/* Visual Progress Bar */}
-                                        <div className="w-full h-2.5 rounded-full bg-black/60 overflow-hidden border border-white/5">
+                                        <div className="w-full h-2.5 rounded-full bg-black/60 overflow-hidden border border-slate-100">
                                             <div
                                                 className={`h-full rounded-full transition-all duration-500 ${
                                                     i === 0 ? "bg-amber-500" : i === 1 ? "bg-emerald-500" : "bg-blue-500"
@@ -467,33 +467,33 @@ export default function AdminAnalyticsDashboardPage() {
                         </div>
 
                         {/* Payment Tender Settlement Breakdown */}
-                        <div className="p-5 sm:p-6 rounded-3xl bg-[#17130F] border border-white/10 shadow-xl space-y-4">
-                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                        <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-4">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                                 <div className="flex items-center gap-2">
                                     <Banknote className="w-5 h-5 text-emerald-400" />
-                                    <h3 className="font-serif font-black text-base text-white">
+                                    <h3 className="font-serif font-black text-base text-slate-900">
                                         Payment Tender Settlement
                                     </h3>
                                 </div>
-                                <span className="text-[11px] font-mono text-white/50">Drawer Reconciliation</span>
+                                <span className="text-[11px] font-mono text-slate-500">Drawer Reconciliation</span>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
                                 {paymentMethods.map((pm, i) => (
-                                    <div key={i} className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1.5">
+                                    <div key={i} className="p-3.5 rounded-2xl bg-slate-100 border border-slate-100 space-y-1.5">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold text-white/70 flex items-center gap-1.5">
+                                            <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
                                                 {pm.name.includes("Cash") ? <Banknote className="w-4 h-4 text-emerald-400" /> : pm.name.includes("UPI") ? <QrCode className="w-4 h-4 text-indigo-400" /> : pm.name.includes("Card") ? <CreditCard className="w-4 h-4 text-amber-400" /> : <Bike className="w-4 h-4 text-blue-400" />}
                                                 {pm.name}
                                             </span>
-                                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-white/80">
+                                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-800">
                                                 {pm.percentage}%
                                             </span>
                                         </div>
-                                        <h4 className="font-mono font-black text-lg text-white">
+                                        <h4 className="font-mono font-black text-lg text-slate-900">
                                             ₹{pm.revenue_rupees.toFixed(2)}
                                         </h4>
-                                        <p className="text-[10px] text-white/40 font-mono">{pm.count} transactions</p>
+                                        <p className="text-[10px] text-slate-400 font-mono">{pm.count} transactions</p>
                                     </div>
                                 ))}
                             </div>
@@ -503,11 +503,11 @@ export default function AdminAnalyticsDashboardPage() {
                     {/* ══════════════════════════════════════════════════════════
                         DAILY REVENUE TREND CHART (Stacked Velocity)
                        ══════════════════════════════════════════════════════════ */}
-                    <div className="p-5 sm:p-6 rounded-3xl bg-[#17130F] border border-white/10 shadow-xl space-y-4">
-                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                    <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                             <div className="flex items-center gap-2">
-                                <TrendingUp className="w-5 h-5 text-[#D4AF37]" />
-                                <h3 className="font-serif font-black text-base text-white">
+                                <TrendingUp className="w-5 h-5 text-blue-600" />
+                                <h3 className="font-serif font-black text-base text-slate-900">
                                     Daily Sales Velocity &amp; Revenue Trend
                                 </h3>
                             </div>
@@ -531,23 +531,23 @@ export default function AdminAnalyticsDashboardPage() {
                                 return (
                                     <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative">
                                         {/* Hover Tooltip */}
-                                        <div className="absolute -top-12 bg-black/90 border border-[#D4AF37] px-2.5 py-1 rounded-xl text-[10px] font-mono text-white opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-20 shadow-xl">
-                                            <div className="font-bold text-[#D4AF37]">{d.display_date}</div>
+                                        <div className="absolute -top-12 bg-black/90 border border-blue-600 px-2.5 py-1 rounded-xl text-[10px] font-mono text-slate-900 opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-20 shadow-xl">
+                                            <div className="font-bold text-blue-600">{d.display_date}</div>
                                             <div>₹{d.revenue_rupees.toFixed(2)} ({d.order_count} ord)</div>
                                         </div>
 
-                                        <span className="text-[10px] font-mono text-white/50 group-hover:text-[#D4AF37] font-bold">
+                                        <span className="text-[10px] font-mono text-slate-500 group-hover:text-blue-600 font-bold">
                                             {d.revenue_rupees > 0 ? `₹${Math.round(d.revenue_rupees)}` : ""}
                                         </span>
 
-                                        <div className="w-full max-w-[40px] rounded-xl bg-black/40 border border-white/5 overflow-hidden flex flex-col-reverse h-36">
+                                        <div className="w-full max-w-[40px] rounded-xl bg-slate-100 border border-slate-100 overflow-hidden flex flex-col-reverse h-36">
                                             <div
-                                                className="w-full bg-gradient-to-t from-amber-600 via-amber-500 to-[#D4AF37] transition-all duration-500 rounded-t-xl group-hover:brightness-125"
+                                                className="w-full bg-gradient-to-t from-amber-600 via-amber-500 to-blue-600 transition-all duration-500 rounded-t-xl group-hover:brightness-125"
                                                 style={{ height: `${Math.max(heightPct, 4)}%` }}
                                             />
                                         </div>
 
-                                        <span className="text-[10px] font-mono text-white/60 truncate w-full text-center">
+                                        <span className="text-[10px] font-mono text-slate-600 truncate w-full text-center">
                                             {d.display_date}
                                         </span>
                                     </div>
@@ -561,42 +561,42 @@ export default function AdminAnalyticsDashboardPage() {
                        ══════════════════════════════════════════════════════════ */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* 1. Top 10 Bestselling Dishes */}
-                        <div className="p-5 sm:p-6 rounded-3xl bg-[#17130F] border border-white/10 shadow-xl space-y-4">
-                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                        <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-4">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                                 <div className="flex items-center gap-2">
                                     <Flame className="w-5 h-5 text-amber-500" />
-                                    <h3 className="font-serif font-black text-base text-white">
+                                    <h3 className="font-serif font-black text-base text-slate-900">
                                         Top 10 Bestselling Dishes
                                     </h3>
                                 </div>
-                                <span className="text-[11px] font-mono text-white/50">Menu Stars</span>
+                                <span className="text-[11px] font-mono text-slate-500">Menu Stars</span>
                             </div>
 
                             <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
                                 {topItems.length === 0 ? (
-                                    <p className="text-xs text-white/50 text-center py-8">No item sales in this range.</p>
+                                    <p className="text-xs text-slate-500 text-center py-8">No item sales in this range.</p>
                                 ) : (
                                     topItems.map((it, idx) => (
                                         <div
                                             key={idx}
-                                            className="p-3 rounded-2xl bg-black/40 border border-white/5 hover:border-[#D4AF37]/40 transition flex items-center justify-between"
+                                            className="p-3 rounded-2xl bg-slate-100 border border-slate-100 hover:border-slate-200 transition flex items-center justify-between"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div
                                                     className={`w-7 h-7 rounded-xl flex items-center justify-center font-mono font-black text-xs ${
                                                         idx === 0
-                                                            ? "bg-amber-500 text-black"
+                                                            ? "bg-amber-500 text-slate-950"
                                                             : idx === 1
-                                                            ? "bg-zinc-300 text-black"
+                                                            ? "bg-zinc-300 text-white"
                                                             : idx === 2
-                                                            ? "bg-amber-700 text-white"
-                                                            : "bg-white/10 text-white/60"
+                                                            ? "bg-amber-700 text-slate-900"
+                                                            : "bg-white/10 text-slate-600"
                                                     }`}
                                                 >
                                                     #{idx + 1}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-xs sm:text-sm text-white leading-tight">
+                                                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
                                                         {it.item_name}
                                                     </h4>
                                                     <span className="text-[10px] text-emerald-400 font-mono">
@@ -605,7 +605,7 @@ export default function AdminAnalyticsDashboardPage() {
                                                 </div>
                                             </div>
 
-                                            <span className="font-mono font-black text-xs sm:text-sm text-[#D4AF37]">
+                                            <span className="font-mono font-black text-xs sm:text-sm text-blue-600">
                                                 ₹{it.revenue_rupees.toFixed(2)}
                                             </span>
                                         </div>
@@ -615,15 +615,15 @@ export default function AdminAnalyticsDashboardPage() {
                         </div>
 
                         {/* 2. Hourly Peak Rush Heatmap (24-Hour Velocity) */}
-                        <div className="p-5 sm:p-6 rounded-3xl bg-[#17130F] border border-white/10 shadow-xl space-y-4">
-                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                        <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-4">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                                 <div className="flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-[#D4AF37]" />
-                                    <h3 className="font-serif font-black text-base text-white">
+                                    <Clock className="w-5 h-5 text-blue-600" />
+                                    <h3 className="font-serif font-black text-base text-slate-900">
                                         24-Hour Peak Rush &amp; Kitchen Load
                                     </h3>
                                 </div>
-                                <span className="text-[11px] font-mono text-white/50">Shift Staffing</span>
+                                <span className="text-[11px] font-mono text-slate-500">Shift Staffing</span>
                             </div>
 
                             <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
@@ -632,17 +632,17 @@ export default function AdminAnalyticsDashboardPage() {
                                     const isPeak = h.order_count >= maxHourlyOrders * 0.7 && h.order_count > 0;
                                     return (
                                         <div key={h.hour} className="flex items-center gap-3 text-xs">
-                                            <span className="font-mono font-bold text-white/70 w-16 shrink-0">
+                                            <span className="font-mono font-bold text-slate-600 w-16 shrink-0">
                                                 {h.label}
                                             </span>
-                                            <div className="flex-1 h-5 rounded-lg bg-black/60 overflow-hidden border border-white/5 flex items-center px-2 relative">
+                                            <div className="flex-1 h-5 rounded-lg bg-black/60 overflow-hidden border border-slate-100 flex items-center px-2 relative">
                                                 <div
                                                     className={`absolute left-0 top-0 bottom-0 rounded-lg transition-all duration-500 ${
                                                         isPeak ? "bg-gradient-to-r from-red-600 to-amber-500" : "bg-amber-500/40"
                                                     }`}
                                                     style={{ width: `${Math.max(pct, h.order_count > 0 ? 5 : 0)}%` }}
                                                 />
-                                                <span className="relative z-10 text-[10px] font-mono font-bold text-white">
+                                                <span className="relative z-10 text-[10px] font-mono font-bold text-slate-900">
                                                     {h.order_count > 0 ? `${h.order_count} orders (₹${h.revenue_rupees.toFixed(0)})` : "-"}
                                                 </span>
                                             </div>
@@ -663,50 +663,50 @@ export default function AdminAnalyticsDashboardPage() {
                         MULTI-BRANCH SIDE-BY-SIDE COMPARISON
                        ══════════════════════════════════════════════════════════ */}
                     {branchComparison.length > 0 && (
-                        <div className="p-5 sm:p-6 rounded-3xl bg-[#17130F] border border-white/10 shadow-xl space-y-4">
-                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                        <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-xl space-y-4">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                                 <div className="flex items-center gap-2">
-                                    <Store className="w-5 h-5 text-[#D4AF37]" />
-                                    <h3 className="font-serif font-black text-base text-white">
+                                    <Store className="w-5 h-5 text-blue-600" />
+                                    <h3 className="font-serif font-black text-base text-slate-900">
                                         Multi-Branch Head-to-Head Performance
                                     </h3>
                                 </div>
-                                <span className="text-[11px] font-mono text-white/50">Branch 1 vs Branch 2</span>
+                                <span className="text-[11px] font-mono text-slate-500">Branch 1 vs Branch 2</span>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {branchComparison.map((b, i) => (
                                     <div
                                         key={b.outlet_id}
-                                        className="p-5 rounded-3xl bg-black/40 border border-white/10 space-y-3 relative overflow-hidden"
+                                        className="p-5 rounded-3xl bg-slate-100 border border-slate-200 space-y-3 relative overflow-hidden"
                                     >
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">
                                                     Branch {i + 1}
                                                 </span>
-                                                <h4 className="font-serif font-black text-lg text-white">
+                                                <h4 className="font-serif font-black text-lg text-slate-900">
                                                     {b.outlet_name}
                                                 </h4>
-                                                <p className="text-xs text-white/50 line-clamp-1">{b.address}</p>
+                                                <p className="text-xs text-slate-500 line-clamp-1">{b.address}</p>
                                             </div>
                                             <div className="text-right">
-                                                <span className="font-mono font-black text-xl text-[#D4AF37]">
+                                                <span className="font-mono font-black text-xl text-blue-600">
                                                     ₹{b.total_revenue_rupees.toFixed(2)}
                                                 </span>
-                                                <span className="text-[10px] text-white/40 block font-mono">
+                                                <span className="text-[10px] text-slate-400 block font-mono">
                                                     {b.total_orders} orders
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-xs">
-                                            <div className="p-2.5 rounded-xl bg-white/5">
-                                                <span className="text-[10px] text-white/50 block">Avg Ticket Size</span>
-                                                <span className="font-mono font-bold text-white">₹{b.avg_order_value_rupees.toFixed(2)}</span>
+                                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
+                                            <div className="p-2.5 rounded-xl bg-slate-50">
+                                                <span className="text-[10px] text-slate-500 block">Avg Ticket Size</span>
+                                                <span className="font-mono font-bold text-slate-900">₹{b.avg_order_value_rupees.toFixed(2)}</span>
                                             </div>
-                                            <div className="p-2.5 rounded-xl bg-white/5">
-                                                <span className="text-[10px] text-white/50 block">Phone Contact</span>
+                                            <div className="p-2.5 rounded-xl bg-slate-50">
+                                                <span className="text-[10px] text-slate-500 block">Phone Contact</span>
                                                 <span className="font-mono font-bold text-amber-400">{b.phone}</span>
                                             </div>
                                         </div>

@@ -38,26 +38,26 @@ export function POSTableSelectorModal({
     });
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="w-full max-w-4xl bg-[#140F0B] border border-[#D4AF37]/40 rounded-3xl p-6 space-y-6 shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-150">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="w-full max-w-4xl bg-white border border-slate-200 rounded-3xl p-6 space-y-6 shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-150">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                     <div>
-                        <span className="text-xs font-mono uppercase tracking-widest text-[#D4AF37] font-bold">
+                        <span className="text-xs font-mono uppercase tracking-widest text-blue-600 font-bold">
                             Live Floor Map • Dining Section
                         </span>
-                        <h2 className="font-serif text-xl sm:text-2xl font-black text-white mt-0.5">
+                        <h2 className="font-serif text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
                             Select Dine-In Table
                         </h2>
                     </div>
 
                     <div className="flex items-center gap-3">
                         {/* Filter tabs */}
-                        <div className="flex rounded-xl bg-black/50 p-1 border border-white/10 text-xs">
+                        <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs">
                             <button
                                 type="button"
                                 onClick={() => setFilter("all")}
-                                className={`px-3 py-1.5 rounded-lg font-bold ${filter === "all" ? "bg-[#D4AF37] text-black" : "text-white/60"}`}
+                                className={`px-3 py-1.5 rounded-lg font-bold ${filter === "all" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600"}`}
                             >
                                 All ({tables.length})
                             </button>
@@ -79,7 +79,7 @@ export function POSTableSelectorModal({
 
                         <button
                             onClick={onClose}
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
+                            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-900 flex items-center justify-center transition cursor-pointer"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -103,14 +103,14 @@ export function POSTableSelectorModal({
                                 }}
                                 className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer relative overflow-hidden min-h-[120px] ${
                                     isSelected
-                                        ? "bg-[#2A1E14] border-[#D4AF37] ring-2 ring-[#D4AF37] shadow-xl scale-102"
+                                        ? "bg-blue-50 border-blue-600 ring-2 ring-blue-400 shadow-xl scale-102"
                                         : isOccupied
                                         ? "bg-[#1F120E] border-red-500/40 hover:border-red-500"
                                         : "bg-[#151D18] border-emerald-500/30 hover:border-emerald-500"
                                 }`}
                             >
                                 <div className="flex items-center justify-between w-full">
-                                    <span className="font-serif font-black text-lg text-white">{t.label}</span>
+                                    <span className="font-serif font-black text-lg text-slate-900">{t.label}</span>
                                     <span
                                         className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
                                             isOccupied ? "bg-red-500/20 text-red-300 border border-red-500/30" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
@@ -122,10 +122,10 @@ export function POSTableSelectorModal({
 
                                 {order ? (
                                     <div className="mt-2 space-y-1">
-                                        <p className="font-mono font-black text-sm text-[#D4AF37]">
+                                        <p className="font-mono font-black text-sm text-blue-600">
                                             {formatRupees(order.total_price_paise || order.total_paise || 0)}
                                         </p>
-                                        <div className="flex items-center gap-1 text-[10px] text-white/50">
+                                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
                                             <Clock className="w-3 h-3" />
                                             <span>{formatRelativeTime(order.created_at)}</span>
                                         </div>

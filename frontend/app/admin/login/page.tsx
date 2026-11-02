@@ -47,49 +47,49 @@ function AdminLoginContent() {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex flex-col justify-center items-center p-4 select-none">
+        <main className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 select-none">
             <div className="max-w-md w-full space-y-5">
                 <div className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/20 text-white">
+                    <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/25 text-white">
                         <Sun className="w-8 h-8" />
                     </div>
-                    <h1 className="text-2xl font-black text-white tracking-tight">Surya Family Restaurant</h1>
-                    <p className="text-amber-400/90 text-sm mt-0.5 font-bold">Kadiri Operations Cockpit</p>
-                    <p className="text-white/40 text-xs mt-1">Opp. RTC Bus Stand, Bypass Road, Kadiri &bull; 098803 58634</p>
+                    <h1 className="text-2xl font-black text-slate-900 tracking-tight">Surya Family Restaurant</h1>
+                    <p className="text-blue-600 text-sm mt-0.5 font-bold">Kadiri Operations Cockpit</p>
+                    <p className="text-slate-500 text-xs mt-1">Opp. RTC Bus Stand, Bypass Road, Kadiri &bull; 098803 58634</p>
                 </div>
 
-                <div className="bg-white rounded-3xl p-7 shadow-2xl space-y-5">
+                <div className="bg-white rounded-3xl p-7 sm:p-8 shadow-xl border border-slate-200/80 space-y-5">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300">
-                            <Building2 className="w-4 h-4 text-amber-700" />
-                            <span className="text-xs font-extrabold text-amber-900">Surya Restaurant Kadiri</span>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200">
+                            <Building2 className="w-4 h-4 text-blue-700" />
+                            <span className="text-xs font-extrabold text-blue-900">Surya Restaurant Kadiri</span>
                         </div>
-                        <span className="text-[11px] text-espresso-400 font-mono">11 AM – 10:30 PM</span>
+                        <span className="text-[11px] text-slate-500 font-mono">11 AM – 10:30 PM</span>
                     </div>
 
                     {/* 1-Tap Quick Login — only visible on on-premise localhost POS or when explicitly enabled */}
                     {(typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || process.env.NEXT_PUBLIC_SHOW_DEMO_LOGIN === "true")) && (
-                    <div className="p-3 bg-cream-100 rounded-2xl border border-cream-300 space-y-2">
-                        <div className="flex items-center justify-between text-xs font-bold text-espresso-700">
+                    <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-700">
                             <div className="flex items-center gap-1.5">
-                                <UserCheck className="w-3.5 h-3.5 text-amber-600" />
+                                <UserCheck className="w-3.5 h-3.5 text-blue-600" />
                                 <span>1-Tap Staff Login:</span>
                             </div>
-                            <span className="text-[10px] text-espresso-500 font-normal">Official Credentials</span>
+                            <span className="text-[10px] text-slate-400 font-normal">Official Credentials</span>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <button
                                 type="button"
                                 onClick={() => handleQuickFill("owner@suryarestaurant.com", "admin123")}
-                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold transition shadow-sm cursor-pointer text-left flex items-center gap-1.5"
+                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold transition shadow-2xs cursor-pointer text-left flex items-center gap-1.5"
                             >
-                                <Crown className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                <Crown className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                                 <span>Manager / Owner</span>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => handleQuickFill("staff@suryarestaurant.com", "staff123")}
-                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold transition shadow-sm cursor-pointer text-left flex items-center gap-1.5"
+                                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold transition shadow-2xs cursor-pointer text-left flex items-center gap-1.5"
                             >
                                 <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                                 <span>Floor Cashier</span>
@@ -100,30 +100,30 @@ function AdminLoginContent() {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1.5">Staff / Owner Email</label>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Staff / Owner Email</label>
                             <div className="relative">
-                                <Mail className="w-4 h-4 text-espresso-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                                 <input
                                     type="email"
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="owner@suryarestaurant.com"
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-cream-300 bg-cream-50/50 text-xs sm:text-sm text-espresso-950 placeholder:text-espresso-400 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-espresso-700 mb-1.5">Password</label>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Password</label>
                             <div className="relative">
-                                <Lock className="w-4 h-4 text-espresso-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                                 <input
                                     type="password"
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-cream-300 bg-cream-50/50 text-xs sm:text-sm text-espresso-950 placeholder:text-espresso-400 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
                                 />
                             </div>
                         </div>
@@ -132,15 +132,15 @@ function AdminLoginContent() {
                             variant="primary"
                             size="lg"
                             isLoading={isLoading}
-                            className="w-full shadow-md shadow-amber-500/20 mt-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold"
+                            className="w-full shadow-md shadow-blue-500/25 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold"
                             rightIcon={<ArrowRight className="w-4 h-4" />}
                         >
                             Sign In to Operations Cockpit
                         </Button>
                     </form>
 
-                    <div className="pt-3 border-t border-cream-200 text-center flex items-center justify-center gap-1.5 text-espresso-400 text-[11px]">
-                        <Shield className="w-3.5 h-3.5 text-espresso-400" />
+                    <div className="pt-3 border-t border-slate-200 text-center flex items-center justify-center gap-1.5 text-slate-400 text-[11px]">
+                        <Shield className="w-3.5 h-3.5 text-slate-400" />
                         <span>Authorized Surya Family Restaurant Staff Only</span>
                     </div>
                 </div>
@@ -151,7 +151,7 @@ function AdminLoginContent() {
 
 export default function AdminLoginPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-stone-900 flex items-center justify-center text-white/50 text-sm">Loading Admin Portal...</div>}>
+        <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 text-sm">Loading Admin Portal...</div>}>
             <AdminLoginContent />
         </Suspense>
     );

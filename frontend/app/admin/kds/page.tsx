@@ -200,14 +200,14 @@ export default function KitchenDisplaySystemPage() {
 
     if (authLoading || !isAuthenticated) {
         return (
-            <div className="min-h-screen bg-espresso-950 flex items-center justify-center">
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <div className="w-8 h-8 rounded-full border-2 border-saffron-500 border-t-transparent animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-espresso-950 flex font-sans">
+        <div className="min-h-screen bg-slate-50 text-slate-800 flex font-sans">
             <AdminSidebar />
 
             <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
@@ -226,19 +226,19 @@ export default function KitchenDisplaySystemPage() {
                 />
 
                 {/* Subheader Toolbar */}
-                <div className="p-4 sm:p-5 bg-espresso-900 border-b border-espresso-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+                <div className="p-4 sm:p-5 bg-white border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-saffron-500/20 border border-saffron-500/30 flex items-center justify-center text-saffron-400 shrink-0">
+                        <div className="w-10 h-10 rounded-2xl bg-saffron-500/20 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
                             <ChefHat className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-lg sm:text-xl font-black tracking-tight text-white flex items-center gap-2.5">
+                            <h2 className="text-lg sm:text-xl font-black tracking-tight text-slate-900 flex items-center gap-2.5">
                                 <span>Kitchen Display System (KDS)</span>
-                                <span className="text-xs px-2.5 py-0.5 rounded-full bg-saffron-500/20 text-saffron-300 font-extrabold border border-saffron-500/30">
+                                <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-extrabold border border-blue-200">
                                     {kdsOrders.length} Active Tickets
                                 </span>
                             </h2>
-                            <p className="text-xs text-espresso-300 font-medium">
+                            <p className="text-xs text-slate-500 font-medium">
                                 High-visibility line prep board • Real-time 10-foot glanceability
                             </p>
                         </div>
@@ -259,7 +259,7 @@ export default function KitchenDisplaySystemPage() {
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                                 soundEnabled
                                     ? "bg-emerald-950/80 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900"
-                                    : "bg-espresso-800 border-espresso-700 text-espresso-400 hover:text-white"
+                                    : "bg-slate-100 border-slate-200 text-slate-400 hover:text-slate-900"
                             }`}
                             title="Toggle Kitchen Order Chime"
                         >
@@ -267,7 +267,7 @@ export default function KitchenDisplaySystemPage() {
                             <span>{soundEnabled ? "Chime: ON" : "Chime: MUTE"}</span>
                         </button>
 
-                        <label className="flex items-center gap-2 text-xs font-bold text-espresso-300 cursor-pointer select-none bg-espresso-800/60 px-3 py-1.5 rounded-xl border border-espresso-700">
+                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 cursor-pointer select-none bg-slate-100/60 px-3 py-1.5 rounded-xl border border-slate-200">
                             <input
                                 type="checkbox"
                                 checked={showReady}
@@ -280,7 +280,7 @@ export default function KitchenDisplaySystemPage() {
                         <Button
                             variant="outline"
                             size="sm"
-                            className="bg-espresso-800 text-white border-espresso-700 hover:bg-espresso-700 cursor-pointer"
+                            className="bg-slate-100 text-slate-900 border-slate-200 hover:bg-slate-200 cursor-pointer"
                             leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
                             onClick={fetchOrders}
                         >
@@ -290,28 +290,28 @@ export default function KitchenDisplaySystemPage() {
                 </div>
 
                 {/* KDS Tickets Grid */}
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-espresso-950">
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50">
                     {isLoadingOrders ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="h-64 rounded-3xl bg-espresso-900/60 border border-espresso-800 animate-pulse p-5 flex flex-col justify-between">
+                                <div key={i} className="h-64 rounded-3xl bg-white/60 border border-slate-200 animate-pulse p-5 flex flex-col justify-between">
                                     <div className="space-y-3">
-                                        <div className="h-6 w-28 bg-espresso-800 rounded-lg" />
-                                        <div className="h-4 w-36 bg-espresso-800/60 rounded-md" />
+                                        <div className="h-6 w-28 bg-slate-100 rounded-lg" />
+                                        <div className="h-4 w-36 bg-slate-100/60 rounded-md" />
                                         <div className="space-y-2 pt-4">
-                                            <div className="h-4 w-full bg-espresso-800/40 rounded" />
-                                            <div className="h-4 w-3/4 bg-espresso-800/40 rounded" />
+                                            <div className="h-4 w-full bg-slate-100/40 rounded" />
+                                            <div className="h-4 w-3/4 bg-slate-100/40 rounded" />
                                         </div>
                                     </div>
-                                    <div className="h-10 w-full bg-espresso-800 rounded-xl" />
+                                    <div className="h-10 w-full bg-slate-100 rounded-xl" />
                                 </div>
                             ))}
                         </div>
                     ) : kdsOrders.length === 0 ? (
-                        <div className="h-96 flex flex-col items-center justify-center text-espresso-400 text-center border-2 border-dashed border-espresso-800 rounded-3xl p-8">
-                            <Utensils className="w-16 h-16 mb-4 opacity-30 text-saffron-400" />
-                            <h3 className="text-lg font-bold text-white">All Kitchen Orders Cleared!</h3>
-                            <p className="text-xs text-espresso-400 mt-1 max-w-sm">
+                        <div className="h-96 flex flex-col items-center justify-center text-slate-400 text-center border-2 border-dashed border-slate-200 rounded-3xl p-8">
+                            <Utensils className="w-16 h-16 mb-4 opacity-30 text-blue-600" />
+                            <h3 className="text-lg font-bold text-slate-900">All Kitchen Orders Cleared!</h3>
+                            <p className="text-xs text-slate-400 mt-1 max-w-sm">
                                 No tickets currently pending in the kitchen. New incoming QR orders will appear here automatically.
                             </p>
                         </div>
@@ -331,19 +331,19 @@ export default function KitchenDisplaySystemPage() {
                                         key={order.id}
                                         className={`rounded-3xl border flex flex-col justify-between overflow-hidden shadow-xl transition-all ${
                                             isDelayed
-                                                ? "bg-espresso-900 border-red-500 ring-2 ring-red-500/50 shadow-red-500/20"
+                                                ? "bg-white border-red-500 ring-2 ring-red-500/50 shadow-red-500/20"
                                                 : isWarning
-                                                ? "bg-espresso-900 border-amber-500/80 ring-2 ring-amber-500/30 shadow-amber-500/10"
+                                                ? "bg-white border-amber-500/80 ring-2 ring-amber-500/30 shadow-amber-500/10"
                                                 : order.status === "preparing"
-                                                ? "bg-espresso-900 border-saffron-500/70 ring-2 ring-saffron-500/20"
+                                                ? "bg-white border-saffron-500/70 ring-2 ring-saffron-500/20"
                                                 : order.status === "ready"
-                                                ? "bg-espresso-900/95 border-emerald-500/70 ring-2 ring-emerald-500/20"
-                                                : "bg-espresso-900 border-espresso-700"
+                                                ? "bg-white border-emerald-500/70 ring-2 ring-emerald-500/20"
+                                                : "bg-white border-slate-200"
                                         }`}
                                     >
                                         {/* Ticket Top Banner - 10-Foot Glanceability Header */}
                                         <div>
-                                            <div className="p-4 bg-espresso-800/95 border-b border-espresso-700 flex items-center justify-between gap-2">
+                                            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2">
                                                 <div className="flex items-center gap-2">
                                                     {order.order_type === "delivery" ? (
                                                         <span className="text-sm font-black px-3.5 py-1.5 rounded-xl bg-cyan-600 text-white shadow-md flex items-center gap-1.5 tracking-wide">
@@ -351,11 +351,11 @@ export default function KitchenDisplaySystemPage() {
                                                             DELIVERY
                                                         </span>
                                                     ) : (
-                                                        <span className="text-base font-black px-3.5 py-1.5 rounded-xl bg-terracotta-500 text-white shadow-md tracking-wide">
+                                                        <span className="text-base font-black px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow-md tracking-wide">
                                                             Table {order.table_label || `T${order.table_id}`}
                                                         </span>
                                                     )}
-                                                    <span className="text-xs font-mono font-bold text-espresso-300">
+                                                    <span className="text-xs font-mono font-bold text-slate-500">
                                                         #{order.order_number.slice(-6)}
                                                     </span>
                                                 </div>
@@ -384,7 +384,7 @@ export default function KitchenDisplaySystemPage() {
                                                         </span>
                                                     )}
                                                     {!isDelayed && isWarning && (
-                                                        <span className="text-[10px] uppercase font-black bg-amber-600/80 text-white px-1.5 py-0.5 rounded">
+                                                        <span className="text-[10px] uppercase font-black bg-amber-600/80 text-slate-900 px-1.5 py-0.5 rounded">
                                                             WARN
                                                         </span>
                                                     )}
@@ -393,14 +393,14 @@ export default function KitchenDisplaySystemPage() {
 
                                             {/* Checklist of Items */}
                                             <div className="p-5 space-y-3">
-                                                <div className="text-[11px] font-extrabold uppercase tracking-wider text-espresso-400 flex items-center justify-between">
+                                                <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
                                                         <span>Items Checklist</span>
                                                         <span
                                                             className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
                                                                 allPrepped
                                                                     ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                                                    : "bg-espresso-800 text-espresso-300 border border-espresso-700"
+                                                                    : "bg-slate-100 text-slate-500 border border-slate-200"
                                                             }`}
                                                         >
                                                             {preppedCount}/{itemsCount} Done
@@ -411,7 +411,7 @@ export default function KitchenDisplaySystemPage() {
                                                             <CheckCircle2 className="w-3 h-3" /> All Done
                                                         </span>
                                                     ) : (
-                                                        <span className="text-[10px] text-espresso-500">Tap to cross out</span>
+                                                        <span className="text-[10px] text-slate-500">Tap to cross out</span>
                                                     )}
                                                 </div>
 
@@ -425,15 +425,15 @@ export default function KitchenDisplaySystemPage() {
                                                                 onClick={() => toggleItemCheck(order.id, it.id)}
                                                                 className={`p-3.5 rounded-2xl border cursor-pointer select-none transition flex items-start gap-3.5 ${
                                                                     isChecked
-                                                                        ? "bg-espresso-950/80 border-espresso-800 text-espresso-500 opacity-50 line-through"
-                                                                        : "bg-espresso-800/90 border-espresso-700 text-white hover:border-saffron-500 hover:bg-espresso-800"
+                                                                        ? "bg-slate-50/80 border-slate-200 text-slate-500 opacity-50 line-through"
+                                                                        : "bg-slate-100/90 border-slate-200 text-slate-900 hover:border-saffron-500 hover:bg-slate-100"
                                                                 }`}
                                                             >
                                                                 <div className="shrink-0 mt-0.5">
                                                                     {isChecked ? (
                                                                         <CheckSquare className="w-5 h-5 text-emerald-400" />
                                                                     ) : (
-                                                                        <Square className="w-5 h-5 text-espresso-400" />
+                                                                        <Square className="w-5 h-5 text-slate-400" />
                                                                     )}
                                                                 </div>
                                                                 <div className="flex-1">
@@ -452,7 +452,7 @@ export default function KitchenDisplaySystemPage() {
                                                                             const addons = JSON.parse(it.selected_addons_json);
                                                                             if (Array.isArray(addons) && addons.length > 0) {
                                                                                 return (
-                                                                                    <div className="text-xs font-bold text-saffron-300 mt-1 pl-1">
+                                                                                    <div className="text-xs font-bold text-blue-600 mt-1 pl-1">
                                                                                         + {addons.map((a: any) => a.name).join(", ")}
                                                                                     </div>
                                                                                 );
@@ -461,8 +461,8 @@ export default function KitchenDisplaySystemPage() {
                                                                         return null;
                                                                     })()}
                                                                     {it.notes && (
-                                                                        <span className="text-xs text-saffron-300 font-bold flex items-center gap-1 mt-1 bg-saffron-950/60 px-2 py-0.5 rounded-lg border border-saffron-500/30">
-                                                                            <AlertTriangle className="w-3.5 h-3.5 text-saffron-400 shrink-0" />
+                                                                        <span className="text-xs text-blue-600 font-bold flex items-center gap-1 mt-1 bg-saffron-950/60 px-2 py-0.5 rounded-lg border border-blue-200">
+                                                                            <AlertTriangle className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                                                                             <span>{it.notes}</span>
                                                                         </span>
                                                                     )}
@@ -474,8 +474,8 @@ export default function KitchenDisplaySystemPage() {
 
                                                 {/* Customer Instructions */}
                                                 {order.customer_notes && (
-                                                    <div className="p-3.5 rounded-2xl bg-espresso-950 border border-saffron-500/40 text-xs text-saffron-200">
-                                                        <span className="font-extrabold uppercase tracking-wider text-[10px] text-saffron-400 block mb-1 flex items-center gap-1">
+                                                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-saffron-500/40 text-xs text-saffron-200">
+                                                        <span className="font-extrabold uppercase tracking-wider text-[10px] text-blue-600 block mb-1 flex items-center gap-1">
                                                             <AlertTriangle className="w-3.5 h-3.5" />
                                                             Special Customer Request:
                                                         </span>
@@ -486,11 +486,11 @@ export default function KitchenDisplaySystemPage() {
                                         </div>
 
                                         {/* Action Bar */}
-                                        <div className="p-4 bg-espresso-900 border-t border-espresso-800 flex items-center gap-2">
+                                        <div className="p-4 bg-white border-t border-slate-200 flex items-center gap-2">
                                             {/* 1-Tap KOT Thermal Print */}
                                             <button
                                                 onClick={() => printKOT(order, outlet)}
-                                                className="p-3 rounded-xl bg-espresso-800 hover:bg-espresso-700 text-espresso-300 hover:text-white border border-espresso-700 transition flex items-center justify-center shrink-0 cursor-pointer"
+                                                className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 border border-slate-200 transition flex items-center justify-center shrink-0 cursor-pointer"
                                                 title="Print Physical KOT Slip"
                                             >
                                                 <Printer className="w-4 h-4 text-amber-400" />
@@ -510,14 +510,14 @@ export default function KitchenDisplaySystemPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => handleUpdateStatus(order.id, "placed")}
-                                                        className="p-2.5 rounded-xl bg-espresso-800 hover:bg-espresso-700 text-espresso-400 hover:text-white border border-espresso-700 transition cursor-pointer"
+                                                        className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
                                                         title="Revert to Placed"
                                                     >
                                                         <Undo2 className="w-4 h-4" />
                                                     </button>
                                                     <Button
                                                         size="md"
-                                                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black cursor-pointer shadow-md"
+                                                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-900 font-black cursor-pointer shadow-md"
                                                         leftIcon={<CheckCircle2 className="w-4 h-4" />}
                                                         onClick={() => handleUpdateStatus(order.id, "ready")}
                                                     >
@@ -529,14 +529,14 @@ export default function KitchenDisplaySystemPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => handleUpdateStatus(order.id, "preparing")}
-                                                        className="p-2.5 rounded-xl bg-espresso-800 hover:bg-espresso-700 text-espresso-400 hover:text-white border border-espresso-700 transition cursor-pointer"
+                                                        className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
                                                         title="Revert to Preparing"
                                                     >
                                                         <Undo2 className="w-4 h-4" />
                                                     </button>
                                                     <Button
                                                         size="md"
-                                                        className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-black cursor-pointer shadow-md"
+                                                        className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-slate-900 font-black cursor-pointer shadow-md"
                                                         leftIcon={<CheckCheck className="w-4 h-4" />}
                                                         onClick={() => handleUpdateStatus(order.id, "served")}
                                                     >
