@@ -189,7 +189,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-5xl h-[90vh] bg-[#17130F] text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
+            <div className="w-full max-w-5xl h-[90vh] bg-white text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden">
                 {/* MODAL HEADER */}
                 <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-100">
                     <div className="flex items-center gap-3">
@@ -229,7 +229,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                 {/* MODAL BODY (TWO COLUMN LAYOUT) */}
                 <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
                     {/* LEFT LIST: SEARCH & BILL CARDS */}
-                    <div className="w-full md:w-5/12 border-r border-slate-200 flex flex-col bg-black/20">
+                    <div className="w-full md:w-5/12 border-r border-slate-200 flex flex-col bg-slate-50">
                         {/* Search & Filter Bar */}
                         <div className="p-3 space-y-2 border-b border-slate-200">
                             <div className="relative">
@@ -331,7 +331,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                         {selectedOrder ? (
                             <div className="space-y-5 max-w-xl mx-auto w-full">
                                 {/* Bill Meta Card */}
-                                <div className="p-4 rounded-3xl bg-[#17130F] border border-slate-200 space-y-3">
+                                <div className="p-4 rounded-3xl bg-white border border-slate-200 space-y-3">
                                     <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                                         <div>
                                             <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
@@ -405,7 +405,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                                 </div>
 
                                 {/* Itemized List */}
-                                <div className="p-4 rounded-3xl bg-[#17130F] border border-slate-200 space-y-3">
+                                <div className="p-4 rounded-3xl bg-white border border-slate-200 space-y-3">
                                     <h4 className="font-serif font-black text-sm text-slate-900 border-b border-slate-200 pb-2">
                                         Ordered Items ({selectedOrder.items?.length || 0})
                                     </h4>
@@ -489,7 +489,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                 {/* MODAL 1: CHANGE PAYMENT METHOD */}
                 {showChangePayment && (
                     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                        <div className="w-full max-w-md bg-[#1E1914] rounded-3xl border border-amber-500/40 p-5 space-y-4 shadow-2xl">
+                        <div className="w-full max-w-md bg-white rounded-3xl border border-amber-300 p-5 space-y-4 shadow-2xl">
                             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                                 <h3 className="font-serif font-black text-base text-slate-900 flex items-center gap-2">
                                     <ArrowRightLeft className="w-4 h-4 text-amber-400" />
@@ -561,7 +561,7 @@ export function POSRecentBillsModal({ isOpen, onClose, outlet }: POSRecentBillsM
                 {/* MODAL 2: VOID / CANCEL BILL */}
                 {showVoidModal && (
                     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                        <div className="w-full max-w-md bg-[#1E1914] rounded-3xl border border-red-500/40 p-5 space-y-4 shadow-2xl">
+                        <div className="w-full max-w-md bg-white rounded-3xl border border-red-300 p-5 space-y-4 shadow-2xl">
                             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                                 <h3 className="font-serif font-black text-base text-red-400 flex items-center gap-2">
                                     <AlertTriangle className="w-4 h-4" />

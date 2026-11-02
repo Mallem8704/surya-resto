@@ -185,11 +185,11 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-2xl bg-[#17130F] text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+            <div className="w-full max-w-2xl bg-white text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
                 {/* MODAL HEADER */}
                 <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-100">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/20 border border-slate-200 flex items-center justify-center text-blue-600">
+                        <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-slate-200 flex items-center justify-center text-blue-600">
                             <Layers className="w-5 h-5" />
                         </div>
                         <div>
@@ -212,7 +212,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                 </div>
 
                 {/* TABS SWITCHER */}
-                <div className="flex border-b border-slate-200 bg-black/20 p-1.5 gap-2 px-4">
+                <div className="flex border-b border-slate-200 bg-slate-50 p-1.5 gap-2 px-4">
                     <button
                         type="button"
                         onClick={() => setActiveTab("variants")}
@@ -307,7 +307,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                                                         <span className="text-xs text-slate-400 font-telugu">({v.name_te})</span>
                                                                     )}
                                                                     {v.is_default && (
-                                                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-blue-600 border border-slate-200 uppercase">
+                                                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 uppercase">
                                                                             Default
                                                                         </span>
                                                                     )}
@@ -411,7 +411,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                     <button
                                         type="submit"
                                         disabled={isAddingVariant}
-                                        className="px-4 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#C59B27] text-black font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer"
+                                        className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer"
                                     >
                                         <Plus className="w-3.5 h-3.5" />
                                         <span>{isAddingVariant ? "Adding..." : "Add Portion"}</span>
@@ -575,7 +575,7 @@ export function ItemVariantsModal({ isOpen, onClose, item, onItemUpdated }: Item
                                     <button
                                         type="submit"
                                         disabled={isAddingAddon}
-                                        className="px-4 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#C59B27] text-black font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer"
+                                        className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer"
                                     >
                                         <Plus className="w-3.5 h-3.5" />
                                         <span>{isAddingAddon ? "Adding..." : "Add Custom Add-on"}</span>

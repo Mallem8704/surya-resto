@@ -216,7 +216,7 @@ export function POSKioskPrintModal({
                 </div>
 
                 {/* Footer with Test Buttons */}
-                <div className="px-6 py-4 bg-[#14100D] border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
@@ -239,7 +239,7 @@ export function POSKioskPrintModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-5 py-2 rounded-xl bg-blue-600 text-white shadow-xs font-black text-xs hover:bg-[#e2bd47] transition cursor-pointer"
+                        className="px-5 py-2 rounded-xl bg-blue-600 text-white shadow-xs font-black text-xs hover:bg-blue-700 transition cursor-pointer"
                     >
                         Done
                     </button>

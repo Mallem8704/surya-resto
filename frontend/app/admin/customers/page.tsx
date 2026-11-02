@@ -408,7 +408,7 @@ export default function AdminCustomersPage() {
                                             className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] ${
                                                 selectedTier === tab.id
                                                     ? "bg-white/20 text-white"
-                                                    : "bg-espresso-200 text-slate-800"
+                                                    : "bg-slate-200 text-slate-800"
                                             }`}
                                         >
                                             {tab.count}
@@ -587,7 +587,7 @@ export default function AdminCustomersPage() {
             {/* Customer Detail Drawer */}
             {selectedCustomerId && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex justify-end transition-opacity"
+                    className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex justify-end transition-opacity"
                     onClick={closeCustomerDrawer}
                 >
                     <div

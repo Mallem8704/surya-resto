@@ -259,8 +259,8 @@ export default function SettingsPage() {
                             <>
                                 <form onSubmit={handleSave} className="space-y-6">
                                 {/* Basic Info */}
-                                <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
-                                    <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center gap-2">
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center gap-2">
                                         <Store className="w-4 h-4 text-slate-600" />
                                         <h2 className="font-bold text-slate-800">Basic Information</h2>
                                     </div>
@@ -297,8 +297,8 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* Contact & Location */}
-                                <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
-                                    <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center gap-2">
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center gap-2">
                                         <MapPin className="w-4 h-4 text-slate-600" />
                                         <h2 className="font-bold text-slate-800">Location & Contact</h2>
                                     </div>
@@ -351,8 +351,8 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* Financial */}
-                                <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
-                                    <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center gap-2">
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center gap-2">
                                         <IndianRupee className="w-4 h-4 text-slate-600" />
                                         <h2 className="font-bold text-slate-800">Financial Settings</h2>
                                     </div>
@@ -388,8 +388,8 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* Compliance & Payment Gateway */}
-                                <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
-                                    <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center gap-2">
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center gap-2">
                                         <Shield className="w-4 h-4 text-slate-600" />
                                         <h2 className="font-bold text-slate-800">Compliance & Digital Payments</h2>
                                     </div>
@@ -442,8 +442,8 @@ export default function SettingsPage() {
                                 </div>
 
                                 {/* ORDERING CHANNELS & OPERATING MODES */}
-                                <div className="bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
-                                    <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center justify-between">
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <Sparkles className="w-4 h-4 text-amber-600" />
                                             <h2 className="font-bold text-slate-800">Ordering Channels & Operational Modes</h2>
@@ -591,8 +591,8 @@ export default function SettingsPage() {
                             </form>
 
                             {/* PROMO CODES & DISCOUNT COUPON MANAGER */}
-                            <div className="mt-10 bg-white rounded-2xl shadow-sm border border-espresso-100 overflow-hidden">
-                                <div className="bg-espresso-50 p-4 border-b border-espresso-100 flex items-center justify-between">
+                            <div className="mt-10 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Tag className="w-5 h-5 text-amber-600" />
                                         <h2 className="font-bold text-slate-900">Promo Codes & Discount Coupons ({coupons.length})</h2>
@@ -601,7 +601,7 @@ export default function SettingsPage() {
                                         <button
                                             type="button"
                                             onClick={() => setShowNewCouponModal(true)}
-                                            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-black text-amber-400 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+                                            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
                                         >
                                             <Plus className="w-3.5 h-3.5" />
                                             <span>Create Coupon</span>
@@ -650,7 +650,7 @@ export default function SettingsPage() {
                                                     </div>
 
                                                     {isOwner && (
-                                                        <div className="pt-3 mt-3 border-t border-espresso-100 flex items-center justify-between">
+                                                        <div className="pt-3 mt-3 border-t border-slate-200 flex items-center justify-between">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleToggleCoupon(c.id, c.code, c.is_active)}
@@ -772,7 +772,7 @@ export default function SettingsPage() {
 
                             {/* Create Coupon Modal */}
                             {showNewCouponModal && (
-                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
                                     <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-3xl p-6 shadow-2xl border border-slate-200">
                                         <h3 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
                                             <Sparkles className="w-5 h-5 text-amber-500" />

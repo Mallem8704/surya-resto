@@ -637,7 +637,7 @@ export default function AdminLiveOrdersKanbanPage() {
                                                 : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200"
                                         }`}
                                     >
-                                        <span className="w-2 h-2 rounded-full bg-espresso-500" />
+                                        <span className="w-2 h-2 rounded-full bg-slate-400" />
                                         <span>Completed</span>
                                         <span className="font-mono text-[11px] font-extrabold">({countCompleted})</span>
                                     </button>

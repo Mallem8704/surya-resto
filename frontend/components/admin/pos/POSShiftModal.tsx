@@ -148,18 +148,18 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-2xl bg-[#17130F] text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[92vh]">
+            <div className="w-full max-w-2xl bg-white text-slate-900 rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden max-h-[92vh]">
                 {/* MODAL HEADER */}
                 <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-100">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400">
+                        <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
                             <Briefcase className="w-5 h-5" />
                         </div>
                         <div>
                             <h2 className="font-serif font-black text-lg sm:text-xl text-slate-900 flex items-center gap-2">
                                 Cash Drawer &amp; Shift Register
                                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
-                                    hasOpenShift ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30" : "bg-red-500/20 text-red-300 border border-red-500/30"
+                                    hasOpenShift ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-red-50 text-red-700 border border-red-200"
                                 }`}>
                                     {hasOpenShift ? "Shift Open" : "Register Closed"}
                                 </span>
@@ -308,8 +308,8 @@ export function POSShiftModal({ isOpen, onClose, outlet, currentUserName = "Cash
                                         ₹{currentShift.upi_sales_rupees.toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="p-3 rounded-2xl bg-amber-500/15 border border-amber-400/40">
-                                    <span className="text-[10px] text-amber-300 block uppercase font-black">Expected Drawer</span>
+                                <div className="p-3 rounded-2xl bg-blue-50 border border-blue-200">
+                                    <span className="text-[10px] text-blue-700 block uppercase font-black">Expected Drawer</span>
                                     <span className="font-mono font-black text-base text-blue-600">
                                         ₹{currentShift.expected_cash_rupees.toFixed(2)}
                                     </span>

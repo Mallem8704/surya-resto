@@ -76,64 +76,64 @@ export function AdminBranchSwitchModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-            <div className="bg-[#120e09] border border-amber-400/40 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col text-white">
-                <div className="p-5 bg-gradient-to-r from-amber-950/80 via-black to-amber-950/80 border-b border-white/10 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in">
+            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col text-slate-900">
+                <div className="p-5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400">
+                        <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
                             <ShieldCheck className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-base font-black text-white tracking-wide">
+                            <h2 className="text-base font-black text-slate-900 tracking-wide">
                                 Admin Branch Authorization
                             </h2>
-                            <p className="text-[11px] text-amber-300/80 font-medium">
+                            <p className="text-[11px] text-slate-500 font-medium">
                                 Multi-Branch Security Verification
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1.5 rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                        className="p-1.5 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSwitchSubmit} className="p-5 space-y-4">
-                    <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
                             <Building2 className="w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">
                                 Target Branch
                             </p>
-                            <h3 className="text-sm font-bold text-white truncate">
+                            <h3 className="text-sm font-bold text-slate-900 truncate">
                                 {targetBranch.name}
                             </h3>
-                            <p className="text-xs text-white/60 line-clamp-1 mt-0.5">
+                            <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
                                 {targetBranch.address}
                             </p>
                         </div>
                     </div>
 
-                    <div className="text-xs text-white/70 leading-relaxed bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2.5">
-                        <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="text-xs text-slate-600 leading-relaxed bg-blue-50/50 border border-blue-100 rounded-xl p-3 flex items-start gap-2.5">
+                        <Lock className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                         <span>
                             Switching active branch context requires Admin authentication to maintain complete multi-tenant data isolation.
                         </span>
                     </div>
 
                     {errorMessage && (
-                        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                        <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
                             <span>{errorMessage}</span>
                         </div>
                     )}
 
                     <div>
-                        <label className="block text-xs font-bold text-amber-300 mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
                             Admin Password
                         </label>
                         <div className="relative">
@@ -144,7 +144,7 @@ export function AdminBranchSwitchModal({
                                 placeholder="Enter Admin Password"
                                 autoFocus
                                 required
-                                className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/20 text-white placeholder:text-white/30 focus:outline-hidden focus:border-amber-400 transition text-sm"
+                                className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition text-sm"
                             />
                         </div>
                     </div>
@@ -153,14 +153,14 @@ export function AdminBranchSwitchModal({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 font-bold text-xs transition cursor-pointer"
+                            className="flex-1 py-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isLoading || !password.trim()}
-                            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-espresso-950 font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <span>Authorizing...</span>

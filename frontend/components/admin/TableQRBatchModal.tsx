@@ -26,16 +26,16 @@ export function TableQRBatchModal({ isOpen, onClose, tables }: TableQRBatchModal
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
             <div className="relative w-full max-w-4xl max-h-[92vh] bg-white rounded-3xl p-4 sm:p-6 sm:p-8 flex flex-col shadow-2xl overflow-hidden">
                 {/* Header (Hidden on print) */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-cream-200 shrink-0 print:hidden gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 shrink-0 print:hidden gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-400/30 flex items-center justify-center text-amber-600">
+                        <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
                             <Printer className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-black text-espresso-950">
+                            <h2 className="text-lg font-black text-slate-900">
                                 Printable Table QR Standees ({tables.length} Tables)
                             </h2>
-                            <p className="text-xs text-espresso-600">
+                            <p className="text-xs text-slate-500">
                                 Ready-to-print A4 / Acrylic standee inserts for {outlet?.name || "Surya Family Restaurant"}
                             </p>
                         </div>
@@ -44,14 +44,14 @@ export function TableQRBatchModal({ isOpen, onClose, tables }: TableQRBatchModal
                     <div className="flex items-center gap-2">
                         <button
                             onClick={handlePrint}
-                            className="px-4 py-2.5 rounded-xl bg-espresso-900 hover:bg-black text-amber-400 font-extrabold text-xs flex items-center gap-2 transition hover:scale-102 shadow-md cursor-pointer"
+                            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center gap-2 transition hover:scale-102 shadow-md cursor-pointer"
                         >
-                            <Printer className="w-4 h-4 text-amber-400" />
+                            <Printer className="w-4 h-4 text-white" />
                             Print Standees Sheet
                         </button>
                         <button
                             onClick={onClose}
-                            className="p-2 rounded-xl text-espresso-400 hover:text-espresso-800 hover:bg-cream-100 transition cursor-pointer"
+                            className="p-2 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -67,24 +67,24 @@ export function TableQRBatchModal({ isOpen, onClose, tables }: TableQRBatchModal
                             return (
                                 <div
                                     key={t.id}
-                                    className="bg-espresso-950 text-slate-900 rounded-3xl p-6 border-4 border-amber-400/40 shadow-xl flex flex-col items-center text-center relative overflow-hidden print:border-black print:bg-white print:text-black print:shadow-none print:break-inside-avoid"
+                                    className="bg-white text-slate-900 rounded-3xl p-6 border-2 border-slate-200 shadow-xl flex flex-col items-center text-center relative overflow-hidden print:border-black print:bg-white print:text-black print:shadow-none print:break-inside-avoid"
                                 >
                                     {/* Gold Accent Top Bar */}
-                                    <div className="absolute top-0 inset-x-0 h-2.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
+                                    <div className="absolute top-0 inset-x-0 h-2 bg-blue-600" />
 
-                                    <div className="flex items-center gap-2 text-amber-400 print:text-amber-700 text-xs font-black uppercase tracking-widest mt-1 mb-2">
+                                    <div className="flex items-center gap-2 text-blue-600 print:text-black text-xs font-black uppercase tracking-widest mt-1 mb-2">
                                         <Sparkles className="w-3.5 h-3.5" />
                                         <span>{outlet?.name || "SURYA FAMILY RESTAURANT"}</span>
                                         <Sparkles className="w-3.5 h-3.5" />
                                     </div>
 
                                     {/* Table Badge */}
-                                    <div className="px-6 py-2 rounded-2xl bg-amber-500/20 border border-amber-400/50 text-amber-300 print:bg-black print:text-slate-900 font-black text-2xl tracking-tight mb-4">
+                                    <div className="px-6 py-2 rounded-2xl bg-blue-50 border border-blue-200 text-blue-700 print:bg-slate-100 print:text-black font-black text-2xl tracking-tight mb-4">
                                         TABLE {t.label}
                                     </div>
 
                                     {/* QR Code */}
-                                    <div className="p-3 bg-white rounded-2xl shadow-inner border-2 border-amber-400/60 mb-4 inline-block">
+                                    <div className="p-3 bg-white rounded-2xl shadow-inner border-2 border-slate-200 mb-4 inline-block">
                                         <img
                                             src={qrImageUrl}
                                             alt={`QR Code for Table ${t.label}`}

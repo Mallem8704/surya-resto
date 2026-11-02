@@ -272,9 +272,9 @@ export function PaymentSettlementModal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in">
-            <div className="bg-[#120e09] border border-amber-400/40 rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col text-slate-900">
+            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col text-slate-900">
                 {/* Header */}
-                <div className="p-5 bg-gradient-to-r from-amber-950/80 via-black to-amber-950/80 border-b border-slate-200 flex items-center justify-between">
+                <div className="p-5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2">
                             <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-black text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
@@ -293,7 +293,7 @@ export function PaymentSettlementModal({
                             <span className="font-mono text-xs text-slate-600">#{order.order_number}</span>
                         </div>
                         <h2 className="text-xl font-black text-slate-900 mt-1">
-                            Settle Bill: <span className="text-amber-400 font-mono">{formatRupees(totalPaise)}</span>
+                            Settle Bill: <span className="text-blue-600 font-mono">{formatRupees(totalPaise)}</span>
                         </h2>
                     </div>
                     <button
@@ -310,7 +310,7 @@ export function PaymentSettlementModal({
                         onClick={() => setActiveTab("cash")}
                         className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                             activeTab === "cash"
-                                ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-black"
+                                ? "bg-emerald-600 text-white shadow-md font-black"
                                 : "text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                     >
@@ -322,7 +322,7 @@ export function PaymentSettlementModal({
                         onClick={() => setActiveTab("upi")}
                         className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                             activeTab === "upi"
-                                ? "bg-amber-500 text-black shadow-md shadow-amber-500/20 font-black"
+                                ? "bg-blue-600 text-white shadow-md font-black"
                                 : "text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                     >
@@ -334,7 +334,7 @@ export function PaymentSettlementModal({
                         onClick={() => setActiveTab("card")}
                         className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                             activeTab === "card"
-                                ? "bg-purple-500 text-black shadow-md shadow-purple-500/20 font-black"
+                                ? "bg-purple-600 text-white shadow-md font-black"
                                 : "text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                     >
@@ -346,7 +346,7 @@ export function PaymentSettlementModal({
                         onClick={() => setActiveTab("split")}
                         className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
                             activeTab === "split"
-                                ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/20 font-black"
+                                ? "bg-slate-900 text-white shadow-md font-black"
                                 : "text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                     >
@@ -369,7 +369,7 @@ export function PaymentSettlementModal({
                                     value={tenderedAmount}
                                     onChange={(e) => setTenderedAmount(e.target.value)}
                                     placeholder="Enter cash given"
-                                    className="w-full px-4 py-3 rounded-2xl bg-slate-100 border border-slate-200 text-xl font-mono font-black text-amber-400 focus:outline-none focus:border-emerald-400"
+                                    className="w-full px-4 py-3 rounded-2xl bg-slate-100 border border-slate-200 text-xl font-mono font-black text-slate-900 focus:outline-none focus:border-blue-600"
                                 />
                             </div>
 

@@ -93,7 +93,7 @@ export function POSMenuGrid({
                             placeholder="Search item by name or short-code... [F2]"
                             value={searchQuery}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 placeholder-white/40 text-xs sm:text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs sm:text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                         />
                         {searchQuery && (
                             <button
@@ -140,7 +140,7 @@ export function POSMenuGrid({
                 </div>
 
                 {/* CATEGORY TABS SCROLLABLE */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-white/10">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-300">
                     <button
                         type="button"
                         onClick={() => onSelectCategory("all")}
@@ -206,7 +206,7 @@ export function POSMenuGrid({
                                         }`}
                                     />
                                     {it.has_variants && (
-                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30 uppercase tracking-tighter">
+                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-tighter">
                                             Variants
                                         </span>
                                     )}
@@ -229,7 +229,7 @@ export function POSMenuGrid({
                                     <span className="font-mono font-black text-xs sm:text-sm text-blue-600">
                                         {formatRupees(it.price_paise)}
                                     </span>
-                                    <div className="w-6 h-6 rounded-lg bg-white group-hover:bg-blue-600 group-hover:text-slate-900 text-slate-600 flex items-center justify-center transition-colors">
+                                    <div className="w-6 h-6 rounded-lg bg-slate-100 group-hover:bg-blue-600 group-hover:text-white text-slate-700 flex items-center justify-center transition-colors">
                                         <Plus className="w-3.5 h-3.5" />
                                     </div>
                                 </div>
@@ -270,7 +270,7 @@ export function POSMenuGrid({
                                     className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition cursor-pointer ${
                                         selectedVariant?.id === v.id
                                             ? "bg-blue-50 border-blue-600 ring-2 ring-blue-200"
-                                            : "bg-white border-slate-200 hover:border-white/30"
+                                            : "bg-white border-slate-200 hover:border-blue-300"
                                     }`}
                                 >
                                     <div className="flex items-center gap-2.5">
@@ -278,7 +278,7 @@ export function POSMenuGrid({
                                             className={`w-4 h-4 rounded-full border flex items-center justify-center ${
                                                 selectedVariant?.id === v.id
                                                     ? "border-blue-600 bg-blue-600 text-white shadow-xs"
-                                                    : "border-white/40"
+                                                    : "border-slate-300"
                                             }`}
                                         >
                                             {selectedVariant?.id === v.id && <Check className="w-3 h-3" />}

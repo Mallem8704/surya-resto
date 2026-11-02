@@ -797,7 +797,7 @@ export default function CashierPOSTerminalPage() {
                 </div>
 
                 {/* Right 35%: Cashier Ticket Cart */}
-                <div className="w-full md:w-96 lg:w-[420px] h-full shrink-0 border-t md:border-t-0 md:border-l border-slate-200 shadow-2xl overflow-hidden">
+                <div className="w-full md:w-96 lg:w-[420px] h-full shrink-0 border-t md:border-t-0 md:border-l border-slate-200 shadow-xl overflow-hidden bg-white">
                     <POSTicketCart
                         orderType={orderType}
                         selectedTable={selectedTable}

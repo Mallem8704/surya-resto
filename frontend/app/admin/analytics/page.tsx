@@ -453,7 +453,7 @@ export default function AdminAnalyticsDashboardPage() {
                                             </div>
                                         </div>
                                         {/* Visual Progress Bar */}
-                                        <div className="w-full h-2.5 rounded-full bg-black/60 overflow-hidden border border-slate-100">
+                                        <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
                                             <div
                                                 className={`h-full rounded-full transition-all duration-500 ${
                                                     i === 0 ? "bg-amber-500" : i === 1 ? "bg-emerald-500" : "bg-blue-500"
@@ -531,8 +531,8 @@ export default function AdminAnalyticsDashboardPage() {
                                 return (
                                     <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative">
                                         {/* Hover Tooltip */}
-                                        <div className="absolute -top-12 bg-black/90 border border-blue-600 px-2.5 py-1 rounded-xl text-[10px] font-mono text-slate-900 opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-20 shadow-xl">
-                                            <div className="font-bold text-blue-600">{d.display_date}</div>
+                                        <div className="absolute -top-12 bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-xl text-[10px] font-mono text-white opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-20 shadow-xl">
+                                            <div className="font-bold text-blue-300">{d.display_date}</div>
                                             <div>₹{d.revenue_rupees.toFixed(2)} ({d.order_count} ord)</div>
                                         </div>
 
@@ -635,10 +635,10 @@ export default function AdminAnalyticsDashboardPage() {
                                             <span className="font-mono font-bold text-slate-600 w-16 shrink-0">
                                                 {h.label}
                                             </span>
-                                            <div className="flex-1 h-5 rounded-lg bg-black/60 overflow-hidden border border-slate-100 flex items-center px-2 relative">
+                                            <div className="flex-1 h-5 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex items-center px-2 relative">
                                                 <div
                                                     className={`absolute left-0 top-0 bottom-0 rounded-lg transition-all duration-500 ${
-                                                        isPeak ? "bg-gradient-to-r from-red-600 to-amber-500" : "bg-amber-500/40"
+                                                        isPeak ? "bg-gradient-to-r from-red-600 to-amber-500" : "bg-blue-100"
                                                     }`}
                                                     style={{ width: `${Math.max(pct, h.order_count > 0 ? 5 : 0)}%` }}
                                                 />
@@ -647,8 +647,8 @@ export default function AdminAnalyticsDashboardPage() {
                                                 </span>
                                             </div>
                                             {isPeak && (
-                                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase shrink-0 inline-flex items-center gap-1">
-                                                    <Flame className="w-3 h-3 text-red-400" />
+                                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 uppercase shrink-0 inline-flex items-center gap-1">
+                                                    <Flame className="w-3 h-3 text-red-500" />
                                                     <span>Peak Rush</span>
                                                 </span>
                                             )}

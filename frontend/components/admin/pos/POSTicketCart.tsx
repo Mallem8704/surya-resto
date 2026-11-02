@@ -126,9 +126,9 @@ export function POSTicketCart({
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#16120E] text-slate-900">
+        <div className="flex flex-col h-full bg-white text-slate-900 border-l border-slate-200">
             {/* TICKET HEADER */}
-            <div className="p-3.5 sm:p-4 border-b border-slate-200 bg-[#1D1712] space-y-2.5 shrink-0">
+            <div className="p-3.5 sm:p-4 border-b border-slate-200 bg-slate-50 space-y-2.5 shrink-0">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-blue-600 text-white animate-pulse" />
@@ -140,13 +140,13 @@ export function POSTicketCart({
                         <button
                             type="button"
                             onClick={onOpenTableSelector}
-                            className="px-3 py-1 rounded-xl bg-blue-50 border border-slate-200 text-blue-600 font-mono font-bold text-xs hover:bg-blue-600 text-white/30 transition cursor-pointer flex items-center gap-1.5"
+                            className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-800 font-mono font-bold text-xs hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
                         >
                             <span>Table: {selectedTable ? selectedTable.label : "Select Table"}</span>
-                            <span className="text-[10px] text-slate-500">[F4]</span>
+                            <span className="text-[10px] text-blue-600 font-semibold">[F4]</span>
                         </button>
                     ) : (
-                        <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-mono font-bold uppercase">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-mono font-bold uppercase">
                             {orderType === "takeaway" ? "Counter Parcel" : "Doorstep Delivery"}
                         </span>
                     )}
@@ -161,7 +161,7 @@ export function POSTicketCart({
                             placeholder="Guest Name"
                             value={customerName}
                             onChange={(e) => onChangeCustomerName(e.target.value)}
-                            className="w-full pl-8 pr-2 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-900 placeholder-white/30 text-xs focus:outline-none focus:border-blue-600"
+                            className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-2xs"
                         />
                     </div>
                     <div className="relative">
@@ -172,7 +172,7 @@ export function POSTicketCart({
                             placeholder="Mobile (10 Digits)"
                             value={customerPhone}
                             onChange={(e) => onChangeCustomerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                            className="w-full pl-8 pr-2 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-900 placeholder-white/30 text-xs font-mono focus:outline-none focus:border-blue-600"
+                            className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs font-mono focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-2xs"
                         />
                     </div>
                 </div>
@@ -184,18 +184,18 @@ export function POSTicketCart({
                             placeholder="Delivery Address & Landmark in Kadiri..."
                             value={deliveryAddress}
                             onChange={(e) => onChangeDeliveryAddress(e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-900 placeholder-white/30 text-xs focus:outline-none focus:border-blue-600"
+                            className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-2xs"
                         />
                     </div>
                 )}
             </div>
 
             {/* RUNNING ITEMS LIST */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-white">
                 {/* 1. Existing Running Table Items (if table was already occupied) */}
                 {existingItems.length > 0 && (
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
-                        <div className="flex items-center justify-between text-[10px] font-mono text-blue-600 font-bold uppercase tracking-wider">
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between text-[10px] font-mono text-blue-700 font-bold uppercase tracking-wider">
                             <span>Previous Orders (Running KOT)</span>
                             <span>{existingItems.length} items</span>
                         </div>
@@ -226,7 +226,7 @@ export function POSTicketCart({
                     </div>
                 ) : (
                     cartItems.map((ci, idx) => (
-                        <div key={idx} className="p-2.5 rounded-xl bg-white border border-slate-200 space-y-2">
+                        <div key={idx} className="p-3 rounded-xl bg-white border border-slate-200 space-y-2 shadow-2xs hover:border-slate-300 transition-colors">
                             <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1">
                                     <h4 className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
@@ -241,7 +241,7 @@ export function POSTicketCart({
                                 <button
                                     type="button"
                                     onClick={() => onRemoveItem(idx)}
-                                    className="text-slate-400 hover:text-red-400 p-1 transition"
+                                    className="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition"
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -253,7 +253,7 @@ export function POSTicketCart({
                                     <button
                                         type="button"
                                         onClick={() => onUpdateQty(idx, ci.qty - 1)}
-                                        className="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-900"
+                                        className="w-6 h-6 rounded bg-white hover:bg-slate-200 flex items-center justify-center text-slate-700 transition"
                                     >
                                         <Minus className="w-3 h-3" />
                                     </button>
@@ -261,13 +261,13 @@ export function POSTicketCart({
                                     <button
                                         type="button"
                                         onClick={() => onUpdateQty(idx, ci.qty + 1)}
-                                        className="w-6 h-6 rounded bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center text-white font-bold"
+                                        className="w-6 h-6 rounded bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center font-bold transition"
                                     >
                                         <Plus className="w-3 h-3" />
                                     </button>
                                 </div>
 
-                                <span className="font-mono font-black text-xs sm:text-sm text-blue-600">
+                                <span className="font-mono font-black text-xs sm:text-sm text-slate-900">
                                     {formatRupees(ci.price_paise * ci.qty)}
                                 </span>
                             </div>
@@ -278,7 +278,7 @@ export function POSTicketCart({
                                 placeholder="Add cooking note (e.g. less spicy)..."
                                 value={ci.notes || ""}
                                 onChange={(e) => onUpdateNotes(idx, e.target.value)}
-                                className="w-full px-2 py-1 rounded bg-slate-100 border border-slate-100 text-[10px] text-slate-800 placeholder-white/20 focus:outline-none focus:border-blue-600"
+                                className="w-full px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white"
                             />
                         </div>
                     ))
@@ -286,9 +286,9 @@ export function POSTicketCart({
             </div>
 
             {/* FINANCIAL SUMMARY & ACTIONS */}
-            <div className="p-3.5 sm:p-4 border-t border-slate-200 bg-[#1D1712] space-y-3 shrink-0">
+            <div className="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50 space-y-3 shrink-0">
                 {/* Financial lines */}
-                <div className="space-y-1.5 text-xs text-[#C5B39A]">
+                <div className="space-y-1.5 text-xs text-slate-600">
                     <div className="flex justify-between">
                         <span>Subtotal ({cartItems.length + existingItems.length} items)</span>
                         <span className="font-mono font-bold text-slate-900">{formatRupees(totalSubtotalPaise)}</span>
@@ -305,7 +305,7 @@ export function POSTicketCart({
                             <span>{discountPaise > 0 ? `Discount Applied (-${formatRupees(discountPaise)})` : "+ Add Discount [F8]"}</span>
                         </button>
                         {discountPaise > 0 && (
-                            <span className="font-mono font-bold text-emerald-400">-{formatRupees(discountPaise)}</span>
+                            <span className="font-mono font-bold text-emerald-600">-{formatRupees(discountPaise)}</span>
                         )}
                     </div>
 
@@ -336,7 +336,7 @@ export function POSTicketCart({
                     {/* Grand Total */}
                     <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
                         <span className="font-serif font-black text-sm text-slate-900 uppercase">Grand Total</span>
-                        <span className="font-mono font-black text-lg sm:text-xl text-blue-600">
+                        <span className="font-mono font-black text-xl sm:text-2xl text-blue-600">
                             {formatRupees(grandTotalPaise)}
                         </span>
                     </div>
@@ -349,9 +349,9 @@ export function POSTicketCart({
                         type="button"
                         onClick={onSendKOT}
                         disabled={isSubmitting || cartItems.length === 0}
-                        className="w-full py-2.5 rounded-xl bg-blue-50 hover:bg-[#38281B] border border-blue-600/50 text-blue-600 font-serif font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer shadow"
+                        className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-98 text-slate-950 font-serif font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer shadow-sm"
                     >
-                        <Flame className="w-4 h-4 text-amber-400" />
+                        <Flame className="w-4 h-4 text-slate-950" />
                         <span>Send Kitchen KOT [F9]</span>
                     </button>
 
@@ -361,7 +361,7 @@ export function POSTicketCart({
                             type="button"
                             onClick={onSettleCash}
                             disabled={isSubmitting || grandTotalPaise === 0}
-                            className="py-2.5 px-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-900 font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
+                            className="py-2.5 px-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
                         >
                             <div className="flex items-center gap-1">
                                 <Banknote className="w-3.5 h-3.5" />
@@ -374,7 +374,7 @@ export function POSTicketCart({
                             type="button"
                             onClick={onSettleUPI}
                             disabled={isSubmitting || grandTotalPaise === 0}
-                            className="py-2.5 px-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-slate-900 font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
+                            className="py-2.5 px-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
                         >
                             <div className="flex items-center gap-1">
                                 <QrCode className="w-3.5 h-3.5" />
@@ -387,7 +387,7 @@ export function POSTicketCart({
                             type="button"
                             onClick={onSettleCard}
                             disabled={isSubmitting || grandTotalPaise === 0}
-                            className="py-2.5 px-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-slate-900 font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
+                            className="py-2.5 px-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 active:scale-98 text-white font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
                         >
                             <div className="flex items-center gap-1">
                                 <CreditCard className="w-3.5 h-3.5" />
@@ -400,7 +400,7 @@ export function POSTicketCart({
                             type="button"
                             onClick={onPrintBillEstimate}
                             disabled={isSubmitting || totalSubtotalPaise === 0}
-                            className="py-2.5 px-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-900 font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow transition disabled:opacity-50 cursor-pointer"
+                            className="py-2.5 px-1.5 rounded-xl bg-white hover:bg-slate-100 active:scale-98 border border-slate-300 text-slate-800 font-black text-xs uppercase flex flex-col items-center justify-center gap-0.5 shadow-sm transition disabled:opacity-50 cursor-pointer"
                         >
                             <div className="flex items-center gap-1">
                                 <Printer className="w-3.5 h-3.5 text-blue-600" />

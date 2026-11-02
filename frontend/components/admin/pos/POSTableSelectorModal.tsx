@@ -105,15 +105,15 @@ export function POSTableSelectorModal({
                                     isSelected
                                         ? "bg-blue-50 border-blue-600 ring-2 ring-blue-400 shadow-xl scale-102"
                                         : isOccupied
-                                        ? "bg-[#1F120E] border-red-500/40 hover:border-red-500"
-                                        : "bg-[#151D18] border-emerald-500/30 hover:border-emerald-500"
+                                        ? "bg-rose-50 border-rose-200 hover:border-rose-400"
+                                        : "bg-white border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/30"
                                 }`}
                             >
                                 <div className="flex items-center justify-between w-full">
                                     <span className="font-serif font-black text-lg text-slate-900">{t.label}</span>
                                     <span
                                         className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                                            isOccupied ? "bg-red-500/20 text-red-300 border border-red-500/30" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                            isOccupied ? "bg-rose-100 text-rose-700 border border-rose-200" : "bg-emerald-100 text-emerald-700 border border-emerald-200"
                                         }`}
                                     >
                                         {isOccupied ? "Occupied" : "Available"}

@@ -95,7 +95,7 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
 
     return (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-[#16120E] border border-slate-200 rounded-3xl p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-150">
+            <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-150">
                 <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-2">
                         <Banknote className="w-5 h-5 text-blue-600" />
@@ -161,7 +161,7 @@ export function PettyCashModal({ isOpen, onClose, outletId }: PettyCashModalProp
                             className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-blue-600"
                         >
                             {QUICK_EXPENSE_REASONS.map((r) => (
-                                <option key={r} value={r} className="bg-[#16120E]">
+                                <option key={r} value={r} className="bg-white text-slate-900">
                                     {r}
                                 </option>
                             ))}
