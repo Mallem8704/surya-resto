@@ -440,8 +440,8 @@ function DeliveryOrderContent() {
     const [selectedBranch, setSelectedBranch] = useState<number>(branchParam ? Number(branchParam) : 2);
 
     // Menu state
-    const [categories, setCategories] = useState<any[]>([]);
-    const [menuItems, setMenuItems] = useState<MenuItemData[]>([]);
+    const [categories, setCategories] = useState<any[]>(() => SURYA_CATEGORIES as any);
+    const [menuItems, setMenuItems] = useState<MenuItemData[]>(() => SURYA_MENU_ITEMS as any);
     const [selectedCategory, setSelectedCategory] = useState<number | "all">("all");
     const [vegFilter, setVegFilter] = useState<"all" | "veg" | "non_veg">("all");
     const [searchQuery, setSearchQuery] = useState("");

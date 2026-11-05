@@ -51,6 +51,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useAdminSocket, SocketEvent } from "@/hooks/useSockets";
 import { printKOT, printRunningKOT, printPOSReceipt } from "@/lib/thermalPrint";
 import { soundManager } from "@/lib/sound";
+import { SURYA_CATEGORIES, SURYA_MENU_ITEMS } from "@/lib/suryaMenuData";
 import { PaymentSettlementModal } from "@/components/admin/PaymentSettlementModal";
 import { AudioUnlockBanner } from "@/components/admin/AudioUnlockBanner";
 
@@ -97,8 +98,8 @@ export default function CaptainWaiterPage() {
     // Floor state
     const [tables, setTables] = useState<CafeTableData[]>([]);
     const [activeOrders, setActiveOrders] = useState<any[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
-    const [menuItems, setMenuItems] = useState<MenuItemData[]>([]);
+    const [categories, setCategories] = useState<any[]>(() => SURYA_CATEGORIES as any);
+    const [menuItems, setMenuItems] = useState<MenuItemData[]>(() => SURYA_MENU_ITEMS as any);
     const [serviceCalls, setServiceCalls] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -211,13 +212,17 @@ export default function CaptainWaiterPage() {
             }
 
             // Categories
-            if (catsRes.status === "fulfilled" && Array.isArray(catsRes.value)) {
+            if (catsRes.status === "fulfilled" && Array.isArray(catsRes.value) && catsRes.value.length > 0) {
                 setCategories(catsRes.value);
+            } else {
+                setCategories(SURYA_CATEGORIES as any);
             }
 
             // Menu Items
-            if (itemsRes.status === "fulfilled" && Array.isArray(itemsRes.value)) {
+            if (itemsRes.status === "fulfilled" && Array.isArray(itemsRes.value) && itemsRes.value.length > 0) {
                 setMenuItems(itemsRes.value);
+            } else {
+                setMenuItems(SURYA_MENU_ITEMS as any);
             }
 
             // Service Calls

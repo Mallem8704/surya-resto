@@ -50,6 +50,7 @@ import { PettyCashModal } from "@/components/admin/pos/PettyCashModal";
 import { POSRecentBillsModal } from "@/components/admin/pos/POSRecentBillsModal";
 import { POSShiftModal } from "@/components/admin/pos/POSShiftModal";
 import { POSKioskPrintModal } from "@/components/admin/pos/POSKioskPrintModal";
+import { SURYA_CATEGORIES, SURYA_MENU_ITEMS } from "@/lib/suryaMenuData";
 import { Briefcase } from "lucide-react";
 
 export default function CashierPOSTerminalPage() {
@@ -64,8 +65,8 @@ export default function CashierPOSTerminalPage() {
     // Floor & Menu Data
     const [tables, setTables] = useState<any[]>([]);
     const [activeOrders, setActiveOrders] = useState<any[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
-    const [menuItems, setMenuItems] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>(() => SURYA_CATEGORIES as any);
+    const [menuItems, setMenuItems] = useState<any[]>(() => SURYA_MENU_ITEMS as any);
     const [isLoading, setIsLoading] = useState(true);
 
     // Selected Table & Active Order
@@ -145,12 +146,16 @@ export default function CashierPOSTerminalPage() {
                 });
             }
 
-            if (catsRes.status === "fulfilled" && Array.isArray(catsRes.value)) {
+            if (catsRes.status === "fulfilled" && Array.isArray(catsRes.value) && catsRes.value.length > 0) {
                 setCategories(catsRes.value);
+            } else {
+                setCategories(SURYA_CATEGORIES as any);
             }
 
-            if (itemsRes.status === "fulfilled" && Array.isArray(itemsRes.value)) {
+            if (itemsRes.status === "fulfilled" && Array.isArray(itemsRes.value) && itemsRes.value.length > 0) {
                 setMenuItems(itemsRes.value);
+            } else {
+                setMenuItems(SURYA_MENU_ITEMS as any);
             }
         } catch (err) {
             console.error("Error loading POS data:", err);

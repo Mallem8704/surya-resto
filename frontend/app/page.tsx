@@ -518,7 +518,7 @@ export default function SuryaLandingPage() {
                                     <Utensils className="w-4 h-4 text-[#D4AF37] shrink-0" />
                                     <div className="text-left">
                                         <span className="block text-[11px] leading-tight font-extrabold text-[#D4AF37]">EXPLORE MENU</span>
-                                        <span className="text-[9px] font-mono tracking-widest text-white/70">48+ DISHES &amp; OFFERS</span>
+                                        <span className="text-[9px] font-mono tracking-widest text-white/70">150+ DISHES &amp; OFFERS</span>
                                     </div>
                                 </Link>
                             )}
@@ -555,7 +555,7 @@ export default function SuryaLandingPage() {
                         <div className="flex flex-wrap items-center gap-3 pt-3">
                             <Link href={canOrderTable ? "/order?branch=1&table=T1" : "/delivery?branch=1"}
                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] hover:underline py-1">
-                                <span>Explore 48 Authentic Dishes &rarr;</span>
+                                <span>Explore 150+ Authentic Dishes &rarr;</span>
                             </Link>
                             <span className="text-white/30">&bull;</span>
                             <a href={GOOGLE_MAPS} target="_blank" rel="noopener noreferrer"
@@ -919,7 +919,7 @@ export default function SuryaLandingPage() {
                                     </div>
                                     <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] text-white/60 flex items-center gap-1.5">
                                         <Search className="w-3 h-3 text-[#D4AF37] shrink-0" />
-                                        <span>48 Dishes Available</span>
+                                        <span>159+ Dishes Available</span>
                                     </div>
                                     <div className="space-y-1.5">
                                         <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
@@ -927,21 +927,21 @@ export default function SuryaLandingPage() {
                                                 <Flame className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                                                 <span>Chicken Dum Biryani</span>
                                             </span>
-                                            <span className="font-mono text-[#D4AF37] font-bold">₹240</span>
+                                            <span className="font-mono text-[#D4AF37] font-bold">₹220</span>
                                         </div>
                                         <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
                                             <span className="flex items-center gap-1.5">
                                                 <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                                                <span>Butter Naan (2 Pcs)</span>
+                                                <span>Butter Naan</span>
                                             </span>
-                                            <span className="font-mono text-[#D4AF37] font-bold">₹90</span>
+                                            <span className="font-mono text-[#D4AF37] font-bold">₹40</span>
                                         </div>
                                         <div className="p-2 rounded-lg bg-[#250C03] border border-[#D4AF37]/20 flex items-center justify-between text-[11px]">
                                             <span className="flex items-center gap-1.5">
                                                 <Utensils className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                                                <span>Punjabi Chicken Curry</span>
+                                                <span>Punjab Chicken (Bone)</span>
                                             </span>
-                                            <span className="font-mono text-[#D4AF37] font-bold">₹280</span>
+                                            <span className="font-mono text-[#D4AF37] font-bold">₹220</span>
                                         </div>
                                     </div>
                                     <Link
