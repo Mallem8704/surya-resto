@@ -50,7 +50,13 @@ export default function AdminTablesPage() {
     const [editTableStatus, setEditTableStatus] = useState("free");
     const [deletingTable, setDeletingTable] = useState<any | null>(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
-    const [qrTargetDomain, setQrTargetDomain] = useState("https://surya-resto.vercel.app");
+    const [qrTargetDomain, setQrTargetDomain] = useState("https://suryafamilyrestaurant.com");
+
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.location.origin) {
+            setQrTargetDomain(window.location.origin);
+        }
+    }, []);
 
     // Auth Guard
     useEffect(() => {
@@ -597,6 +603,9 @@ export default function AdminTablesPage() {
                                     onChange={(e) => setQrTargetDomain(e.target.value)}
                                     className="w-full p-2 rounded-xl border border-slate-200 bg-white font-mono text-xs font-semibold"
                                 >
+                                    <option value="https://suryafamilyrestaurant.com">
+                                        Official Domain: https://suryafamilyrestaurant.com
+                                    </option>
                                     <option value="https://surya-resto.vercel.app">
                                         Production (Vercel): https://surya-resto.vercel.app
                                     </option>
