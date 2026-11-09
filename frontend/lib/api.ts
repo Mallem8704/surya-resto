@@ -3,17 +3,9 @@
  */
 
 export function getApiBase(): string {
-    // 1. Explicit override if specified
-    if (process.env.NEXT_PUBLIC_API_URL !== undefined) {
-        return process.env.NEXT_PUBLIC_API_URL;
-    }
-    // 2. Standalone Unified Next.js Mode: Use same-origin relative URLs ("")
-    // Completely eliminates Render cold starts and external hosting dependencies.
-    if (typeof window !== "undefined") {
-        return "";
-    }
-    // 3. Server-side: use BACKEND_URL if provided, else relative
-    return process.env.BACKEND_URL || "";
+    // 100% Standalone Next.js Architecture: Render is completely disconnected.
+    // All requests resolve strictly same-origin ("") to internal App Router route handlers.
+    return "";
 }
 
 export const API_BASE = getApiBase();

@@ -7,15 +7,15 @@ import { safeStorage } from "@/lib/safeStorage";
 // Derive WebSocket URL from API_BASE or window location
 function getWsBase(): string {
     const envWs = process.env.NEXT_PUBLIC_WS_URL;
-    if (envWs) return envWs;
+    if (envWs && !envWs.includes("onrender.com") && !envWs.includes("render.com")) return envWs;
     if (typeof window !== "undefined") {
-        if (!API_BASE) {
-            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-            return `${protocol}//${window.location.host}/ws`;
+        const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        if (isLocalhost) {
+            return "ws://127.0.0.1:8000/ws";
         }
-        return API_BASE.replace(/^http/, "ws") + "/ws";
+        return ""; // In cloud/Vercel standalone mode, SSE (/api/realtime) is primary
     }
-    return "ws://127.0.0.1:8000/ws";
+    return "";
 }
 
 export interface SocketEvent {
@@ -108,8 +108,14 @@ export function useOrderSocket(
     const connect = useCallback(() => {
         if (!orderId || !isMountedRef.current) return;
 
+        const wsBase = getWsBase();
+        if (!wsBase) {
+            startSseFallback();
+            return;
+        }
+
         try {
-            const url = `${getWsBase()}?client_type=customer&order_id=${orderId}`;
+            const url = `${wsBase}?client_type=customer&order_id=${orderId}`;
             const ws = new WebSocket(url);
             wsRef.current = ws;
 
@@ -259,8 +265,14 @@ export function useAdminSocket(
     const connect = useCallback(() => {
         if (!isMountedRef.current) return;
 
+        const wsBase = getWsBase();
+        if (!wsBase) {
+            startSseFallback();
+            return;
+        }
+
         try {
-            let url = `${getWsBase()}?client_type=admin&outlet_id=${outletId}`;
+            let url = `${wsBase}?client_type=admin&outlet_id=${outletId}`;
             if (typeof window !== "undefined") {
                 const token = safeStorage.getItem("surya_token");
                 if (token) url += `&token=${encodeURIComponent(token)}`;
