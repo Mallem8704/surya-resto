@@ -124,14 +124,44 @@ export async function apiFetch<T = any>(endpoint: string, options: FetchOptions 
     try {
         response = await fetch(url, config);
     } catch (networkErr: any) {
-        const error: any = new Error(
-            navigator.onLine === false
-                ? "You appear to be offline. Please check your internet connection."
-                : "Network error — cannot reach the server. Please check your connection or try again."
-        );
-        error.status = 0;
-        error.isNetworkError = true;
-        throw error;
+        // Resilient Fallback: If external API fails, seamlessly failover to local Next.js unified API route handler!
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            const internalUrl = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+            try {
+                response = await fetch(internalUrl, config);
+            } catch {
+                const error: any = new Error(
+                    typeof navigator !== "undefined" && navigator.onLine === false
+                        ? "You appear to be offline. Please check your internet connection."
+                        : "Network error — cannot reach the server. Please check your connection or try again."
+                );
+                error.status = 0;
+                error.isNetworkError = true;
+                throw error;
+            }
+        } else {
+            const error: any = new Error(
+                typeof navigator !== "undefined" && navigator.onLine === false
+                    ? "You appear to be offline. Please check your internet connection."
+                    : "Network error — cannot reach the server. Please check your connection or try again."
+            );
+            error.status = 0;
+            error.isNetworkError = true;
+            throw error;
+        }
+    }
+
+    // Also failover to internal Next.js API if external service responds with 502/503/504 gateway timeout
+    if (!response.ok && (response.status === 502 || response.status === 503 || response.status === 504) && (url.startsWith("http://") || url.startsWith("https://"))) {
+        const internalUrl = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+        try {
+            const fallbackResp = await fetch(internalUrl, config);
+            if (fallbackResp.ok) {
+                response = fallbackResp;
+            }
+        } catch {
+            // retain response
+        }
     }
 
     if (!response.ok) {
