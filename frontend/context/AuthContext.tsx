@@ -41,9 +41,21 @@ function isTokenValid(token: string | null): boolean {
     const parts = token.split(".");
     if (parts.length !== 3) return false;
 
-    // Check if token has expired by decoding the payload
+    // Check if token has expired by decoding the payload with robust Base64URL support
     try {
-        const payload = JSON.parse(atob(parts[1]));
+        let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        while (base64.length % 4 !== 0) {
+            base64 += "=";
+        }
+        const decoded = typeof atob !== "undefined"
+            ? decodeURIComponent(
+                  atob(base64)
+                      .split("")
+                      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                      .join("")
+              )
+            : Buffer.from(base64, "base64").toString("utf-8");
+        const payload = JSON.parse(decoded);
         if (payload.exp) {
             const expiresAt = payload.exp * 1000; // convert to milliseconds
             const now = Date.now();
@@ -149,7 +161,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         safeStorage.setItem("surya_token", authToken);
         safeStorage.setItem("surya_user", JSON.stringify(authUser));
 
-        router.push("/admin");
+        // Reliable hard navigation so all storage and headers mount cleanly
+        if (typeof window !== "undefined") {
+            window.location.href = "/admin";
+        } else {
+            router.push("/admin");
+        }
     };
 
     const updateAuthSession = (authToken: string, authUser: AuthUser) => {
