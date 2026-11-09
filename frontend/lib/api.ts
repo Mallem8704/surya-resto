@@ -4,15 +4,16 @@
 
 export function getApiBase(): string {
     // 1. Explicit override if specified
-    if (process.env.NEXT_PUBLIC_API_URL) {
+    if (process.env.NEXT_PUBLIC_API_URL !== undefined) {
         return process.env.NEXT_PUBLIC_API_URL;
     }
-    // 2. Client-side on localhost (standalone local dev): point to local backend
-    if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
-        return "http://127.0.0.1:8000";
+    // 2. Standalone Unified Next.js Mode: Use same-origin relative URLs ("")
+    // Completely eliminates Render cold starts and external hosting dependencies.
+    if (typeof window !== "undefined") {
+        return "";
     }
-    // 3. Server-side or client-side production: use live Render backend
-    return process.env.BACKEND_URL || "https://surya-resto-backend.onrender.com";
+    // 3. Server-side: use BACKEND_URL if provided, else relative
+    return process.env.BACKEND_URL || "";
 }
 
 export const API_BASE = getApiBase();

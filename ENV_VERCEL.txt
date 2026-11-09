@@ -1,25 +1,18 @@
 # ==============================================================================
-# VERCEL ENVIRONMENT VARIABLES (Frontend - Next.js)
-# Copy & Paste these into: Vercel Dashboard -> Project -> Settings -> Environment Variables
+# SURYA FAMILY RESTAURANT KADIRI — VERCEL PRODUCTION ENVIRONMENT VARIABLES (STANDALONE UNIFIED NEXT.JS)
+# Copy and paste these into: Vercel Dashboard -> Project Settings -> Environment Variables
 # ==============================================================================
 
-# Backend API URL (Replace with your actual Render service URL if different)
-NEXT_PUBLIC_API_URL=https://surya-resto-backend.onrender.com
+# 1. Unified Next.js API (Same-Origin, Zero Render Cold Starts)
+NEXT_PUBLIC_API_URL=
+NEXT_PUBLIC_STANDALONE=true
 
-# Backend WebSocket URL for live real-time kitchen & order updates
-NEXT_PUBLIC_WS_URL=wss://surya-resto-backend.onrender.com/ws
+# 2. Real-Time Engine (Native Server-Sent Events /api/realtime)
+NEXT_PUBLIC_WS_URL=
 
-# Internal server rewrite URL for Next.js API proxying
-BACKEND_URL=https://surya-resto-backend.onrender.com
+# 3. Production Website Domain (Canonical SEO & Metadata)
+NEXT_PUBLIC_SITE_URL=https://surya-resto.vercel.app
 
-# Production Website Domain (Canonical URL for metadata, SEO & social sharing)
-NEXT_PUBLIC_SITE_URL=https://suryafamilyrestaurant.com
-
-# Supabase Authentication & Realtime Cloud Keys
-NEXT_PUBLIC_SUPABASE_URL=https://poexygwbosuxbezeastc.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_gmrvTKp0DnRvIbZ6JMTamg_EJjxcMjz
-
-# Ordering Channel Feature Flags (Default: Online Delivery Active, Table Booking/QR Paused)
-NEXT_PUBLIC_ENABLE_ONLINE_ORDERING=true
-NEXT_PUBLIC_ENABLE_TABLE_BOOKING=false
-NEXT_PUBLIC_ENABLE_TABLE_ORDERING=false
+# 4. Customer Ordering Mode Feature Flags
+NEXT_PUBLIC_ENABLE_TABLE_BOOKING=true
+NEXT_PUBLIC_ENABLE_TABLE_ORDERING=true

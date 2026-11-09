@@ -2,27 +2,5 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
-  "installCommand": "npm install",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://surya-resto-backend.onrender.com/api/$1"
-    },
-    {
-      "source": "/uploads/(.*)",
-      "destination": "https://surya-resto-backend.onrender.com/uploads/$1"
-    },
-    {
-      "source": "/docs",
-      "destination": "https://surya-resto-backend.onrender.com/docs"
-    },
-    {
-      "source": "/openapi.json",
-      "destination": "https://surya-resto-backend.onrender.com/openapi.json"
-    },
-    {
-      "source": "/health",
-      "destination": "https://surya-resto-backend.onrender.com/health"
-    }
-  ]
+  "installCommand": "npm install"
 }
