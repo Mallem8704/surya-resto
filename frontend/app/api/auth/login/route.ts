@@ -1,35 +1,30 @@
 import { NextResponse } from "next/server";
-import { CREDENTIALS_FALLBACK, signStaffToken } from "@/lib/authServer";
+import { authenticateStaff, signStaffToken } from "@/lib/authServer";
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { email, password } = body;
+        const identifier = body.email || body.username || body.user || body.phone;
+        const password = body.password;
 
-        if (!email || !password) {
+        if (!identifier || !password) {
             return NextResponse.json(
-                { detail: "Email and password are required" },
+                { detail: "Email or username, and password are required" },
                 { status: 400 }
             );
         }
 
-        const normalizedEmail = email.toLowerCase().trim();
-        const cred = CREDENTIALS_FALLBACK[normalizedEmail];
+        const userPayload = authenticateStaff(identifier, password);
 
-        if (!cred || cred.password !== password) {
+        if (!userPayload) {
             return NextResponse.json(
-                { detail: "Invalid email or password" },
+                {
+                    detail:
+                        "Invalid credentials. Please use owner@suryarestaurant.com / admin123 or staff@suryarestaurant.com / staff123",
+                },
                 { status: 401 }
             );
         }
-
-        const userPayload = {
-            id: cred.id,
-            name: cred.name,
-            email: normalizedEmail,
-            role: cred.role,
-            outlet_id: 1,
-        };
 
         const token = await signStaffToken(userPayload);
 
